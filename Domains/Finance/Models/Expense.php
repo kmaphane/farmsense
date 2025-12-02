@@ -1,0 +1,87 @@
+<?php
+
+namespace Domains\Finance\Models;
+
+use Domains\Shared\Enums\ExpenseCategory;
+use Domains\Shared\Traits\BelongsToTeam;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+class Expense extends Model
+{
+    use BelongsToTeam;
+
+    protected $fillable = [
+        'team_id',
+        'amount',
+        'currency',
+        'category',
+        'description',
+        'allocatable_type',
+        'allocatable_id',
+        'ocr_data',
+        'receipt_path',
+    ];
+
+    protected $casts = [
+        'category' => ExpenseCategory::class,
+        'ocr_data' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
+     * Get the allocatable resource (Batch or General Farm)
+     *
+     * @return MorphTo
+     */
+    public function allocatable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * Get the amount formatted as currency string
+     *
+     * @return string
+     */
+    public function getFormattedAmountAttribute(): string
+    {
+        return number_format($this->amount / 100, 2) . ' ' . $this->currency;
+    }
+
+    /**
+     * Get category label
+     *
+     * @return string
+     */
+    public function getCategoryLabelAttribute(): string
+    {
+        return $this->category?->label() ?? '';
+    }
+
+    /**
+     * Scope: Get expenses for a specific batch
+     *
+     * @param mixed $query
+     * @param int $batchId
+     * @return mixed
+     */
+    public function scopeForBatch($query, int $batchId)
+    {
+        return $query->where('allocatable_type', 'Domains\\Broiler\\Models\\Batch')
+            ->where('allocatable_id', $batchId);
+    }
+
+    /**
+     * Scope: Get expenses for general farm (not allocated to specific batch)
+     *
+     * @param mixed $query
+     * @return mixed
+     */
+    public function scopeForGeneral($query)
+    {
+        return $query->whereNull('allocatable_type')
+            ->whereNull('allocatable_id');
+    }
+}
