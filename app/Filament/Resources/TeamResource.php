@@ -3,28 +3,34 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TeamResource\Pages;
+use BackedEnum;
 use Domains\Auth\Models\Team;
+use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class TeamResource extends Resource
 {
     protected static ?string $model = Team::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office';
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $navigationGroup = 'Administration';
+    protected static string|UnitEnum|null $navigationGroup = 'Administration';
 
-    public static function form(Form $form): Form
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function form(Schema $form): Schema
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Team Information')
+                Section::make('Team Information')
                     ->description('Create or edit team (farm)')
                     ->schema([
                         Forms\Components\TextInput::make('name')
@@ -48,7 +54,7 @@ class TeamResource extends Resource
                             ->helperText('Plan tier determines feature access (Phase 2+)'),
                     ])->columns(1),
 
-                Forms\Components\Section::make('Team Members')
+                Section::make('Team Members')
                     ->description('Manage users in this team and their roles')
                     ->schema([
                         Forms\Components\Placeholder::make('members_info')
@@ -69,7 +75,8 @@ class TeamResource extends Resource
                     ->label('Owner')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\BadgeColumn::make('subscription_plan')
+                Tables\Columns\TextColumn::make('subscription_plan')
+                    ->badge()
                     ->colors([
                         'gray' => 'Basic',
                         'primary' => 'Pro',
@@ -88,16 +95,16 @@ class TeamResource extends Resource
                         'Enterprise' => 'Enterprise',
                     ]),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make()
                     ->requiresConfirmation()
                     ->modalHeading('Delete Team')
                     ->modalDescription('Are you sure you want to delete this team? All associated data will be lost.'),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

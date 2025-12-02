@@ -340,6 +340,156 @@ php artisan queue:listen --tries=1
 ```
 Queue worker automatically starts with `composer dev`.
 
+### Git Commits
+
+**Commit Message Format (with emojis):**
+
+All commits MUST follow this format:
+
+```
+<emoji> Short imperative title (50 chars max)
+
+Detailed explanation of the changes (wrap at 72 chars).
+Include why the change was made and what problem it solves.
+
+- Use bullet points for multiple changes
+- Be clear and concise
+- Use imperative mood ("Add" not "Added")
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**Emoji Guide:**
+
+Use these emojis at the start of commit messages:
+
+**Feature & Functionality:**
+- ✨ `New Feature` - New functionality or features added
+- 🎁 `Enhancement` - Improvement to existing feature
+- 🚀 `Performance` - Performance improvements and optimizations
+- ⚡ `Speed` - Making code faster or more efficient
+- 🎯 `Feature` - Generic feature implementation
+
+**Code Quality & Maintenance:**
+- 🎨 `Refactoring` - Code style, formatting, structure changes (no logic change)
+- ♻️ `Cleanup` - Code cleanup and refactoring
+- 🧹 `Polish` - Code polish and minor improvements
+- 🔧 `Fix` - Fixing code structure or patterns
+- 🔨 `Build` - Build system changes
+
+**Bug Fixes & Issues:**
+- 🐛 `Bug Fix` - Fixing a bug or issue
+- 🩹 `Patch` - Quick patch for minor issues
+- ❌ `Remove` - Removing deprecated or broken code
+- 🚫 `Disable` - Disabling features temporarily
+
+**Testing & Validation:**
+- 🧪 `Tests` - Adding or updating tests
+- ✅ `Validation` - Validation checks and validation-related changes
+- 📋 `Check` - Adding checks or verifications
+- 🔍 `Review` - Code review related changes
+
+**Documentation & Communication:**
+- 📚 `Documentation` - Documentation changes (README, comments, guides)
+- 📝 `Notes` - Adding notes or comments
+- 📖 `Guide` - Adding guides or tutorials
+- 💬 `Comment` - Code comments and explanations
+- 🏷️ `Label` - Adding labels or tags
+
+**Security & Safety:**
+- 🔒 `Security` - Security fixes or improvements
+- 🔐 `Encrypt` - Encryption or secure data handling
+- 🛡️ `Protect` - Protection mechanisms
+
+**Configuration & Setup:**
+- 🔧 `Configuration` - Config file changes
+- ⚙️ `Settings` - Settings and configuration changes
+- 📦 `Package Updates` - Updating packages or dependencies
+- 📥 `Dependencies` - Dependency management
+- 🎯 `Chore` - Dependency updates, build config, etc.
+
+**Version Control & Migration:**
+- 🔄 `Migration` - Version upgrades or major migrations (e.g., Filament v3→v4)
+- 📝 `Naming/Conventions` - File/folder renaming or convention standardization
+- 🏗️ `Architecture` - Architecture changes
+- 🔀 `Merge` - Merge-related changes
+- 📌 `Pin` - Pinning versions or dependencies
+
+**Deployment & Release:**
+- 🚀 `Deployment` - Deployment-related changes
+- 🎉 `Release` - Release related changes
+- 🌟 `Highlight` - Highlighting important features
+- 📱 `Mobile` - Mobile-specific changes
+- 🌐 `Web` - Web-specific changes
+
+**Error Handling & Debugging:**
+- 🐛 `Debug` - Debugging changes
+- 💥 `Crash` - Fixing crashes
+- ⚠️ `Warning` - Adding warnings
+- 🚨 `Error` - Error handling improvements
+
+**UI/UX & Styling:**
+- 🎨 `UI` - User interface changes
+- 🖌️ `Style` - Styling changes
+- 🎭 `Theme` - Theme changes
+- 📐 `Layout` - Layout improvements
+- 🎪 `Animation` - Animation additions
+
+**Data & Database:**
+- 💾 `Save` - Data saving/persistence
+- 📊 `Data` - Data-related changes
+- 📈 `Analytics` - Analytics improvements
+- 🗄️ `Database` - Database schema or migration changes
+- 🔗 `Link` - Linking or relationship changes
+
+**Examples:**
+
+```bash
+✨ Add customer management to Filament admin
+
+Implemented full CRUD resource for customers with:
+- Search and filtering by type
+- Credit limit management
+- Team-based access control
+
+Fixes #42
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+```bash
+🔄 Migrate Filament Resources to v4 API
+
+Updated all 5 Resource classes for Filament v4.2 compatibility:
+- Changed form method signature: Form → Schema
+- Replaced deprecated actions() → recordActions()
+- Replaced deprecated bulkActions() → toolbarActions()
+- Fixed BadgeColumn → TextColumn with ->badge()
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+```bash
+📚 Add Filament v4 Resource standards to CLAUDE.md
+
+Comprehensive documentation covering:
+- Resource class structure
+- Type hints for static properties
+- Form and table method signatures
+- Component imports and usage
+- Complete example resource
+- Quick checklist for new resources
+
+This prevents future regressions to deprecated v3 patterns.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
 ## Naming Conventions (Strict Rules)
 
 ### Directory Structure
@@ -1512,4 +1662,348 @@ Forms\Components\Select::make('user_id')
 - Table columns: `Tables/Columns/`
 - Table filters: `Tables/Filters/`
 - Actions: `Actions/`
+
+## Filament v4 Resource Standards
+
+### Resource Class Structure
+
+All Filament Resource classes must follow these standards:
+
+```php
+<?php
+
+namespace App\Filament\Resources;
+
+use BackedEnum;
+use Filament\Actions;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
+use UnitEnum;
+
+class MyResource extends Resource
+{
+    protected static ?string $model = MyModel::class;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-...';
+    protected static string|UnitEnum|null $navigationGroup = 'GroupName';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function form(Schema $form): Schema
+    {
+        return $form->schema([
+            Section::make('Section Title')
+                ->description('Section description')
+                ->schema([
+                    Forms\Components\TextInput::make('field'),
+                    // More fields
+                ])->columns(2),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('field'),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('field'),
+            ])
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    // ... other methods
+}
+```
+
+### Type Hints - Static Properties
+
+**Required for v4 compatibility:**
+
+```php
+// Icons must accept BackedEnum (for Heroicon enum support)
+protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document';
+
+// Navigation groups must accept UnitEnum (for enum-based groups)
+protected static string|UnitEnum|null $navigationGroup = 'CRM';
+
+// Record title attribute
+protected static ?string $recordTitleAttribute = 'name';
+
+// Model reference
+protected static ?string $model = MyModel::class;
+```
+
+### Form Method Signature
+
+**REQUIRED - v4 uses Schema, not Form:**
+
+```php
+// ❌ WRONG (v3 style)
+public static function form(Form $form): Form
+{
+    return $form->schema([...]);
+}
+
+// ✅ CORRECT (v4 style)
+public static function form(Schema $form): Schema
+{
+    return $form->schema([...]);
+}
+```
+
+**Imports needed:**
+
+```php
+use Filament\Schemas\Schema;           // Form method parameter/return
+use Filament\Schemas\Components\Section; // Layout sections
+use Filament\Forms;                     // Form field components
+```
+
+### Section Component
+
+**Sections are schema components, NOT form components:**
+
+```php
+// ❌ WRONG
+Forms\Components\Section::make('Title')
+
+// ✅ CORRECT
+Section::make('Title')
+    ->description('Optional description')
+    ->schema([
+        Forms\Components\TextInput::make('name'),
+        Forms\Components\Select::make('type'),
+    ])
+    ->columns(2)
+    ->collapsible()
+    ->collapsed(false);
+```
+
+### Form Field Components
+
+All form fields are in `Filament\Forms\Components`:
+
+```php
+Forms\Components\TextInput::make('name')->required(),
+Forms\Components\Select::make('type')->options([...]),
+Forms\Components\Checkbox::make('active'),
+Forms\Components\DatePicker::make('date'),
+Forms\Components\DateTimePicker::make('created_at'),
+Forms\Components\Textarea::make('description'),
+Forms\Components\Toggle::make('is_active'),
+Forms\Components\FileUpload::make('file'),
+Forms\Components\RichEditor::make('content'),
+Forms\Components\TagsInput::make('tags'),
+Forms\Components\Repeater::make('items')->schema([...]),
+Forms\Components\Builder::make('blocks')->blocks([...]),
+// ... and more
+```
+
+### Table Actions (v4 API)
+
+**Actions are now in `Filament\Actions` namespace:**
+
+```php
+// Import actions
+use Filament\Actions;
+
+// Use in table method
+->recordActions([
+    Actions\ViewAction::make(),
+    Actions\EditAction::make(),
+    Actions\DeleteAction::make()
+        ->requiresConfirmation()
+        ->modalHeading('Delete Record?'),
+])
+->toolbarActions([
+    Actions\BulkActionGroup::make([
+        Actions\DeleteBulkAction::make(),
+    ]),
+    // Header/bulk actions
+])
+
+// DO NOT use deprecated methods:
+// ❌ ->actions()      → Use ->recordActions()
+// ❌ ->bulkActions()  → Use ->toolbarActions()
+// ❌ Tables\Actions\* → Use Filament\Actions\*
+```
+
+### Table Column Updates
+
+**BadgeColumn is deprecated - use TextColumn with ->badge():**
+
+```php
+// ❌ WRONG (v3 style)
+Tables\Columns\BadgeColumn::make('status')
+    ->colors(['success' => 'active', 'danger' => 'inactive'])
+
+// ✅ CORRECT (v4 style)
+Tables\Columns\TextColumn::make('status')
+    ->badge()
+    ->colors(['success' => 'active', 'danger' => 'inactive'])
+```
+
+**IconColumn for boolean values:**
+
+```php
+// For true/false displays
+Tables\Columns\IconColumn::make('is_active')
+    ->boolean()
+    ->label('Active')
+```
+
+**Other column improvements:**
+
+```php
+// Use formatStateUsing for custom formatting
+Tables\Columns\TextColumn::make('price')
+    ->formatStateUsing(fn($state) => '$' . number_format($state, 2)),
+
+// Use icon method
+Tables\Columns\TextColumn::make('email')
+    ->icon('heroicon-m-envelope'),
+
+// Numeric formatting
+Tables\Columns\TextColumn::make('count')
+    ->numeric()
+    ->sortable(),
+
+// Date formatting
+Tables\Columns\TextColumn::make('created_at')
+    ->dateTime()
+    ->sortable(),
+```
+
+### Table Filters
+
+```php
+Tables\Filters\SelectFilter::make('status')
+    ->options(['active' => 'Active', 'inactive' => 'Inactive']),
+
+Tables\Filters\TernaryFilter::make('is_active')
+    ->nullable(),
+
+Tables\Filters\Filter::make('date_range')
+    ->form([
+        Forms\Components\DatePicker::make('from'),
+        Forms\Components\DatePicker::make('to'),
+    ])
+    ->query(function ($query, array $data) {
+        return $query
+            ->when($data['from'] ?? null,
+                fn($q) => $q->whereDate('created_at', '>=', $data['from'])
+            )
+            ->when($data['to'] ?? null,
+                fn($q) => $q->whereDate('created_at', '<=', $data['to'])
+            );
+    }),
+```
+
+### Complete Example Resource
+
+```php
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\CustomerResource\Pages;
+use BackedEnum;
+use Domains\CRM\Models\Customer;
+use Domains\Shared\Enums\CustomerType;
+use Filament\Actions;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
+use UnitEnum;
+
+class CustomerResource extends Resource
+{
+    protected static ?string $model = Customer::class;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
+    protected static string|UnitEnum|null $navigationGroup = 'CRM';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function form(Schema $form): Schema
+    {
+        return $form->schema([
+            Section::make('Customer Information')
+                ->description('Basic customer details')
+                ->schema([
+                    Forms\Components\TextInput::make('name')->required(),
+                    Forms\Components\TextInput::make('email')->email(),
+                    Forms\Components\Select::make('type')
+                        ->options(CustomerType::class)
+                        ->required(),
+                ])->columns(2),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('name')->searchable(),
+                Tables\Columns\TextColumn::make('email')->icon('heroicon-m-envelope'),
+                Tables\Columns\TextColumn::make('type')->badge(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('type')
+                    ->options(CustomerType::class),
+            ])
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListCustomers::route('/'),
+            'create' => Pages\CreateCustomer::route('/create'),
+            'edit' => Pages\EditCustomer::route('/{record}/edit'),
+        ];
+    }
+}
+```
+
+### Quick Checklist for New Resources
+
+- [ ] Static properties have correct union types (BackedEnum, UnitEnum)
+- [ ] Form method uses `Schema` parameter and return type
+- [ ] Form sections use `Section::make()` not `Forms\Components\Section::make()`
+- [ ] Form fields use `Forms\Components\*` namespace
+- [ ] Table actions use `Actions\*` namespace, not `Tables\Actions\*`
+- [ ] Table uses `->recordActions()` not `->actions()`
+- [ ] Table uses `->toolbarActions()` not `->bulkActions()`
+- [ ] Badge displays use `TextColumn::make()->badge()` not `BadgeColumn`
+- [ ] No deprecated Filament v3 patterns used
+- [ ] All imports are correct and non-redundant
 </laravel-boost-guidelines>

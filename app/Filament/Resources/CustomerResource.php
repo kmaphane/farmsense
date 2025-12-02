@@ -3,29 +3,35 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CustomerResource\Pages;
+use BackedEnum;
 use Domains\CRM\Models\Customer;
 use Domains\Shared\Enums\CustomerType;
+use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $navigationGroup = 'CRM';
+    protected static string|UnitEnum|null $navigationGroup = 'CRM';
 
-    public static function form(Form $form): Form
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function form(Schema $form): Schema
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Customer Information')
+                Section::make('Customer Information')
                     ->description('Basic customer details')
                     ->schema([
                         Forms\Components\TextInput::make('name')
@@ -44,7 +50,7 @@ class CustomerResource extends Resource
                             ->default(CustomerType::Retail),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Financial Terms')
+                Section::make('Financial Terms')
                     ->description('Credit and payment information')
                     ->schema([
                         Forms\Components\TextInput::make('credit_limit')
@@ -55,7 +61,7 @@ class CustomerResource extends Resource
                             ->helperText('e.g., Net 30, COD, 50% deposit'),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Additional Information')
+                Section::make('Additional Information')
                     ->schema([
                         Forms\Components\Textarea::make('notes')
                             ->maxLength(500)
@@ -77,7 +83,8 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable()
                     ->icon('heroicon-m-phone'),
-                Tables\Columns\BadgeColumn::make('type')
+                Tables\Columns\TextColumn::make('type')
+                    ->badge()
                     ->colors([
                         'primary' => CustomerType::Wholesale->value,
                         'success' => CustomerType::Retail->value,
@@ -95,13 +102,13 @@ class CustomerResource extends Resource
                 Tables\Filters\SelectFilter::make('type')
                     ->options(CustomerType::class),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

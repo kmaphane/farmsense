@@ -3,29 +3,35 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ExpenseResource\Pages;
+use BackedEnum;
 use Domains\Finance\Models\Expense;
 use Domains\Shared\Enums\ExpenseCategory;
+use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-receipt-percent';
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $navigationGroup = 'Finance';
+    protected static string|UnitEnum|null $navigationGroup = 'Finance';
 
-    public static function form(Form $form): Form
+    protected static ?string $recordTitleAttribute = 'description';
+
+    public static function form(Schema $form): Schema
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Expense Details')
+                Section::make('Expense Details')
                     ->description('Record a new expense transaction')
                     ->schema([
                         Forms\Components\TextInput::make('description')
@@ -49,7 +55,7 @@ class ExpenseResource extends Resource
                             ->searchable(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Allocation (Optional)')
+                Section::make('Allocation (Optional)')
                     ->description('Allocate expense to a specific batch or leave blank for general farm expenses')
                     ->schema([
                         Forms\Components\TextInput::make('allocatable_type')
@@ -60,7 +66,7 @@ class ExpenseResource extends Resource
                             ->helperText('Batch ID - Phase 3: UI will provide batch selector'),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Receipt & OCR')
+                Section::make('Receipt & OCR')
                     ->description('OCR functionality in Phase 2')
                     ->schema([
                         Forms\Components\FileUpload::make('receipt_path')
@@ -70,7 +76,7 @@ class ExpenseResource extends Resource
                             ->helperText('Max 5MB. OCR extraction in Phase 2.'),
                     ]),
 
-                Forms\Components\Section::make('Notes')
+                Section::make('Notes')
                     ->schema([
                         Forms\Components\Textarea::make('notes')
                             ->maxLength(500),
@@ -90,7 +96,8 @@ class ExpenseResource extends Resource
                     ->formatStateUsing(fn($state) => number_format($state / 100, 2) . ' BWP')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\BadgeColumn::make('category')
+                Tables\Columns\TextColumn::make('category')
+                    ->badge()
                     ->colors([
                         'primary' => ExpenseCategory::Feed->value,
                         'warning' => ExpenseCategory::Labor->value,
@@ -128,13 +135,13 @@ class ExpenseResource extends Resource
                             );
                     }),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

@@ -4,27 +4,33 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
+use BackedEnum;
+use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user';
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $navigationGroup = 'Administration';
+    protected static string|UnitEnum|null $navigationGroup = 'Administration';
 
-    public static function form(Form $form): Form
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function form(Schema $form): Schema
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('User Account')
+                Section::make('User Account')
                     ->description('Create or edit user account')
                     ->schema([
                         Forms\Components\TextInput::make('name')
@@ -44,7 +50,7 @@ class UserResource extends Resource
                             ->minLength(8),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Team Assignment')
+                Section::make('Team Assignment')
                     ->description('Assign user to teams with specific roles')
                     ->schema([
                         Forms\Components\Select::make('current_team_id')
@@ -53,11 +59,11 @@ class UserResource extends Resource
                             ->searchable(),
                     ]),
 
-                Forms\Components\Section::make('System Settings')
+                Section::make('System Settings')
                     ->schema([
-                        Forms\Components\Toggle::make('email_verified_at')
-                            ->label('Email Verified')
-                            ->helperText('Admin can mark email as verified'),
+                        Forms\Components\DateTimePicker::make('email_verified_at')
+                            ->label('Email Verified At')
+                            ->helperText('Leave empty if not verified'),
                     ]),
             ]);
     }
@@ -76,9 +82,9 @@ class UserResource extends Resource
                     ->label('Current Team')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('email_verified_at')
-                    ->label('Email Verified')
-                    ->boolean()
+                Tables\Columns\TextColumn::make('email_verified_at')
+                    ->label('Email Verified At')
+                    ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -86,17 +92,18 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('email_verified_at')
+                Tables\Filters\Filter::make('email_verified')
                     ->label('Email Verified')
-                    ->nullable(),
+                    ->toggle()
+                    ->query(fn($query, $value) => $value ? $query->whereNotNull('email_verified_at') : $query->whereNull('email_verified_at')),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

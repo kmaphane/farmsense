@@ -3,29 +3,35 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SupplierResource\Pages;
+use BackedEnum;
 use Domains\CRM\Models\Supplier;
 use Domains\Shared\Enums\SupplierCategory;
+use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class SupplierResource extends Resource
 {
     protected static ?string $model = Supplier::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-truck';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $navigationGroup = 'CRM';
+    protected static string|UnitEnum|null $navigationGroup = 'CRM';
 
-    public static function form(Form $form): Form
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function form(Schema $form): Schema
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Supplier Information')
+                Section::make('Supplier Information')
                     ->description('Global supplier reference data accessible to all teams')
                     ->schema([
                         Forms\Components\TextInput::make('name')
@@ -44,7 +50,7 @@ class SupplierResource extends Resource
                             ->default(SupplierCategory::Feed),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Performance & Pricing')
+                Section::make('Performance & Pricing')
                     ->schema([
                         Forms\Components\Slider::make('performance_rating')
                             ->minValue(1)
@@ -61,7 +67,7 @@ class SupplierResource extends Resource
                             ->helperText('Inactive suppliers won\'t appear in selection dropdowns'),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Notes')
+                Section::make('Notes')
                     ->schema([
                         Forms\Components\Textarea::make('notes')
                             ->maxLength(500)
@@ -83,7 +89,8 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable()
                     ->icon('heroicon-m-phone'),
-                Tables\Columns\BadgeColumn::make('category')
+                Tables\Columns\TextColumn::make('category')
+                    ->badge()
                     ->colors([
                         'primary' => SupplierCategory::Feed->value,
                         'success' => SupplierCategory::Chicks->value,
@@ -113,13 +120,13 @@ class SupplierResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->nullable(),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
