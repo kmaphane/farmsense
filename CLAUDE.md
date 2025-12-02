@@ -347,7 +347,7 @@ Queue worker automatically starts with `composer dev`.
 **Absolute Rules:**
 1. **Top-level Laravel directories:** ALL LOWERCASE
    - `app/`, `config/`, `database/`, `resources/`, `routes/`, `tests/`, `storage/`, `public/`, `bootstrap/`, `vendor/`
-   - Custom directories: `docs/`, `plans/`, `reports/`
+   - Custom directories: `domains/`, `docs/`, `plans/`, `reports/`
 
 2. **PascalCase (UpperCamelCase) for subdirectories:**
    - Laravel standard: `Migrations/`, `Seeders/`, `Factories/`, `Controllers/`, `Requests/`, `Models/`, `Providers/`, `Middleware/`
@@ -371,7 +371,7 @@ farmsense/
 │   ├── Providers/                 # PascalCase (Laravel standard)
 │   └── Actions/                   # PascalCase (custom, Fortify actions)
 │
-├── Domains/                       # PascalCase (custom root for DDD)
+├── domains/                       # lowercase (custom root for DDD)
 │   ├── Shared/                    # PascalCase (domain name)
 │   │   ├── Traits/                # PascalCase (feature)
 │   │   ├── Enums/                 # PascalCase (feature)
