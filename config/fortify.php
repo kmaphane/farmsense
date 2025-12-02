@@ -73,7 +73,7 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    'home' => '/admin',
 
     /*
     |--------------------------------------------------------------------------
@@ -130,7 +130,7 @@ return [
     |
     */
 
-    'views' => true,
+    'views' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -144,14 +144,14 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration(), // Disabled - admin-only user creation via Filament
         Features::resetPasswords(),
-        Features::emailVerification(),
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-            // 'window' => 0
-        ]),
+        // Features::emailVerification(), // Disabled - not required for now
+        // Features::twoFactorAuthentication([ // Disabled - use Filament 2FA if needed
+        //     'confirm' => true,
+        //     'confirmPassword' => true,
+        //     // 'window' => 0
+        // ]),
     ],
 
 ];
