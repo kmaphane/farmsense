@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(composer dump-autoload:*)"
+      "Bash(composer dump-autoload:*)",
+      "Bash(php artisan test:*)"
     ],
     "deny": [],
     "ask": []

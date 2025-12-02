@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,15 +11,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Only seed in local environment
+        if (!app()->isLocal()) {
+            return;
+        }
 
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => 'password',
-                'email_verified_at' => now(),
-            ]
-        );
+        // Order matters - dependencies first
+        $this->call([
+            RoleAndPermissionSeeder::class,  // Filament Shield roles/permissions
+            SupplierSeeder::class,            // Global suppliers (no dependencies)
+            TeamSeeder::class,                // Create teams
+            UserSeeder::class,                // Create users and assign to teams
+            CustomerSeeder::class,            // Create customers per team
+            ExpenseSeeder::class,             // Create expenses per team
+        ]);
     }
 }
