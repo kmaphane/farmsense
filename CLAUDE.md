@@ -340,6 +340,221 @@ php artisan queue:listen --tries=1
 ```
 Queue worker automatically starts with `composer dev`.
 
+## Naming Conventions (Strict Rules)
+
+### Directory Structure
+
+**Absolute Rules:**
+1. **Top-level Laravel directories:** ALL LOWERCASE
+   - `app/`, `config/`, `database/`, `resources/`, `routes/`, `tests/`, `storage/`, `public/`, `bootstrap/`, `vendor/`
+   - Custom directories: `docs/`, `plans/`, `reports/`
+
+2. **PascalCase (UpperCamelCase) for subdirectories:**
+   - Laravel standard: `Migrations/`, `Seeders/`, `Factories/`, `Controllers/`, `Requests/`, `Models/`, `Providers/`, `Middleware/`
+   - Filament: `Resources/`, `Pages/`, `Widgets/`, `Forms/`, `Tables/`
+   - Domains: Domain names (e.g., `Auth/`, `CRM/`, `Finance/`, `Shared/`, `Broiler/`, `Inventory/`, `IoT/`)
+   - Domain subdirectories: `Models/`, `Services/`, `Actions/`, `Policies/`, `Contracts/`, `Traits/`, `Enums/`, `Drivers/`, `DTOs/`, `Exceptions/`, `Events/`, `tests/` (lowercase `tests` within domains)
+
+**Directory Hierarchy:**
+```plaintext
+farmsense/
+├── app/                           # Lowercase (Laravel standard)
+│   ├── Filament/                  # PascalCase (Filament feature)
+│   │   ├── Resources/             # PascalCase (Filament feature)
+│   │   ├── Pages/                 # PascalCase (Filament feature)
+│   │   └── Widgets/               # PascalCase (Filament feature)
+│   ├── Http/                      # PascalCase (Laravel standard)
+│   │   ├── Controllers/           # PascalCase (Laravel standard)
+│   │   ├── Requests/              # PascalCase (Laravel standard)
+│   │   └── Middleware/            # PascalCase (Laravel standard)
+│   ├── Models/                    # PascalCase (Laravel standard)
+│   ├── Providers/                 # PascalCase (Laravel standard)
+│   └── Actions/                   # PascalCase (custom, Fortify actions)
+│
+├── Domains/                       # PascalCase (custom root for DDD)
+│   ├── Shared/                    # PascalCase (domain name)
+│   │   ├── Traits/                # PascalCase (feature)
+│   │   ├── Enums/                 # PascalCase (feature)
+│   │   ├── Contracts/             # PascalCase (feature)
+│   │   ├── DTOs/                  # PascalCase (feature)
+│   │   ├── Exceptions/            # PascalCase (feature)
+│   │   └── tests/                 # lowercase (tests subdir)
+│   │
+│   ├── Auth/                      # PascalCase (domain name)
+│   │   ├── Models/                # PascalCase (feature)
+│   │   ├── Policies/              # PascalCase (feature)
+│   │   ├── Actions/               # PascalCase (feature)
+│   │   └── tests/                 # lowercase (tests subdir)
+│   │
+│   ├── CRM/                       # PascalCase (domain name)
+│   ├── Finance/                   # PascalCase (domain name)
+│   ├── Inventory/                 # PascalCase (domain name)
+│   ├── Broiler/                   # PascalCase (domain name)
+│   └── IoT/                       # PascalCase (domain name)
+│
+├── database/                      # lowercase (Laravel standard)
+│   ├── migrations/                # lowercase (Laravel standard)
+│   ├── seeders/                   # lowercase (Laravel standard)
+│   └── factories/                 # lowercase (Laravel standard)
+│
+├── resources/                     # lowercase (Laravel standard)
+├── routes/                        # lowercase (Laravel standard)
+├── tests/                         # lowercase (Laravel standard)
+├── config/                        # lowercase (Laravel standard)
+├── storage/                       # lowercase (Laravel standard)
+├── public/                        # lowercase (Laravel standard)
+├── docs/                          # lowercase (custom)
+├── plans/                         # lowercase (custom)
+└── reports/                       # lowercase (custom)
+```
+
+### File Naming
+
+1. **Class Files:** PascalCase (matches class name)
+   - `User.php` (class User)
+   - `CreateUserAction.php` (class CreateUserAction)
+   - `UserPolicy.php` (class UserPolicy)
+   - `UserRepository.php` (class UserRepository)
+   - `BelongsToTeam.php` (trait BelongsToTeam)
+   - `CustomerType.php` (enum CustomerType)
+
+2. **Configuration Files:** lowercase with hyphens
+   - `config/app.php`
+   - `config/database.php`
+   - `config/filament-shield.php`
+
+3. **Migration Files:** timestamp + snake_case + action
+   - `2025_12_02_201315_create_teams_table.php`
+   - `2025_12_02_201316_create_team_user_table.php`
+   - `2025_12_02_201317_add_team_context_to_users_table.php`
+
+4. **Seeder Files:** PascalCase
+   - `DatabaseSeeder.php`
+   - `RoleAndPermissionSeeder.php`
+   - `SupplierSeeder.php`
+
+5. **Test Files:** PascalCase + "Test" suffix
+   - `TeamManagementTest.php`
+   - `AuthorizationTest.php`
+   - `SupplierTest.php`
+   - `ExpensePolicyTest.php`
+
+6. **Route Files:** lowercase
+   - `routes/web.php`
+   - `routes/api.php`
+
+7. **Frontend Files:**
+   - **React Components:** PascalCase
+     - `components/Button.tsx`
+     - `components/ui/Card.tsx`
+     - `pages/Dashboard.tsx`
+     - `layouts/AppLayout.tsx`
+
+   - **Hooks:** lowercase with `use` prefix
+     - `hooks/use-appearance.tsx`
+     - `hooks/use-auth.ts`
+
+   - **Utilities:** lowercase with hyphens
+     - `lib/utils.ts`
+     - `lib/api-client.ts`
+
+### Class & Function Naming
+
+1. **Classes:** PascalCase
+   - `class User`
+   - `class CreateUserAction`
+   - `class UserPolicy`
+   - `trait BelongsToTeam`
+   - `enum CustomerType`
+   - `interface Allocatable`
+
+2. **Methods & Functions:** camelCase
+   - `public function getCurrentTeamId()`
+   - `public function setCurrentTeam()`
+   - `public function scopeBelongsToTeam()`
+   - `private function calculateFCR()`
+
+3. **Constants:** SCREAMING_SNAKE_CASE
+   - `const DEFAULT_PAGINATION = 15;`
+   - `const CACHE_TTL_HOURS = 24;`
+
+4. **Variables & Properties:** camelCase
+   - `protected $currentTeamId;`
+   - `private $cache;`
+   - `$userId = 123;`
+
+### Database Naming
+
+1. **Table Names:** snake_case, plural
+   - `users`
+   - `teams`
+   - `team_user` (pivot)
+   - `customers`
+   - `suppliers`
+   - `expenses`
+
+2. **Column Names:** snake_case
+   - `user_id` (foreign key)
+   - `team_id` (foreign key)
+   - `role_id` (foreign key)
+   - `current_team_id` (relationship reference)
+   - `email_verified_at` (timestamp)
+   - `created_at` (timestamp)
+   - `updated_at` (timestamp)
+
+3. **Foreign Key Naming:** `{table_singular}_id`
+   - `user_id` (references users table)
+   - `team_id` (references teams table)
+   - `supplier_id` (references suppliers table)
+
+4. **Pivot Table Naming:** `{model1_singular}_{model2_singular}` (alphabetical if same length)
+   - `team_user` (not `user_team`)
+   - `role_team` (not `team_role`)
+
+### PHP Namespace Naming
+
+1. **App Namespace:**
+   - `App\Models\User`
+   - `App\Http\Controllers\DashboardController`
+   - `App\Filament\Resources\UserResource`
+   - `App\Providers\AuthServiceProvider`
+
+2. **Domain Namespace:**
+   - `Domains\Auth\Models\User`
+   - `Domains\Auth\Policies\UserPolicy`
+   - `Domains\CRM\Models\Supplier`
+   - `Domains\Finance\Models\Expense`
+   - `Domains\Shared\Traits\BelongsToTeam`
+   - `Domains\Shared\Enums\CustomerType`
+
+3. **Test Namespace:** Follow domain structure
+   - `Domains\Auth\Tests\Feature\TeamManagementTest`
+   - `Domains\CRM\Tests\Feature\SupplierTest`
+   - `Domains\Finance\Tests\Feature\ExpensePolicyTest`
+
+### Filament Resource Naming
+
+1. **Resource Classes:** PascalCase matching model name + "Resource"
+   - `UserResource.php`
+   - `TeamResource.php`
+   - `SupplierResource.php`
+   - `ExpenseResource.php`
+
+2. **Resource Namespace:** `App\Filament\Resources\`
+
+3. **Resource Pages:** Nested in resource subdirectories
+   - `app/Filament/Resources/UserResource/Pages/ListUsers.php`
+   - `app/Filament/Resources/UserResource/Pages/CreateUser.php`
+   - `app/Filament/Resources/UserResource/Pages/EditUser.php`
+
+### Naming Convention Rules (Enforcement)
+
+- **Never deviate:** These rules are non-negotiable for consistency
+- **Case-sensitive:** Linux servers are case-sensitive; maintain exact casing everywhere
+- **Windows vs Linux:** Windows ignores case, Linux enforces it. Always write code as if on Linux
+- **Automated:** Use Laravel Pint for PHP code formatting: `./vendor/bin/pint`
+- **IDE Help:** Configure your IDE to respect these conventions (ESLint, Prettier, Laravel Pint)
+
 ## Implementation Roadmap
 
 This project follows a phase-based approach to build features systematically. Each phase builds on the previous, ensuring solid foundations before adding complexity.
