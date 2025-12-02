@@ -3,26 +3,37 @@
 namespace Domains\CRM\Models;
 
 use Domains\Shared\Enums\SupplierCategory;
-use Domains\Shared\Traits\BelongsToTeam;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Supplier Model
+ *
+ * NOTE: Suppliers are GLOBAL/SHARED across all teams in the system.
+ * This enables:
+ * - Cross-team supplier performance insights
+ * - Shared pricing reference data
+ * - Future API integration for live pricing and orders
+ *
+ * Teams reference suppliers but do not own them.
+ */
 class Supplier extends Model
 {
-    use BelongsToTeam;
-
     protected $fillable = [
-        'team_id',
         'name',
         'email',
         'phone',
         'category',
         'performance_rating',
+        'current_price_per_unit',
         'notes',
+        'is_active',
     ];
 
     protected $casts = [
         'category' => SupplierCategory::class,
         'performance_rating' => 'float',
+        'current_price_per_unit' => 'float',
+        'is_active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

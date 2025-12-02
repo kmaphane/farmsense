@@ -13,17 +13,21 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
+            // NOTE: Suppliers are GLOBAL/SHARED across all teams
+            // This enables supplier pricing insights across the platform
+            // Future: API integration for live pricing and order placement
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->enum('category', ['Feed', 'Chicks', 'Meds'])->default('Feed');
             $table->decimal('performance_rating', 3, 2)->nullable()->comment('1.00 to 5.00 scale');
+            $table->decimal('current_price_per_unit', 10, 2)->nullable()->comment('Current market price (Phase 2+)');
             $table->text('notes')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index('team_id');
             $table->index('category');
+            $table->index('is_active');
         });
     }
 

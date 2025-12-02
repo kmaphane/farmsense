@@ -26,6 +26,7 @@ class SupplierResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Supplier Information')
+                    ->description('Global supplier reference data accessible to all teams')
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->required()
@@ -43,16 +44,28 @@ class SupplierResource extends Resource
                             ->default(SupplierCategory::Feed),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Performance')
+                Forms\Components\Section::make('Performance & Pricing')
                     ->schema([
                         Forms\Components\Slider::make('performance_rating')
                             ->minValue(1)
                             ->maxValue(5)
                             ->step(0.5)
                             ->helperText('Rate supplier quality 1-5 stars'),
+                        Forms\Components\TextInput::make('current_price_per_unit')
+                            ->numeric()
+                            ->step(0.01)
+                            ->minValue(0)
+                            ->helperText('Current market price for budgeting reference (Phase 2+ API integration)'),
+                        Forms\Components\Toggle::make('is_active')
+                            ->default(true)
+                            ->helperText('Inactive suppliers won\'t appear in selection dropdowns'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Notes')
+                    ->schema([
                         Forms\Components\Textarea::make('notes')
                             ->maxLength(500)
-                            ->columnSpanFull(),
+                            ->helperText('Payment terms, special handling, contacts, etc.'),
                     ]),
             ]);
     }
@@ -79,6 +92,16 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('performance_rating')
                     ->label('Rating')
                     ->formatStateUsing(fn($state) => $state ? str_repeat('★', (int) $state) . str_repeat('☆', 5 - (int) $state) : '—'),
+                Tables\Columns\TextColumn::make('current_price_per_unit')
+                    ->label('Current Price')
+                    ->formatStateUsing(fn($state) => $state ? 'BWP ' . number_format($state, 2) : '—')
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean()
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -87,6 +110,8 @@ class SupplierResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
                     ->options(SupplierCategory::class),
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->nullable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
