@@ -566,6 +566,38 @@ Route helpers regenerate automatically during dev server (`npm run dev`). If rou
 - Feature tests use in-memory SQLite with array cache/session
 - Test environment configured in `phpunit.xml`
 
+## Implementation Reporting
+
+To maintain focused development and avoid documentation overhead:
+
+**Reporting Rule:** Complete one comprehensive implementation report **per plan completion**, not per step.
+
+**Workflow:**
+
+1. Review and approve plan (e.g., `plans/PHASE_1.md`)
+2. Implement all steps in the plan
+3. At the end, create a single report (e.g., `reports/PHASE_1_IMPLEMENTATION_REPORT.md`)
+4. Use the `reports/IMPLEMENTATION_REPORT_TEMPLATE.md` as your guide
+
+**Report Requirements:**
+
+- ✅ Executive summary of what was built
+- ✅ Features implemented with acceptance criteria
+- ✅ Architecture changes with Mermaid diagrams
+- ✅ Database schema and ER diagrams
+- ✅ All git commits made during the phase
+- ✅ Test coverage and quality metrics
+- ✅ Deployment notes
+- ✅ Lessons learned
+- ✅ Cross-domain impact analysis
+
+**Why This Approach:**
+
+- Keeps documentation manageable and sprintable
+- Avoids fragmentation across multiple micro-reports
+- Provides complete context for future reference
+- Faster to execute and easier to maintain
+
 ===
 
 <laravel-boost-guidelines>
