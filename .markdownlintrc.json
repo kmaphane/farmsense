@@ -1,0 +1,9 @@
+{
+  "extends": "markdownlint/style/mdl.json",
+  "md022": false,
+  "md032": {
+    "list_items": false
+  },
+  "md040": false,
+  "default": true
+}

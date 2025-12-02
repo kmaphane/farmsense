@@ -45,6 +45,7 @@ npm run types         # TypeScript type checking (no emit)
 ```
 
 ### Code Quality
+
 ```bash
 ./vendor/bin/pint     # Format PHP code (Laravel Pint)
 ```
@@ -1648,6 +1649,7 @@ Forms\Components\Select::make('user_id')
 
 
 ### Important Version 4 Changes
+
 - File visibility is now `private` by default.
 - The `deferFilters` method from Filament v3 is now the default behavior in Filament v4, so users must click a button before the filters are applied to the table. To disable this behavior, you can use the `deferFilters(false)` method.
 - The `Grid`, `Section`, and `Fieldset` layout components no longer span all columns by default.
