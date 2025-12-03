@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
-            $table->enum('type', ['Wholesale', 'Retail'])->default('Retail');
+            $table->string('type')->default('retail');
             $table->bigInteger('credit_limit')->default(0)->comment('Stored as cents/thebe');
             $table->text('payment_terms')->nullable();
             $table->text('notes')->nullable();

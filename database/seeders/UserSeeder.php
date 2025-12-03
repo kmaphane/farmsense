@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
 
         // Super Admin - has access to all teams
         $superAdmin = User::firstOrCreate(
-            ['email' => 'admin@farmsense.local'],
+            ['email' => 'kenna@omkom.com'],
             [
                 'name' => 'System Admin',
                 'password' => bcrypt('password'),

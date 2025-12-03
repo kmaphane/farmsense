@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
-            $table->enum('category', ['Feed', 'Chicks', 'Meds'])->default('Feed');
+            $table->string('category')->default('feed');
             $table->decimal('performance_rating', 3, 2)->nullable()->comment('1.00 to 5.00 scale');
             $table->decimal('current_price_per_unit', 10, 2)->nullable()->comment('Current market price (Phase 2+)');
             $table->text('notes')->nullable();

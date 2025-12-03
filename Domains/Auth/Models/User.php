@@ -4,15 +4,17 @@ namespace Domains\Auth\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -54,8 +56,6 @@ class User extends Authenticatable
 
     /**
      * Get the teams the user belongs to
-     *
-     * @return BelongsToMany
      */
     public function teams(): BelongsToMany
     {
@@ -65,20 +65,15 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the current team the user is working with
-     *
-     * @return Team|null
+     * Get the current team the user is working with (relationship)
      */
-    public function currentTeam(): ?Team
+    public function currentTeam(): BelongsTo
     {
-        return $this->current_team_id ? Team::find($this->current_team_id) : null;
+        return $this->belongsTo(Team::class, 'current_team_id');
     }
 
     /**
      * Set the current team context
-     *
-     * @param Team $team
-     * @return void
      */
     public function setCurrentTeam(Team $team): void
     {
@@ -89,9 +84,6 @@ class User extends Authenticatable
 
     /**
      * Check if user has access to a specific team
-     *
-     * @param Team $team
-     * @return bool
      */
     public function hasTeamAccess(Team $team): bool
     {
@@ -100,9 +92,6 @@ class User extends Authenticatable
 
     /**
      * Check if user is the owner of a team
-     *
-     * @param Team $team
-     * @return bool
      */
     public function isTeamOwner(Team $team): bool
     {
