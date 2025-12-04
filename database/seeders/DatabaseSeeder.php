@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Only seed in local environment
-        if (!app()->isLocal()) {
+        if (! app()->isLocal()) {
             return;
         }
 
@@ -24,6 +24,11 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,                // Create users and assign to teams
             CustomerSeeder::class,            // Create customers per team
             ExpenseSeeder::class,             // Create expenses per team
+            ProductSeeder::class,             // Create products per team
+            WarehouseSeeder::class,           // Create warehouses per team
+            StockMovementSeeder::class,       // Create stock movements
+            InvoiceSeeder::class,             // Create invoices with line items
+            PaymentSeeder::class,             // Create payments for invoices
         ]);
     }
 }
