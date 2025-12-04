@@ -6,6 +6,7 @@ use Domains\Auth\Models\Team;
 use Domains\CRM\Models\Customer;
 use Domains\CRM\Models\Supplier;
 use Domains\Finance\Models\Expense;
+use Illuminate\Support\Facades\Auth;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -13,7 +14,7 @@ class Dashboard extends BaseDashboard
 {
     public function getStats(): array
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $team = $user->currentTeam;
 
         if (! $team) {

@@ -1,0 +1,21 @@
+<?php
+
+namespace Domains\Inventory\Enums;
+
+enum MovementType: string
+{
+    case In = 'in';
+    case Out = 'out';
+    case Adjustment = 'adjustment';
+    case Transfer = 'transfer';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::In => 'Stock In',
+            self::Out => 'Stock Out',
+            self::Adjustment => 'Adjustment',
+            self::Transfer => 'Transfer',
+        };
+    }
+}
