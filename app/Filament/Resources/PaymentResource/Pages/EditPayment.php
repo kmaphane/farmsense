@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PaymentResource\Pages;
 
 use App\Filament\Resources\PaymentResource;
+use Domains\Finance\DTOs\PaymentData;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -15,5 +16,12 @@ class EditPayment extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $dto = PaymentData::fromFilament($data);
+
+        return $dto->toArray();
     }
 }

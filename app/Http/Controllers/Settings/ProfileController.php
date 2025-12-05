@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\ProfileUpdateRequest;
+use Domains\Auth\DTOs\ProfileUpdateData;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,11 +25,15 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile settings.
+     * Update the user's profile settings using DTO.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validate(ProfileUpdateData::rules());
+
+        $dto = ProfileUpdateData::from($validated);
+
+        $request->user()->fill($dto->toArray());
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;

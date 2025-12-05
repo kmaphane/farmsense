@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Filament\Resources\InvoiceResource;
+use Domains\Finance\DTOs\InvoiceData;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -15,5 +16,12 @@ class EditInvoice extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $dto = InvoiceData::fromFilament($data);
+
+        return $dto->toArray();
     }
 }

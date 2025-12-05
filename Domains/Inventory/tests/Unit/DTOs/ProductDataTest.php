@@ -1,0 +1,64 @@
+<?php
+
+use Domains\Inventory\DTOs\ProductData;
+
+beforeEach(function () {
+    $this->user = \App\Models\User::factory()->create([
+        'current_team_id' => 1,
+    ]);
+    $this->actingAs($this->user);
+});
+
+it('creates product DTO from array', function () {
+    $dto = ProductData::from([
+        'team_id' => 1,
+        'name' => 'Broiler Starter Feed',
+        'description' => 'High protein starter feed',
+        'type' => 'feed',
+        'unit' => 'kg',
+        'quantity_on_hand' => 5000,
+        'reorder_level' => 1000,
+        'unit_cost' => 2500,
+        'is_active' => true,
+    ]);
+
+    expect($dto->name)->toBe('Broiler Starter Feed')
+        ->and($dto->type)->toBe('feed')
+        ->and($dto->unit)->toBe('kg')
+        ->and($dto->quantity_on_hand)->toBe(5000)
+        ->and($dto->reorder_level)->toBe(1000)
+        ->and($dto->unit_cost)->toBe(2500)
+        ->and($dto->is_active)->toBeTrue();
+});
+
+it('creates product DTO using fromFilament method with defaults', function () {
+    $dto = ProductData::fromFilament([
+        'name' => 'New Product',
+        'type' => 'equipment',
+        'unit' => 'pcs',
+    ]);
+
+    expect($dto->name)->toBe('New Product')
+        ->and($dto->team_id)->toBe(1)
+        ->and($dto->quantity_on_hand)->toBe(0)
+        ->and($dto->is_active)->toBeTrue();
+});
+
+it('validates product type enum', function () {
+    ProductData::from([
+        'team_id' => 1,
+        'name' => 'Test Product',
+        'type' => 'invalid_type', // Invalid
+        'unit' => 'kg',
+    ]);
+})->throws(\Spatie\LaravelData\Exceptions\ValidationException::class);
+
+it('validates minimum values for quantities', function () {
+    ProductData::from([
+        'team_id' => 1,
+        'name' => 'Test Product',
+        'type' => 'feed',
+        'unit' => 'kg',
+        'quantity_on_hand' => -10, // Invalid - negative
+    ]);
+})->throws(\Spatie\LaravelData\Exceptions\ValidationException::class);
