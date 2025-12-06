@@ -1,6 +1,8 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
+
+namespace Domains\Finance\Seeders;
 
 use Domains\CRM\Models\Customer;
 use Domains\Finance\Enums\InvoiceStatus;
@@ -15,7 +17,7 @@ class InvoiceSeeder extends Seeder
     {
         $customers = Customer::all();
         $products = Product::all();
-        $invoiceCounter = 1000 + (int)(microtime(true) * 1000) % 10000;
+        $invoiceCounter = 1000 + (int) (microtime(true) * 1000) % 10000;
 
         foreach ($customers as $customer) {
             // Create 3-5 invoices per customer

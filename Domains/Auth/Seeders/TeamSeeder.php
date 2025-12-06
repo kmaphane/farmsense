@@ -1,9 +1,11 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
 
-use Domains\Auth\Models\User;
+namespace Domains\Auth\Seeders;
+
 use Domains\Auth\Models\Team;
+use Domains\Auth\Models\User;
 use Illuminate\Database\Seeder;
 
 class TeamSeeder extends Seeder

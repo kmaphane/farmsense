@@ -1,6 +1,8 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
+
+namespace Domains\Finance\Seeders;
 
 use Domains\Auth\Models\User;
 use Domains\Finance\Enums\PaymentMethod;
@@ -40,7 +42,7 @@ class PaymentSeeder extends Seeder
                         'invoice_id' => $invoice->id,
                         'amount' => $amount,
                         'payment_method' => PaymentMethod::cases()[array_rand(PaymentMethod::cases())],
-                        'reference' => 'REF-'.str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT),
+                        'reference' => 'REF-'.str_pad((string) rand(100000, 999999), 6, '0', STR_PAD_LEFT),
                         'notes' => 'Partial payment received',
                         'recorded_by' => $user->id,
                         'payment_date' => now()->subDays(rand(0, 30)),

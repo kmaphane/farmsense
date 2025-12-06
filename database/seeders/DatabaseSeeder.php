@@ -2,6 +2,19 @@
 
 namespace Database\Seeders;
 
+use Domains\Auth\Seeders\RoleAndPermissionSeeder;
+use Domains\Auth\Seeders\TeamSeeder;
+use Domains\Auth\Seeders\UserSeeder;
+use Domains\Broiler\Seeders\BatchSeeder;
+use Domains\Broiler\Seeders\DailyLogSeeder;
+use Domains\CRM\Seeders\CustomerSeeder;
+use Domains\CRM\Seeders\SupplierSeeder;
+use Domains\Finance\Seeders\ExpenseSeeder;
+use Domains\Finance\Seeders\InvoiceSeeder;
+use Domains\Finance\Seeders\PaymentSeeder;
+use Domains\Inventory\Seeders\ProductSeeder;
+use Domains\Inventory\Seeders\StockMovementSeeder;
+use Domains\Inventory\Seeders\WarehouseSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -29,6 +42,8 @@ class DatabaseSeeder extends Seeder
             StockMovementSeeder::class,       // Create stock movements
             InvoiceSeeder::class,             // Create invoices with line items
             PaymentSeeder::class,             // Create payments for invoices
+            BatchSeeder::class,               // Create broiler batches per team
+            DailyLogSeeder::class,            // Create daily logs for batches
         ]);
     }
 }

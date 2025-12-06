@@ -1,6 +1,8 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
+
+namespace Domains\Finance\Seeders;
 
 use Domains\Auth\Models\Team;
 use Domains\Finance\Models\Expense;

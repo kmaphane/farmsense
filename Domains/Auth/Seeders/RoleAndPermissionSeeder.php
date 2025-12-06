@@ -1,8 +1,9 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+namespace Domains\Auth\Seeders;
+
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;

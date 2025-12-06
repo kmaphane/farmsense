@@ -1,6 +1,8 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
+
+namespace Domains\Inventory\Seeders;
 
 use Domains\Auth\Models\Team;
 use Domains\Inventory\Enums\ProductType;

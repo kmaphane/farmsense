@@ -1,6 +1,8 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
+
+namespace Domains\CRM\Seeders;
 
 use Domains\Auth\Models\Team;
 use Domains\CRM\Models\Customer;
@@ -76,7 +78,7 @@ class CustomerSeeder extends Seeder
                 Customer::create([
                     ...$customerData,
                     'team_id' => $team->id,
-                    'notes' => 'Created for ' . $team->name,
+                    'notes' => 'Created for '.$team->name,
                 ]);
             }
         }

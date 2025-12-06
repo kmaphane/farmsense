@@ -1,11 +1,13 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
 
-use Domains\Auth\Models\User;
+namespace Domains\Auth\Seeders;
+
 use Domains\Auth\Models\Team;
-use Spatie\Permission\Models\Role;
+use Domains\Auth\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -35,7 +37,7 @@ class UserSeeder extends Seeder
 
         // Assign Super Admin to all teams with Super Admin role
         foreach ($teams as $team) {
-            if (!$superAdmin->teams()->where('team_id', $team->id)->exists()) {
+            if (! $superAdmin->teams()->where('team_id', $team->id)->exists()) {
                 $superAdmin->teams()->attach($team->id, ['role_id' => $superAdminRole->id]);
             }
         }
@@ -69,7 +71,7 @@ class UserSeeder extends Seeder
             );
 
             $team = $teams->get($teamIndex);
-            if (!$manager->teams()->where('team_id', $team->id)->exists()) {
+            if (! $manager->teams()->where('team_id', $team->id)->exists()) {
                 $manager->teams()->attach($team->id, ['role_id' => $farmManagerRole->id]);
             }
             $manager->update(['current_team_id' => $team->id]);
@@ -104,7 +106,7 @@ class UserSeeder extends Seeder
 
             foreach ($teamIndices as $index) {
                 $team = $teams->get($index);
-                if (!$partner->teams()->where('team_id', $team->id)->exists()) {
+                if (! $partner->teams()->where('team_id', $team->id)->exists()) {
                     $partner->teams()->attach($team->id, ['role_id' => $partnerRole->id]);
                 }
             }
@@ -146,7 +148,7 @@ class UserSeeder extends Seeder
             );
 
             $team = $teams->get($teamIndex);
-            if (!$worker->teams()->where('team_id', $team->id)->exists()) {
+            if (! $worker->teams()->where('team_id', $team->id)->exists()) {
                 $worker->teams()->attach($team->id, ['role_id' => $fieldWorkerRole->id]);
             }
             $worker->update(['current_team_id' => $team->id]);

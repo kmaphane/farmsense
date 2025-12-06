@@ -1,6 +1,8 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
+
+namespace Domains\CRM\Seeders;
 
 use Domains\CRM\Models\Supplier;
 use Domains\Shared\Enums\SupplierCategory;
