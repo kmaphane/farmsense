@@ -10,7 +10,7 @@ use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Width;
 
 class ViewBatch extends ViewRecord
 {
@@ -56,7 +56,7 @@ class ViewBatch extends ViewRecord
                 ->label('Close Batch')
                 ->icon('heroicon-o-lock-closed')
                 ->requiresConfirmation()
-                ->modalWidth(MaxWidth::Medium)
+                ->modalWidth(Width::Medium)
                 ->visible(fn () => $this->record->status === BatchStatus::Harvesting)
                 ->form([
                     Forms\Components\TextInput::make('average_weight_kg')
