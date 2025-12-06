@@ -85,7 +85,7 @@ class Batch extends Model
 
         $endDate = $this->actual_end_date ?? now();
 
-        return $this->start_date->diffInDays($endDate);
+        return (int) $this->start_date->diffInDays($endDate);
     }
 
     public function getTotalMortalityAttribute(): int
