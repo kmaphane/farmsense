@@ -2,7 +2,7 @@
 
 namespace Domains\Auth\DTOs;
 
-use App\Models\User;
+use Domains\Auth\Models\User;
 use Domains\Shared\DTOs\BaseData;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Attributes\Validation\Email;

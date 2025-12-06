@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
-use App\Models\User;
 use Domains\Auth\Models\Team;
+use Domains\Auth\Models\User;
 use Domains\Auth\Policies\TeamPolicy;
 use Domains\Auth\Policies\UserPolicy;
 use Domains\CRM\Models\Customer;

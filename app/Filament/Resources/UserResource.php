@@ -3,8 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Models\User;
 use BackedEnum;
+use Domains\Auth\Models\User;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\Resource;
