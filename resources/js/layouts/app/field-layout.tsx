@@ -40,9 +40,7 @@ export function FieldLayout({
                                 href="/batches"
                                 className="flex items-center gap-2"
                             >
-                                <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-green-600 text-white">
-                                    <AppLogoIcon className="size-5 fill-current" />
-                                </div>
+                                <AppLogoIcon className="size-8 object-contain" />
                                 <span className="font-semibold text-gray-900 dark:text-gray-100">
                                     FarmSense
                                 </span>
