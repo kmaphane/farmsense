@@ -37,10 +37,10 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
     const today = React.useMemo(() => new Date(), []);
     const batchStart = React.useMemo(() => new Date(batchStartDate), [batchStartDate]);
     const batchEnd = React.useMemo(() => batchEndDate ? new Date(batchEndDate) : null, [batchEndDate]);
-    
+
     // Calculate current week of the batch
     const currentWeek = Math.ceil(batchAgeInDays / 7) || 1;
-    
+
     // View mode state - default to current week
     const [viewMode, setViewMode] = React.useState<ViewMode>('week');
     const [selectedWeek, setSelectedWeek] = React.useState(currentWeek);
@@ -82,7 +82,7 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
     const filteredDays = React.useMemo(() => {
         switch (viewMode) {
             case 'today':
-                return allBatchDays.filter(d => 
+                return allBatchDays.filter(d =>
                     d.date.toDateString() === today.toDateString()
                 );
             case 'week':
@@ -220,8 +220,8 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
             ) : (
                 // Grid view for week/all
                 <div className={`grid gap-2 ${
-                    viewMode === 'week' 
-                        ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7' 
+                    viewMode === 'week'
+                        ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7'
                         : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7'
                 }`}>
                     {filteredDays.map(({ date, dayNumber, weekNumber }) => {
@@ -311,8 +311,8 @@ function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, com
         <div className={getCellClasses()} onClick={handleClick}>
             {/* Header */}
             <div className={`flex items-center justify-between px-2 py-1.5 border-b ${
-                isToday 
-                    ? 'bg-green-500 border-green-600 text-white' 
+                isToday
+                    ? 'bg-green-500 border-green-600 text-white'
                     : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800'
             }`}>
                 <div className="flex items-center gap-1.5">
@@ -321,8 +321,8 @@ function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, com
                     </span>
                     {!compact && (
                         <span className={`text-[10px] px-1 py-0.5 rounded ${
-                            isToday 
-                                ? 'bg-green-400/30 text-green-100' 
+                            isToday
+                                ? 'bg-green-400/30 text-green-100'
                                 : 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
                         }`}>
                             W{weekNumber}
@@ -351,7 +351,7 @@ function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, com
                             <span className="text-xs text-gray-600 dark:text-gray-400">{log.feed_consumed_kg}kg</span>
                         </div>
                     </div>
-                    
+
                     {/* Secondary metrics */}
                     {!compact && (
                         <div className="space-y-1">
