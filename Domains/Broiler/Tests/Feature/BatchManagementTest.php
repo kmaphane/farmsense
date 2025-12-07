@@ -160,7 +160,10 @@ describe('Batch Status Transitions', function () {
     });
 
     it('transitions from harvesting to closed', function () {
-        $batch = Batch::factory()->forTeam($this->team)->harvesting()->create();
+        // Create batch with 0 remaining birds (fully sold/slaughtered)
+        $batch = Batch::factory()->forTeam($this->team)->harvesting()->create([
+            'current_quantity' => 0,
+        ]);
 
         $action = new CloseBatchAction(new BatchCalculationService);
         $closedBatch = $action->execute($batch, 2.35);
@@ -168,6 +171,37 @@ describe('Batch Status Transitions', function () {
         expect($closedBatch->status)->toBe(BatchStatus::Closed);
         expect($closedBatch->actual_end_date)->not->toBeNull();
         expect((float) $closedBatch->average_weight_kg)->toBe(2.35);
+    });
+
+    it('transitions from harvesting to closed with remaining birds and closure reason', function () {
+        $batch = Batch::factory()->forTeam($this->team)->harvesting()->create([
+            'current_quantity' => 10, // Birds remaining
+        ]);
+
+        $action = new CloseBatchAction(new BatchCalculationService);
+        $closedBatch = $action->execute(
+            batch: $batch,
+            averageWeightKg: 2.35,
+            manureBagsCollected: 5,
+            closureReason: \Domains\Broiler\Enums\DiscrepancyReason::HouseholdConsumption,
+            closureNotes: '10 birds kept for household',
+        );
+
+        expect($closedBatch->status)->toBe(BatchStatus::Closed);
+        expect($closedBatch->manure_bags_collected)->toBe(5);
+        expect($closedBatch->closure_reason)->toBe(\Domains\Broiler\Enums\DiscrepancyReason::HouseholdConsumption);
+        expect($closedBatch->closure_notes)->toBe('10 birds kept for household');
+    });
+
+    it('requires closure reason when birds remain in batch', function () {
+        $batch = Batch::factory()->forTeam($this->team)->harvesting()->create([
+            'current_quantity' => 10, // Birds remaining
+        ]);
+
+        $action = new CloseBatchAction(new BatchCalculationService);
+
+        expect(fn () => $action->execute($batch, 2.35))
+            ->toThrow(InvalidArgumentException::class, 'Closure reason is required when birds remain in the batch.');
     });
 
     it('throws exception when transitioning from planned directly to harvesting', function () {

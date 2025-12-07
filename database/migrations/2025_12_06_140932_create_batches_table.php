@@ -25,6 +25,12 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('target_weight_kg', 8, 2)->nullable();
             $table->decimal('average_weight_kg', 8, 2)->nullable();
+
+            // Batch closure fields
+            $table->integer('manure_bags_collected')->nullable()->comment('Bags of manure collected at closure');
+            $table->string('closure_reason')->nullable()->comment('Required if birds remain at closure');
+            $table->text('closure_notes')->nullable();
+
             $table->timestamps();
 
             $table->index(['team_id', 'status']);

@@ -1,9 +1,24 @@
 import { BatchCard, type BatchCardData } from '@/components/broiler/BatchCard';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Activity, AlertTriangle, Bird, TrendingUp, Utensils } from 'lucide-react';
+import {
+    Activity,
+    AlertTriangle,
+    Bird,
+    DollarSign,
+    Package,
+    Scissors,
+    TrendingUp,
+    Utensils,
+} from 'lucide-react';
 
 interface DashboardStats {
     activeBatches: number;
@@ -43,14 +58,20 @@ function StatCard({
         <Card className={alert ? 'border-red-200 dark:border-red-900' : ''}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon className={`h-4 w-4 ${alert ? 'text-red-500' : 'text-muted-foreground'}`} />
+                <Icon
+                    className={`h-4 w-4 ${alert ? 'text-red-500' : 'text-muted-foreground'}`}
+                />
             </CardHeader>
             <CardContent>
-                <div className={`text-2xl font-bold ${alert ? 'text-red-600 dark:text-red-400' : ''}`}>
+                <div
+                    className={`text-2xl font-bold ${alert ? 'text-red-600 dark:text-red-400' : ''}`}
+                >
                     {value}
                 </div>
                 {description && (
-                    <p className="text-xs text-muted-foreground">{description}</p>
+                    <p className="text-xs text-muted-foreground">
+                        {description}
+                    </p>
                 )}
             </CardContent>
         </Card>
@@ -85,7 +106,11 @@ export default function Dashboard({ stats, recentBatches }: Props) {
                     <StatCard
                         title="Avg Mortality Rate"
                         value={`${stats.avgMortalityRate.toFixed(1)}%`}
-                        description={stats.avgMortalityRate > 5 ? 'Above target' : 'Within target'}
+                        description={
+                            stats.avgMortalityRate > 5
+                                ? 'Above target'
+                                : 'Within target'
+                        }
                         icon={Activity}
                         alert={stats.avgMortalityRate > 5}
                     />
@@ -102,11 +127,77 @@ export default function Dashboard({ stats, recentBatches }: Props) {
                     <StatCard
                         title="Pending Alerts"
                         value={stats.pendingAlerts}
-                        description={stats.pendingAlerts > 0 ? 'Requires attention' : 'All clear'}
+                        description={
+                            stats.pendingAlerts > 0
+                                ? 'Requires attention'
+                                : 'All clear'
+                        }
                         icon={AlertTriangle}
                         alert={stats.pendingAlerts > 0}
                     />
                 </div>
+
+                {/* Quick Actions */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Quick Actions</CardTitle>
+                        <CardDescription>
+                            Common operations for processing and sales
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <Link
+                                href="/slaughter/create"
+                                className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-red-200 hover:bg-red-50 dark:border-gray-800 dark:hover:border-red-900 dark:hover:bg-red-950"
+                            >
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                                    <Scissors className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                                        Slaughter
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        Process birds
+                                    </p>
+                                </div>
+                            </Link>
+                            <Link
+                                href="/portioning/create"
+                                className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-purple-200 hover:bg-purple-50 dark:border-gray-800 dark:hover:border-purple-900 dark:hover:bg-purple-950"
+                            >
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                                    <Package className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                                        Portioning
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        Cut into packs
+                                    </p>
+                                </div>
+                            </Link>
+                            <Link
+                                href="/products/pricing"
+                                className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-blue-200 hover:bg-blue-50 dark:border-gray-800 dark:hover:border-blue-900 dark:hover:bg-blue-950"
+                            >
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                    <DollarSign className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                                        Pricing
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        Update prices
+                                    </p>
+                                </div>
+                            </Link>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Active Batches */}
                 <Card className="flex-1">
@@ -114,7 +205,9 @@ export default function Dashboard({ stats, recentBatches }: Props) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <CardTitle>Active Batches</CardTitle>
-                                <CardDescription>Your broiler batches currently in production</CardDescription>
+                                <CardDescription>
+                                    Your broiler batches currently in production
+                                </CardDescription>
                             </div>
                             <Link
                                 href="/admin/batches/create"
@@ -132,13 +225,18 @@ export default function Dashboard({ stats, recentBatches }: Props) {
                                     No Active Batches
                                 </h3>
                                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                    Create a new batch in the admin panel to get started.
+                                    Create a new batch in the admin panel to get
+                                    started.
                                 </p>
                             </div>
                         ) : (
                             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 {recentBatches.map((batch) => (
-                                    <BatchCard key={batch.id} batch={batch} variant="card" />
+                                    <BatchCard
+                                        key={batch.id}
+                                        batch={batch}
+                                        variant="card"
+                                    />
                                 ))}
                             </div>
                         )}

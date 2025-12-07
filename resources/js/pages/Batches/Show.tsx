@@ -3,6 +3,7 @@ import {
     type DailyLogData,
 } from '@/components/broiler/DailyLogCalendar';
 import { DailyLogForm } from '@/components/broiler/DailyLogForm';
+import { LiveSaleForm } from '@/components/broiler/LiveSaleForm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,15 +22,17 @@ import {
 } from '@/components/ui/sheet';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     Activity,
     Bird,
     Calendar,
     ClipboardList,
+    DollarSign,
     Edit,
     Plus,
     Scale,
+    Scissors,
     TrendingUp,
     Utensils,
 } from 'lucide-react';
@@ -66,12 +69,19 @@ interface LastLogData {
     humidity_percent: number | null;
 }
 
+interface LiveSaleData {
+    canSell: boolean;
+    liveBirdPrice: number | null;
+    customers: { id: number; name: string }[];
+}
+
 interface Props {
     batch: BatchData;
     stats: BatchStats;
     dailyLogs: DailyLogData[];
     lastLog: LastLogData | null;
     suggestedDate: string;
+    liveSale: LiveSaleData;
 }
 
 function StatCard({
@@ -117,9 +127,11 @@ export default function Show({
     dailyLogs,
     lastLog,
     suggestedDate,
+    liveSale,
 }: Props) {
     const isHighMortality = stats.mortalityRate > 5;
     const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+    const [isLiveSaleOpen, setIsLiveSaleOpen] = React.useState(false);
     const [editingLog, setEditingLog] = React.useState<DailyLogData | null>(
         null,
     );
@@ -186,6 +198,59 @@ export default function Show({
                                 alert={isHighMortality}
                             />
                         </div>
+
+                        {/* Quick Actions */}
+                        {(batch.status === 'active' ||
+                            batch.status === 'harvesting') && (
+                            <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-200 pt-4 dark:border-gray-700">
+                                {liveSale.canSell && (
+                                    <Sheet
+                                        open={isLiveSaleOpen}
+                                        onOpenChange={setIsLiveSaleOpen}
+                                    >
+                                        <SheetTrigger asChild>
+                                            <Button variant="outline" size="sm">
+                                                <DollarSign className="mr-1.5 h-4 w-4" />
+                                                Sell Live Birds
+                                            </Button>
+                                        </SheetTrigger>
+                                        <SheetContent size="md">
+                                            <SheetHeader
+                                                title="Sell Live Birds"
+                                                description={`${batch.name} • ${batch.current_bird_count.toLocaleString()} birds available`}
+                                                icon={
+                                                    <DollarSign className="h-5 w-5" />
+                                                }
+                                            />
+                                            <SheetBody>
+                                                <LiveSaleForm
+                                                    batchId={batch.id}
+                                                    currentBirdCount={
+                                                        batch.current_bird_count
+                                                    }
+                                                    liveBirdPrice={
+                                                        liveSale.liveBirdPrice
+                                                    }
+                                                    customers={
+                                                        liveSale.customers
+                                                    }
+                                                    suggestedDate={
+                                                        suggestedDate
+                                                    }
+                                                    compact
+                                                />
+                                            </SheetBody>
+                                        </SheetContent>
+                                    </Sheet>
+                                )}
+                                <Link href="/slaughter/create">
+                                    <Button variant="outline" size="sm">
+                                        <Scissors className="mr-1.5 h-4 w-4" />
+                                        Process Slaughter
+                                    </Button>
+                                </Link>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 

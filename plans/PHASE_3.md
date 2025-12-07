@@ -1,42 +1,45 @@
 # Phase 3 Plan: Broiler Domain (MVP Core)
 
-**Status:** Planning
+**Status:** In Progress
 **Focus:** Core farm operations for broiler chicken farming
 **Target Date:** Current session
-**Estimated Effort:** 16-20 hours (2-3 working days)
+**Estimated Effort:** 24-30 hours (3-4 working days)
+**Last Updated:** 2025-12-07
 
 ---
 
 ## Overview
 
-Phase 3 delivers the **core MVP functionality** of Farmsense: complete broiler chicken batch management with daily log tracking, financial integration, and performance analytics. This phase introduces the first React frontend feature ("Field Mode") for workers to input daily farm data.
+Phase 3 delivers the **core MVP functionality** of Farmsense: complete broiler chicken batch management with daily log tracking, financial integration, performance analytics, **slaughter processing**, **product management**, and **inventory integration**. This phase introduces the first React frontend feature ("Field Mode") for workers to input daily farm data.
 
-### Three Major Feature Areas:
+### Five Major Feature Areas:
 
-1. **Batch Engine** - Lifecycle management (Planned → Active → Harvesting → Closed) with business rules
-2. **React Frontend "Field Mode"** - Mobile-friendly daily log entry UI for field workers
-3. **Analytics & Financial Integration** - FCR/EPEF calculations, expense allocation, and feed consumption tracking
+1. **Batch Engine** - Lifecycle management (Planned → Active → Harvesting → Closed) with business rules ✅
+2. **React Frontend "Field Mode"** - Mobile-friendly daily log entry UI for field workers ✅
+3. **Analytics & Financial Integration** - FCR/EPEF calculations, expense allocation, and feed consumption tracking ✅
+4. **Slaughter & Portioning System** - Multi-batch slaughter, yield tracking, discrepancy management 🔄
+5. **Product Catalog & Pricing** - Poultry products with versioned pricing, packaging units, yield calculations 🔄
 
 ---
 
 ## Detailed Tasks
 
-### STEP 1: Create Broiler Domain Structure
+### STEP 1: Create Broiler Domain Structure ✅ COMPLETED
 
-**Files to Create:**
+**Files Created:**
 
 Domain Models:
-- `Domains/Broiler/Models/Batch.php` - Aggregate root for flock lifecycle
-- `Domains/Broiler/Models/DailyLog.php` - Daily tracking (mortality, feed, water, temp)
-- `Domains/Broiler/Enums/BatchStatus.php` - Planned, Active, Harvesting, Closed
-- `Domains/Broiler/DTOs/BatchData.php` - Type-safe batch data
-- `Domains/Broiler/DTOs/DailyLogData.php` - Type-safe daily log data
+- ✅ `Domains/Broiler/Models/Batch.php` - Aggregate root for flock lifecycle
+- ✅ `Domains/Broiler/Models/DailyLog.php` - Daily tracking (mortality, feed, water, temp)
+- ✅ `Domains/Broiler/Enums/BatchStatus.php` - Planned, Active, Harvesting, Closed
+- ✅ `Domains/Broiler/DTOs/BatchData.php` - Type-safe batch data
+- ✅ `Domains/Broiler/DTOs/DailyLogData.php` - Type-safe daily log data
 
 Services & Actions:
-- `Domains/Broiler/Services/BatchCalculationService.php` - FCR, EPEF, mortality rate calculations
-- `Domains/Broiler/Actions/CreateBatchAction.php` - Batch creation with validation
-- `Domains/Broiler/Actions/RecordDailyLogAction.php` - Daily log with stock movement integration
-- `Domains/Broiler/Actions/CloseBatchAction.php` - Batch closure with final calculations
+- ✅ `Domains/Broiler/Services/BatchCalculationService.php` - FCR, EPEF, mortality rate calculations
+- ✅ `Domains/Broiler/Actions/CreateBatchAction.php` - Batch creation with validation
+- ✅ `Domains/Broiler/Actions/RecordDailyLogAction.php` - Daily log with stock movement integration
+- ✅ `Domains/Broiler/Actions/CloseBatchAction.php` - Batch closure with final calculations
 
 **Database Migrations:**
 
@@ -356,63 +359,846 @@ Frontend Tests (Pest + Browser):
 
 ---
 
+### STEP 8: Extend Product Catalog for Poultry 🔄 NEW
+
+**Purpose:**
+
+Extend the Inventory domain to support poultry products with proper categorization, packaging units, yield calculations, and versioned pricing. Products sold include live birds, whole dressed chickens, chicken pieces, offal (feet, necks, gizzards, etc.), and by-products (manure).
+
+**New Enums:**
+
+- `Domains/Inventory/Enums/PackageUnit.php` - Piece, Kilogram, Cup, Bag, Pack
+- `Domains/Broiler/Enums/FeedType.php` - Starter, Grower, Finisher
+- `Domains/Broiler/Enums/DiscrepancyReason.php` - Theft, Death, Miscount, Other
+
+**Extend ProductType Enum:**
+
+```php
+// Domains/Inventory/Enums/ProductType.php
+enum ProductType: string
+{
+    // Existing
+    case Feed = 'feed';
+    case Medicine = 'medicine';
+    case Packaging = 'packaging';
+    case Equipment = 'equipment';
+    case Other = 'other';
+    
+    // New for poultry
+    case LiveBird = 'live_bird';
+    case WholeChicken = 'whole_chicken';
+    case ChickenPieces = 'chicken_pieces';
+    case Offal = 'offal';
+    case ByProduct = 'by_product';
+}
+```
+
+**Enhance Product Model:**
+
+Add fields to `products` table:
+- `selling_price_cents` (bigint) - Current selling price in thebe
+- `units_per_package` (decimal) - How many units per package (e.g., 6 necks, 10 feet, 0.5 kg)
+- `package_unit` (enum: PackageUnit) - Unit of measurement
+- `yield_per_bird` (decimal, nullable) - How many of this item per slaughtered bird (e.g., 2 for feet, 1 for heart)
+
+**New Model: ProductPriceHistory**
+
+Versioned pricing with automatic history tracking:
+- `id`, `product_id` (FK)
+- `selling_price_cents` - Price at this time
+- `units_per_package` - Package size at this time
+- `effective_from` (datetime) - When this price became active
+- `effective_until` (datetime, nullable) - When this price ended (null = current)
+- `changed_by` (FK to users) - Who made the change
+- `notes` (text, nullable) - Reason for change
+
+**Business Rules:**
+
+1. When price changes via React frontend:
+   - Close current price record (set `effective_until` to now)
+   - Create new price record (set `effective_from` to now)
+   - Historical reports use price effective at time of sale
+
+2. `yield_per_bird` enables automatic yield estimation:
+   - 100 birds × 2 feet/bird = 200 feet
+   - 200 feet ÷ 10 feet/pack = 20 packs estimated
+
+**Seed Products:**
+
+| Product | Type | Yield/Bird | Units/Pack | Unit | Price (BWP) |
+|---------|------|-----------|------------|------|-------------|
+| Live Broiler | LiveBird | 1 | 1 | Piece | 82.00 |
+| Whole Bird | WholeChicken | 1 | 1 | Piece | 80.00 |
+| Chicken Pieces | ChickenPieces | — | 0.5 | Kg | 30.00 |
+| Feet/Runaways | Offal | 2 | 10 | Pack | 12.00 |
+| Necks/Melala | Offal | 1 | 6 | Pack | 12.00 |
+| Gizzards/Dintshu | Offal | 1 | 6 | Pack | 15.00 |
+| Livers/Debete | Offal | 1 | 6 | Pack | 12.00 |
+| Hearts/Dipelo | Offal | 1 | 10 | Pack | 5.00 |
+| Intestines/Mala | Offal | 1 | 1 | Cup | 15.00 |
+| Heads/Thogo | Offal | 1 | 20 | Pack | 20.00 |
+| Manure/Motshetelo | ByProduct | — | 50 | Bag | 50.00 |
+
+---
+
+### STEP 9: Create Feed Schedule System 🔄 NEW
+
+**Purpose:**
+
+Track recommended feeding schedules based on bird age. Different feed types (Starter, Grower, Finisher) are used at different growth stages. This helps workers know which feed to use and expected consumption rates.
+
+**New Enum: FeedType**
+
+```php
+// Domains/Broiler/Enums/FeedType.php
+enum FeedType: string
+{
+    case Starter = 'starter';   // Days 1-28
+    case Grower = 'grower';     // Days 29-42
+    case Finisher = 'finisher'; // Days 43-49
+    
+    public function label(): string { ... }
+    public function ageRange(): string { ... }
+}
+```
+
+**New Model: FeedSchedule**
+
+Team-scoped feeding templates:
+- `id`, `team_id` (FK)
+- `name` - Schedule name (e.g., "Standard Broiler Schedule")
+- `week_number` (int) - Week of cycle (1-7)
+- `age_days_start` (int) - Starting age for this phase
+- `age_days_end` (int) - Ending age for this phase
+- `feed_type` (enum: FeedType) - Starter/Grower/Finisher
+- `feed_per_100_birds_kg` (decimal) - Expected daily feed per 100 birds
+- `supplement_kg` (decimal, nullable) - Additional supplements (Moroko)
+- `notes` (text, nullable)
+
+**Default Feed Schedule (per your guidelines):**
+
+| Week | Days | Feed Type | Feed/100 Birds/Day (kg) | Supplement (kg) |
+|------|------|-----------|------------------------|-----------------|
+| 1 | 1-7 | Starter | 2.2 | 0 |
+| 2 | 8-14 | Starter | 4.0 | ~0.87 |
+| 3 | 15-21 | Starter | 6.5 | ~0.87 |
+| 4 | 22-28 | Starter | 9.5 | ~1.78 |
+| 5 | 29-35 | Grower | 13.5 | ~3.4 |
+| 6 | 36-42 | Grower | 17.0 | ~2.0 |
+| 7 | 43-49 | Finisher | 17.0 | ~2.0 |
+
+---
+
+### STEP 10: Create Slaughter System 🔄 NEW
+
+**Purpose:**
+
+Record slaughter events that convert live birds from batches into sellable inventory products. Supports multi-batch slaughter (birds from different batches in one session), yield estimation with manual override, and discrepancy tracking (theft/loss detection).
+
+**New Model: SlaughterRecord**
+
+Master record for a slaughter session:
+- `id`, `team_id` (FK)
+- `slaughter_date` (date)
+- `total_birds_slaughtered` (int) - Sum from all batch sources
+- `total_live_weight_kg` (decimal) - Combined live weight
+- `total_dressed_weight_kg` (decimal) - After processing
+- `household_consumption_notes` (text, nullable) - What was kept for household
+- `recorded_by` (FK to users)
+- `notes` (text, nullable)
+- `created_at`, `updated_at`
+
+**New Model: SlaughterBatchSource**
+
+Links slaughter to multiple batches with discrepancy tracking:
+- `id`, `slaughter_record_id` (FK)
+- `batch_id` (FK)
+- `expected_quantity` (int) - Birds expected (what user intended to take)
+- `actual_quantity` (int) - Birds actually available/slaughtered
+- `discrepancy_reason` (enum: DiscrepancyReason, nullable) - Theft, Death, Miscount, Other
+- `discrepancy_notes` (text, nullable) - Details about the discrepancy
+
+**Business Rules:**
+
+1. **Validation:** `expected_quantity` cannot exceed `Batch.current_quantity`
+2. **Immediate Deduction:** When slaughter recorded, deduct `actual_quantity` from `Batch.current_quantity`
+3. **Discrepancy Detection:** If `actual_quantity < expected_quantity`, require `discrepancy_reason`
+4. **Manager Notification:** When discrepancy recorded, notify farm managers via `DiscrepancyNotification`
+
+**New Model: SlaughterYield**
+
+Products produced from slaughter:
+- `id`, `slaughter_record_id` (FK)
+- `product_id` (FK) - Links to Product (whole bird, feet, etc.)
+- `estimated_quantity` (int) - Auto-calculated from `total_birds × yield_per_bird ÷ units_per_package`
+- `actual_quantity` (int) - User-entered actual count
+- `household_consumed` (int) - Remainder kept for household (estimated - actual)
+
+**Yield Calculation Example:**
+
+100 birds slaughtered:
+- Whole Birds: 100 × 1 / 1 = **100 packs estimated**
+- Feet: 100 × 2 / 10 = **20 packs estimated**
+- Necks: 100 × 1 / 6 = **16 packs estimated** (16.67 rounded)
+- Gizzards: 100 × 1 / 6 = **16 packs estimated**
+- Livers: 100 × 1 / 6 = **16 packs estimated**
+- Hearts: 100 × 1 / 10 = **10 packs estimated**
+- Heads: 100 × 1 / 20 = **5 packs estimated**
+- Intestines: 100 × 1 / 1 = **100 cups estimated**
+
+User enters actuals, difference = household consumed.
+
+**Stock Movement Integration:**
+
+On slaughter completion, create `StockMovement` (type: In) for each `SlaughterYield`:
+- `product_id` = yield product
+- `quantity` = `actual_quantity`
+- `reason` = "Slaughter Record #{id} - {date}"
+- `notes` = Batch source details
+
+---
+
+### STEP 11: Create Portioning System 🔄 NEW
+
+**Purpose:**
+
+Convert whole birds from inventory into chicken pieces. This is a separate process from slaughter — whole birds are stock, and portioning converts them into pieces.
+
+**New Model: PortioningRecord**
+
+- `id`, `team_id` (FK)
+- `portioning_date` (date)
+- `whole_birds_used` (int) - Deducted from whole bird stock
+- `packs_produced` (int) - Number of piece packs created
+- `pack_weight_kg` (decimal) - Weight per pack (default 0.5kg)
+- `recorded_by` (FK to users)
+- `notes` (text, nullable)
+- `created_at`, `updated_at`
+
+**Stock Movement Integration:**
+
+On portioning:
+1. `StockMovement` (type: Out) for Whole Bird product - quantity = `whole_birds_used`
+2. `StockMovement` (type: In) for Chicken Pieces product - quantity = `packs_produced`
+
+**Business Rules:**
+
+- No waste tracking (per user requirement) — just input whole birds, output piece packs
+- Typical yield: 1 whole bird (~2kg) → ~3 packs of 0.5kg pieces (after bone/waste)
+
+---
+
+### STEP 12: Create Live Sale System 🔄 NEW
+
+**Purpose:**
+
+Record direct sales of live birds from batches. Live birds are sold before slaughter and deduct directly from `Batch.current_quantity`.
+
+**New Model: LiveSaleRecord**
+
+- `id`, `team_id` (FK)
+- `batch_id` (FK) - Source batch
+- `sale_date` (date)
+- `quantity_sold` (int) - Number of live birds
+- `unit_price_cents` (bigint) - Price per bird (from Product or override)
+- `total_amount_cents` (bigint) - Calculated
+- `customer_id` (FK to customers, nullable) - Optional customer link
+- `recorded_by` (FK to users)
+- `notes` (text, nullable)
+- `created_at`, `updated_at`
+
+**Business Rules:**
+
+1. **Validation:** `quantity_sold` cannot exceed `Batch.current_quantity`
+2. **Immediate Deduction:** Deduct from `Batch.current_quantity` on record creation
+3. **No Stock Movement:** Live sales don't create inventory stock — they're direct batch sales
+4. **Can link to Invoice:** In Phase 4, can create invoice line item for the sale
+
+---
+
+### STEP 13: Enhance Batch Closure 🔄 NEW
+
+**Purpose:**
+
+Enhance `CloseBatchAction` to support optional manure collection and require closure reason when birds remain in batch.
+
+**Modifications to CloseBatchAction:**
+
+Add parameters:
+- `manure_bags_collected` (int, nullable) - Bags of manure collected at closure
+- `closure_reason` (enum: DiscrepancyReason, required if `current_quantity > 0`)
+- `closure_notes` (text, nullable) - Explanation for remaining birds
+
+**Business Rules:**
+
+1. **Manure Collection (Optional):**
+   - If `manure_bags_collected > 0`, create `StockMovement` (type: In) for Manure product
+   - Reference: "Batch {batch_number} - Closure Manure Collection"
+
+2. **Closure with Remaining Birds:**
+   - If `Batch.current_quantity > 0` at closure, require `closure_reason`
+   - Notify managers of unexplained bird count (potential theft)
+
+3. **Final Calculations:**
+   - Calculate final FCR, EPEF, mortality rate
+   - Store as batch statistics for historical reporting
+
+---
+
+### STEP 14: Implement Stock Movement Integration 🔄 NEW
+
+**Purpose:**
+
+Complete the `createFeedStockMovement()` stub in `RecordDailyLogAction` and integrate all operations with inventory.
+
+**Feed Consumption (DailyLog → StockMovement):**
+
+When daily log recorded with `feed_consumed_kg > 0`:
+1. Look up team's default feed product (or product_id on daily log)
+2. Create `StockMovement`:
+   - `type` = Out
+   - `product_id` = feed product
+   - `quantity` = feed_consumed_kg
+   - `reason` = "Batch {batch_number} - Day {age}"
+   - `warehouse_id` = team's default warehouse
+   - `recorded_by` = daily log recorder
+
+**Add to DailyLog Model:**
+
+- `product_id` (FK, nullable) - Optional specific feed product (otherwise use team default)
+
+**Add to Batch Model:**
+
+- `default_feed_product_id` (FK, nullable) - Default feed product for this batch
+
+---
+
+### STEP 15: Create Notifications 🔄 NEW
+
+**Purpose:**
+
+Notify farm managers when discrepancies are detected in slaughter or batch closure.
+
+**New Notification: DiscrepancyNotification**
+
+Triggered when:
+- `SlaughterBatchSource.actual_quantity < expected_quantity`
+- `Batch` closed with `current_quantity > 0`
+
+Contains:
+- Discrepancy type (Slaughter or Batch Closure)
+- Expected vs actual count
+- Discrepancy reason
+- Link to record
+- Recorded by user
+
+**Notification Channels:**
+
+- Database (for in-app notification bell)
+- Email (optional, configurable per user)
+
+---
+
+### STEP 16: Create Actions 🔄 NEW
+
+**New Actions:**
+
+1. **RecordSlaughterAction**
+   - Accepts: `slaughter_date`, array of `[batch_id => [expected, actual, reason]]`, yields data
+   - Validates quantities against batch availability
+   - Deducts from each batch
+   - Creates `SlaughterRecord`, `SlaughterBatchSource`, `SlaughterYield` records
+   - Creates `StockMovement` (In) for each yield product
+   - Sends `DiscrepancyNotification` if needed
+
+2. **RecordPortioningAction**
+   - Validates whole bird stock available
+   - Creates `PortioningRecord`
+   - Creates `StockMovement` (Out) for whole birds
+   - Creates `StockMovement` (In) for pieces
+
+3. **RecordLiveSaleAction**
+   - Validates against batch quantity
+   - Deducts from batch
+   - Creates `LiveSaleRecord`
+   - Optional: Create invoice line item
+
+4. **CalculateSlaughterYieldsAction**
+   - Input: `total_birds_slaughtered`
+   - Output: Array of estimated yields per product based on `yield_per_bird`
+   - Used for real-time form calculation as user enters bird count
+
+5. **UpdateProductPriceAction**
+   - Closes current `ProductPriceHistory` (sets `effective_until`)
+   - Creates new `ProductPriceHistory` record
+   - Updates `Product.selling_price_cents`
+
+---
+
+### STEP 17: Create Tests for New Models ✅ COMPLETED
+
+**Feature Tests:**
+
+- `Domains/Broiler/Tests/Feature/SlaughterRecordingTest` - Multi-batch slaughter, yield creation
+- `Domains/Broiler/Tests/Feature/DiscrepancyTrackingTest` - Theft detection, notifications
+- `Domains/Broiler/Tests/Feature/PortioningRecordingTest` - Whole bird to pieces conversion
+- `Domains/Broiler/Tests/Feature/LiveSaleRecordingTest` - Direct batch sales
+- `Domains/Broiler/Tests/Feature/BatchClosureEnhancedTest` - Manure collection, closure reasons
+- `Domains/Inventory/Tests/Feature/ProductPricingHistoryTest` - Price versioning
+
+**Unit Tests:**
+
+- `Domains/Broiler/Tests/Unit/SlaughterYieldCalculationTest` - Yield estimation logic
+- `Domains/Broiler/Tests/Unit/FeedTypeTest` - Enum values, age ranges
+- `Domains/Inventory/Tests/Unit/PackageUnitTest` - Enum values, labels
+
+---
+
+### STEP 18: Create DTOs for UI Validation 🔄 NEW
+
+**Purpose:**
+
+Create Spatie Data DTOs as single source of truth for validating data from React forms. These will be used by controllers to validate incoming requests.
+
+**New DTOs in Broiler Domain:**
+
+1. **SlaughterData** (`domains/Broiler/DTOs/SlaughterData.php`)
+   - `team_id` (int, required)
+   - `slaughter_date` (Carbon, required)
+   - `batch_sources` (array of SlaughterBatchSourceData, required)
+   - `yields` (array of SlaughterYieldData, required)
+   - `notes` (string, nullable)
+
+2. **SlaughterBatchSourceData** (`domains/Broiler/DTOs/SlaughterBatchSourceData.php`)
+   - `batch_id` (int, required)
+   - `expected_quantity` (int, required, min: 1)
+   - `actual_quantity` (int, required, min: 0)
+   - `discrepancy_reason` (DiscrepancyReason enum, nullable)
+   - `discrepancy_notes` (string, nullable)
+
+3. **SlaughterYieldData** (`domains/Broiler/DTOs/SlaughterYieldData.php`)
+   - `product_id` (int, required)
+   - `estimated_quantity` (int, required)
+   - `actual_quantity` (int, required, min: 0)
+
+4. **PortioningData** (`domains/Broiler/DTOs/PortioningData.php`)
+   - `team_id` (int, required)
+   - `portioning_date` (Carbon, required)
+   - `whole_birds_used` (int, required, min: 1)
+   - `packs_produced` (int, required, min: 1)
+   - `pack_weight_kg` (float, default: 0.5)
+   - `notes` (string, nullable)
+
+5. **LiveSaleData** (`domains/Broiler/DTOs/LiveSaleData.php`)
+   - `team_id` (int, required)
+   - `batch_id` (int, required)
+   - `sale_date` (Carbon, required)
+   - `quantity_sold` (int, required, min: 1)
+   - `unit_price_cents` (int, nullable - uses product price if null)
+   - `customer_id` (int, nullable)
+   - `notes` (string, nullable)
+
+**New DTO in Inventory Domain:**
+
+6. **ProductPriceUpdateData** (`domains/Inventory/DTOs/ProductPriceUpdateData.php`)
+   - `new_price_cents` (int, required, min: 1)
+   - `reason` (string, nullable)
+
+---
+
+### STEP 19: Create Controllers 🔄 NEW
+
+**Purpose:**
+
+Create controllers following existing patterns (like BatchController). Use DTOs for validation.
+
+**New Controllers:**
+
+1. **SlaughterController** (`app/Http/Controllers/Slaughter/SlaughterController.php`)
+   ```php
+   public function create()  // Show form with active batches, products
+   public function store(SlaughterData $data)  // Create via RecordSlaughterAction
+   public function show(SlaughterRecord $record)  // View details
+   ```
+
+2. **PortioningController** (`app/Http/Controllers/Portioning/PortioningController.php`)
+   ```php
+   public function create()  // Show form with stock levels
+   public function store(PortioningData $data)  // Create via RecordPortioningAction
+   ```
+
+3. **LiveSaleController** (`app/Http/Controllers/LiveSales/LiveSaleController.php`)
+   ```php
+   public function create(Batch $batch)  // Show form for specific batch
+   public function store(LiveSaleData $data)  // Create via RecordLiveSaleAction
+   ```
+
+4. **ProductPricingController** (`app/Http/Controllers/Products/ProductPricingController.php`)
+   ```php
+   public function index()  // Show products with prices and history
+   public function update(Product $product, ProductPriceUpdateData $data)  // Update via UpdateProductPriceAction
+   ```
+
+---
+
+### STEP 20: Add Routes & Wayfinder 🔄 NEW
+
+**Purpose:**
+
+Add routes to web.php and generate Wayfinder TypeScript functions.
+
+**New Routes (in routes/web.php):**
+
+```php
+Route::middleware(['auth'])->group(function () {
+    // Slaughter management
+    Route::get('/slaughter/create', [SlaughterController::class, 'create'])->name('slaughter.create');
+    Route::post('/slaughter', [SlaughterController::class, 'store'])->name('slaughter.store');
+    Route::get('/slaughter/{record}', [SlaughterController::class, 'show'])->name('slaughter.show');
+
+    // Portioning
+    Route::get('/portioning/create', [PortioningController::class, 'create'])->name('portioning.create');
+    Route::post('/portioning', [PortioningController::class, 'store'])->name('portioning.store');
+
+    // Live sales
+    Route::get('/batches/{batch}/live-sale/create', [LiveSaleController::class, 'create'])->name('live-sales.create');
+    Route::post('/batches/{batch}/live-sale', [LiveSaleController::class, 'store'])->name('live-sales.store');
+
+    // Product pricing
+    Route::get('/products/pricing', [ProductPricingController::class, 'index'])->name('products.pricing');
+    Route::patch('/products/{product}/price', [ProductPricingController::class, 'update'])->name('products.update-price');
+});
+```
+
+**Wayfinder Generation:**
+
+Run `php artisan wayfinder:generate` after adding routes to generate TypeScript functions in `resources/js/actions/`.
+
+---
+
+### STEP 21: Install shadcn/ui Components 🔄 NEW
+
+**Purpose:**
+
+Install necessary shadcn/ui components for consistent, maintainable UI.
+
+**Components to Install:**
+
+```bash
+npx shadcn@latest add select
+npx shadcn@latest add table
+npx shadcn@latest add badge
+npx shadcn@latest add skeleton
+npx shadcn@latest add alert
+npx shadcn@latest add dialog
+```
+
+**Already Available:**
+- Button, Card, Input, Label (from existing setup)
+
+---
+
+### STEP 22: Create React Pages 🔄 NEW
+
+**Purpose:**
+
+Build mobile-first React pages using shadcn/ui components and Wayfinder for routes.
+
+**Pages to Create/Update:**
+
+1. **Batches/Index.tsx** (Update existing)
+   - Grid of batch cards with status badges
+   - Quick action buttons: Record Log, Sell Live, View Details
+   - Filter by status (Active, Planned, Closed)
+
+2. **Batches/Show.tsx** (Update existing)
+   - Batch details card with metrics
+   - Daily log history table
+   - Closure info section (if closed)
+   - Actions: Record Log, Record Slaughter, Sell Live Birds
+
+3. **Batches/Create.tsx** (New)
+   - Form with: name, batch_number, start_date, initial_quantity
+   - Supplier select dropdown
+   - Target weight input
+   - Uses Wayfinder `store.form()` for form props
+
+4. **DailyLog/Create.tsx** (Update existing)
+   - Add feed product dropdown (optional)
+   - Large touch-friendly inputs
+   - Auto-calculated current quantity display
+
+5. **Slaughter/Create.tsx** (New)
+   - **Batch Source Repeater:**
+     - Add/remove batch sources
+     - Per-source: Batch select, expected qty, actual qty
+     - Discrepancy reason select (if actual < expected)
+   - **Yield Estimation (Client-side):**
+     - Real-time calculation as total birds change
+     - Formula: `totalBirds × yieldPerBird ÷ unitsPerPackage`
+     - Per-product: Estimated qty (auto), Actual qty (input)
+   - Products passed from controller with `yield_per_bird`, `units_per_package`
+
+6. **Portioning/Create.tsx** (New)
+   - Whole birds used input
+   - Packs produced input
+   - Pack weight dropdown (0.5kg default)
+   - Current stock display
+
+7. **LiveSales/Create.tsx** (New)
+   - Quantity input
+   - Unit price input (pre-filled from product)
+   - Customer select (optional)
+   - Total amount display
+
+8. **Products/Pricing.tsx** (New)
+   - Products table with current prices
+   - Edit button opens dialog with:
+     - New price input
+     - Reason textarea
+   - Price history table below
+
+**Client-Side Yield Calculation (JavaScript):**
+
+```typescript
+// In Slaughter/Create.tsx
+const calculateYields = (totalBirds: number, products: Product[]) => {
+  return products
+    .filter(p => p.yield_per_bird > 0)
+    .map(product => ({
+      product_id: product.id,
+      name: product.name,
+      estimated: Math.floor(
+        (totalBirds * product.yield_per_bird) / product.units_per_package
+      ),
+      actual: 0, // User enters this
+    }));
+};
+```
+
+---
+
+### STEP 23: Create Browser Tests 🔄 NEW
+
+**Purpose:**
+
+Create basic happy-path browser tests for new UI flows using Pest Browser.
+
+**Test Files:**
+
+1. **tests/Browser/Slaughter/SlaughterRecordingTest.php**
+   ```php
+   it('can record a slaughter session', function () {
+       // Setup: Create batch with birds, poultry products
+       // Visit slaughter create page
+       // Fill form with batch source, yields
+       // Submit and verify redirect + flash message
+   });
+   ```
+
+2. **tests/Browser/Portioning/PortioningRecordingTest.php**
+   ```php
+   it('can record portioning session', function () {
+       // Setup: Create whole chicken stock
+       // Visit portioning create page
+       // Fill form with birds used, packs produced
+       // Submit and verify stock changes
+   });
+   ```
+
+3. **tests/Browser/LiveSales/LiveSaleRecordingTest.php**
+   ```php
+   it('can record live sale from batch', function () {
+       // Setup: Create batch with birds
+       // Visit live sale create page
+       // Fill form with quantity, price
+       // Submit and verify batch quantity deducted
+   });
+   ```
+
+4. **tests/Browser/Products/ProductPricingTest.php**
+   ```php
+   it('can update product price', function () {
+       // Setup: Create product with price
+       // Visit pricing page
+       // Click edit, enter new price
+       // Submit and verify price updated + history created
+   });
+   ```
+
+---
+
 ## Implementation Order
 
+### Part A: Core Broiler Domain (COMPLETED ✅)
 1. ✅ Create Broiler domain structure (models, enums, DTOs, migrations)
 2. ✅ Create services and actions (BatchCalculationService, actions)
 3. ✅ Create Filament BatchResource with analytics page
 4. ✅ Create database seeders for realistic test data
 5. ✅ Create React "Field Mode" frontend (pages, components, controllers)
-6. ✅ Implement financial integration (Allocatable, StockMovements)
+6. ✅ Implement financial integration (Allocatable, StockMovements stub)
 7. ✅ Write comprehensive test suite (feature + unit)
-8. ✅ Create git commits with detailed messages
-9. ✅ Create Phase 3 Implementation Report
+
+### Part B: Product & Slaughter System (COMPLETED ✅)
+8. ✅ Extend ProductType enum with poultry types
+9. ✅ Create PackageUnit, FeedType, DiscrepancyReason enums
+10. ✅ Enhance Product model (selling_price, units_per_package, yield_per_bird)
+11. ✅ Create ProductPriceHistory model
+12. ✅ Create FeedSchedule model
+13. ✅ Create SlaughterRecord, SlaughterBatchSource, SlaughterYield models
+14. ✅ Create PortioningRecord model
+15. ✅ Create LiveSaleRecord model
+16. ✅ Enhance CloseBatchAction (manure, closure reason)
+17. ✅ StockMovement integration (slaughter, portioning) - feed consumption deferred
+18. ✅ Create DiscrepancyNotification
+19. ✅ Create Actions (Slaughter, Portioning, LiveSale, YieldCalculation, PriceUpdate)
+20. ✅ Seed poultry products with prices and yields
+21. ✅ Tests passing (165 total, 11 skipped)
+22. ✅ Code formatted with Pint
+
+### Part C: React UI Implementation (IN PROGRESS 🔄)
+23. 🔄 Create DTOs for slaughter, portioning, live sales, pricing
+24. 🔄 Create SlaughterController, PortioningController, LiveSaleController, ProductPricingController
+25. 🔄 Add routes to web.php with Wayfinder generation
+26. 🔄 Install shadcn/ui components (Select, Table, Badge, Skeleton, Alert)
+27. 🔄 Update Batches/Index.tsx with batch cards and actions
+28. 🔄 Update Batches/Show.tsx with details, logs, closure info
+29. 🔄 Create Batches/Create.tsx for batch creation
+30. 🔄 Update DailyLog/Create.tsx with feed product selection
+31. 🔄 Create Slaughter/Create.tsx with multi-batch repeater and client-side yield calculation
+32. 🔄 Create Portioning/Create.tsx for whole→pieces conversion
+33. 🔄 Create LiveSales/Create.tsx for direct batch sales
+34. 🔄 Create Products/Pricing.tsx with price update form and history table
+35. 🔄 Create basic happy-path browser tests
+36. 🔄 Run full test suite and format code
 
 ---
 
 ## Success Criteria
 
-- [x] 2 new domain models (Batch, DailyLog) with proper relationships
-- [x] 2 new migrations without errors
+### Part A: Core Broiler Domain ✅
+- [x] 2 domain models (Batch, DailyLog) with proper relationships
+- [x] 2 migrations without errors
 - [x] 2 Spatie DTOs implemented
-- [x] 1 Filament Resource (BatchResource) with 6 pages + 2 relation managers
+- [x] 1 Filament Resource (BatchResource) with pages + relation managers
 - [x] 3 React pages for "Field Mode"
 - [x] 5+ React components for broiler features
 - [x] 3 Laravel controllers for Inertia routes
 - [x] BatchCalculationService with 4+ calculation methods
 - [x] 2 seeders with realistic test data
-- [x] 12+ tests (8 feature, 4 unit) with >90% coverage
+- [x] 12+ tests (feature + unit) with >90% coverage
 - [x] All tests passing
 - [x] Code formatted with Pint and Prettier
-- [x] Financial integration (Expenses + StockMovements) working
-- [x] Git commits with detailed messages
+
+### Part B: Product & Slaughter System ✅
+- [x] 3 new enums (PackageUnit, FeedType, DiscrepancyReason)
+- [x] ProductType extended with 5 poultry types
+- [x] Product model enhanced with pricing/packaging fields
+- [x] ProductPriceHistory model with versioning
+- [x] FeedSchedule model with feeding templates
+- [x] 3 slaughter models (SlaughterRecord, SlaughterBatchSource, SlaughterYield)
+- [x] PortioningRecord model
+- [x] LiveSaleRecord model
+- [x] CloseBatchAction enhanced (manure, closure reason)
+- [x] StockMovement integration (slaughter, portioning) - feed consumption deferred to Phase 4
+- [x] DiscrepancyNotification implemented
+- [x] 5 new Actions implemented
+- [x] 11 poultry products seeded with correct prices/yields
+- [x] 165 tests passing (11 skipped)
+- [x] All existing tests still passing
+
+### Part C: React UI Implementation 🔄
+- [ ] 6 new DTOs for slaughter, portioning, live sales, pricing
+- [ ] Batches UI (Index/Show/Create pages with shadcn/ui)
+- [ ] Daily log enhancement (feed product selection)
+- [ ] Slaughter recording UI (multi-batch repeater, client-side yield calculation)
+- [ ] Portioning UI (whole birds → pieces conversion)
+- [ ] Live sales UI (direct batch sales form)
+- [ ] Product pricing UI (price update form, history table)
+- [ ] New controllers (Slaughter, Portioning, LiveSale, ProductPricing)
+- [ ] Routes with Wayfinder integration
+- [ ] Mobile-first responsive design
+- [ ] Basic happy-path browser tests
 
 ---
 
 ## Deliverables
 
+### Part A: Core Broiler Domain ✅
+
 **Backend:**
-- Complete Broiler domain (models, services, actions)
-- Batch lifecycle management with business rules
-- FCR/EPEF calculation engine
-- Financial integration (expense allocation, feed tracking)
+- ✅ Complete Broiler domain (models, services, actions)
+- ✅ Batch lifecycle management with business rules
+- ✅ FCR/EPEF calculation engine
+- ✅ Financial integration (expense allocation)
 
 **Admin UI (Filament):**
-- BatchResource with full CRUD
-- Batch analytics dashboard
-- Daily log relation manager
-- Expense allocation interface
+- ✅ BatchResource with full CRUD
+- ✅ Batch analytics dashboard
+- ✅ Daily log relation manager
+- ✅ Expense allocation interface
 
 **Frontend UI (React):**
-- Active batch dashboard for workers
-- Mobile-friendly daily log entry form
-- Batch details with charts and metrics
-- Real-time FCR/EPEF display
+- ✅ Active batch dashboard for workers
+- ✅ Mobile-friendly daily log entry form
+- ✅ Batch details with charts and metrics
+- ✅ Real-time FCR/EPEF display
 
 **Data:**
-- 2-3 batches per team with realistic lifecycle data
-- 60+ daily logs across batches
-- Proper expense and stock movement integration
+- ✅ 2-3 batches per team with realistic lifecycle data
+- ✅ 60+ daily logs across batches
+
+### Part B: Product & Slaughter System ✅
+
+**Backend:**
+- ✅ Extended Product model with poultry products
+- ✅ ProductPriceHistory for versioned pricing
+- ✅ FeedSchedule for feeding templates
+- ✅ SlaughterRecord with multi-batch support
+- ✅ SlaughterYield with auto-calculation
+- ✅ PortioningRecord for whole→pieces conversion
+- ✅ LiveSaleRecord for direct batch sales
+- ✅ StockMovement integration (slaughter, portioning)
+
+**Notifications:**
+- ✅ DiscrepancyNotification for theft/loss detection
+
+**Data:**
+- ✅ 11 poultry products with prices and yields
+- ✅ Default feed schedule based on guidelines (ready for seeder)
+
+### Part C: React UI Implementation 🔄
+
+**DTOs (Single Source of Truth for Validation):**
+- 🔄 SlaughterData - Main slaughter session
+- 🔄 SlaughterBatchSourceData - Per-batch source with discrepancy
+- 🔄 SlaughterYieldData - Per-product yields
+- 🔄 PortioningData - Whole→pieces conversion
+- 🔄 LiveSaleData - Direct batch sales
+- 🔄 ProductPriceUpdateData - Price updates with reason
+
+**Controllers (Following Existing Patterns):**
+- 🔄 SlaughterController - create(), store(), show()
+- 🔄 PortioningController - create(), store()
+- 🔄 LiveSaleController - create(), store()
+- 🔄 ProductPricingController - index(), update()
+
+**React Pages (Mobile-First with shadcn/ui):**
+- 🔄 Batches/Index.tsx - Batch cards with quick actions
+- 🔄 Batches/Show.tsx - Details with logs, closure info
+- 🔄 Batches/Create.tsx - Batch creation form
+- 🔄 DailyLog/Create.tsx - Enhanced with feed product dropdown
+- 🔄 Slaughter/Create.tsx - Multi-batch repeater, client-side yield calc
+- 🔄 Portioning/Create.tsx - Whole birds → pieces form
+- 🔄 LiveSales/Create.tsx - Direct batch sale form
+- 🔄 Products/Pricing.tsx - Price update form + history table
+
+**shadcn/ui Components:**
+- 🔄 Select, Table, Badge, Skeleton, Alert (to install)
+- ✅ Button, Card, Input, Label (existing)
+
+**Tests:**
+- 🔄 Basic happy-path browser tests for each UI flow
 
 ---
 
@@ -423,8 +1209,14 @@ graph TD
     subgraph "Broiler Domain"
         Batch["<b>Batch Model</b><br/>Aggregate Root<br/>Status Lifecycle"]
         DailyLog["<b>DailyLog Model</b><br/>Daily Tracking<br/>Immutable after 24h"]
+        FeedSchedule["<b>FeedSchedule Model</b><br/>Feeding Templates<br/>Age-based Guidelines"]
+        SlaughterRecord["<b>SlaughterRecord Model</b><br/>Multi-batch Slaughter<br/>Yield Tracking"]
+        SlaughterBatchSource["<b>SlaughterBatchSource</b><br/>Per-batch Quantities<br/>Discrepancy Tracking"]
+        SlaughterYield["<b>SlaughterYield Model</b><br/>Product Yields<br/>Estimated vs Actual"]
+        PortioningRecord["<b>PortioningRecord</b><br/>Whole→Pieces<br/>Stock Conversion"]
+        LiveSaleRecord["<b>LiveSaleRecord</b><br/>Direct Batch Sales<br/>Pre-slaughter"]
         CalcService["<b>BatchCalculationService</b><br/>FCR, EPEF, Mortality"]
-        Actions["<b>Actions</b><br/>CreateBatch<br/>RecordDailyLog<br/>CloseBatch"]
+        Actions["<b>Actions</b><br/>CreateBatch<br/>RecordDailyLog<br/>CloseBatch<br/>RecordSlaughter<br/>RecordPortioning<br/>RecordLiveSale"]
     end
 
     subgraph "Finance Domain"
@@ -432,8 +1224,9 @@ graph TD
     end
 
     subgraph "Inventory Domain"
-        StockMovement["<b>StockMovement Model</b><br/>Feed Consumption"]
-        Product["<b>Product Model</b><br/>Feed Items"]
+        StockMovement["<b>StockMovement Model</b><br/>In/Out Tracking<br/>Feed, Slaughter, Portioning"]
+        Product["<b>Product Model</b><br/>Feed + Poultry Products<br/>Price + Yield"]
+        ProductPriceHistory["<b>ProductPriceHistory</b><br/>Price Versioning<br/>Effective Dates"]
     end
 
     subgraph "CRM Domain"
@@ -445,30 +1238,50 @@ graph TD
     end
 
     subgraph "React Frontend"
-        FieldMode["<b>Field Mode</b><br/>Daily Log Entry<br/>Mobile UI"]
+        FieldMode["<b>Field Mode</b><br/>Daily Log Entry<br/>Slaughter Recording<br/>Mobile UI"]
     end
 
     Batch -->|hasMany| DailyLog
+    Batch -->|hasMany| SlaughterBatchSource
+    Batch -->|hasMany| LiveSaleRecord
     Batch -->|morphMany| Expense
-    Batch -->|triggers| StockMovement
     Batch -->|belongsTo| Supplier
 
+    SlaughterRecord -->|hasMany| SlaughterBatchSource
+    SlaughterRecord -->|hasMany| SlaughterYield
+
+    SlaughterYield -->|creates| StockMovement
+    PortioningRecord -->|creates| StockMovement
     DailyLog -->|creates| StockMovement
     DailyLog -->|references| Product
+
+    Product -->|hasMany| ProductPriceHistory
+    Product -->|hasMany| SlaughterYield
 
     CalcService -->|calculates metrics for| Batch
     Actions -->|creates/updates| Batch
     Actions -->|creates| DailyLog
+    Actions -->|creates| SlaughterRecord
+    Actions -->|creates| PortioningRecord
+    Actions -->|creates| LiveSaleRecord
 
     BatchResource -->|manages| Batch
     FieldMode -->|records| DailyLog
+    FieldMode -->|records| SlaughterRecord
 
     style Batch fill:#fff3e0
     style DailyLog fill:#fff3e0
+    style FeedSchedule fill:#fff3e0
+    style SlaughterRecord fill:#fff3e0
+    style SlaughterBatchSource fill:#fff3e0
+    style SlaughterYield fill:#fff3e0
+    style PortioningRecord fill:#fff3e0
+    style LiveSaleRecord fill:#fff3e0
     style CalcService fill:#e1f5ff
     style Expense fill:#e8f5e9
     style StockMovement fill:#ffe0b2
     style Product fill:#ffe0b2
+    style ProductPriceHistory fill:#ffe0b2
     style Supplier fill:#fff3e0
     style BatchResource fill:#fce4ec
     style FieldMode fill:#e3f2fd
@@ -602,38 +1415,44 @@ stateDiagram-v2
 
 ## Future Enhancements (Post-Phase 3)
 
-**Phase 4+ Ideas:**
+**Phase 4: Sales & Invoicing**
+- Invoice generation for poultry sales
+- Customer management integration
+- Payment tracking
+- Sales reports and analytics
+
+**Phase 5+ Ideas:**
 
 1. **IoT Sensor Integration:**
    - Auto-record temperature/humidity from sensors
    - Alerts for out-of-range conditions
 
-2. **Harvest Management:**
-   - Record harvest quantities, weights, grades
-   - Link to customer orders/invoices
-
-3. **Medication Scheduling:**
+2. **Medication Scheduling:**
    - Vaccination calendar per batch
    - Medication log with cost tracking
 
-4. **Predictive Analytics:**
+3. **Predictive Analytics:**
    - ML model for mortality prediction
    - Optimal harvest date suggestion
    - Feed consumption forecasting
 
-5. **Multi-House Management:**
+4. **Multi-House Management:**
    - Track multiple houses per farm
    - House-specific batches and logs
+
+5. **Offline Support:**
+   - Service worker for offline data entry
+   - Sync when connection restored
 
 ---
 
 ## Next Steps (After Phase 3)
 
-**Phase 4: Polish & Documentation**
+**Phase 4: Sales & Customer Integration**
+- Invoice/Sales module
+- Customer portal
+- Payment tracking
 - Audit logs for all critical events
-- API documentation (Scramble)
-- Code quality (Larastan static analysis)
-- CI/CD pipeline setup
 
 **Phase 5: Additional Domains**
 - Layers domain (egg production)
@@ -647,6 +1466,8 @@ stateDiagram-v2
 
 ---
 
-**Plan Version:** 1.0
+**Plan Version:** 3.0 (Part B Complete, Part C UI Implementation Added)
 **Created:** 2025-12-06
-**Next Review:** After Phase 3 Implementation
+**Part B Completed:** 2025-12-07 (165 tests passing)
+**Last Updated:** 2025-12-07
+**Next Review:** After Phase 3 Part C Implementation

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Domains\Broiler\Models;
 
 use Domains\Broiler\Enums\BatchStatus;
+use Domains\Broiler\Enums\DiscrepancyReason;
 use Domains\Broiler\Factories\BatchFactory;
 use Domains\CRM\Models\Supplier;
 use Domains\Finance\Models\Expense;
@@ -43,6 +44,9 @@ class Batch extends Model
         'supplier_id',
         'target_weight_kg',
         'average_weight_kg',
+        'manure_bags_collected',
+        'closure_reason',
+        'closure_notes',
     ];
 
     protected function casts(): array
@@ -56,6 +60,8 @@ class Batch extends Model
             'current_quantity' => 'integer',
             'target_weight_kg' => 'decimal:2',
             'average_weight_kg' => 'decimal:2',
+            'manure_bags_collected' => 'integer',
+            'closure_reason' => DiscrepancyReason::class,
         ];
     }
 
@@ -91,6 +97,26 @@ class Batch extends Model
         return $this->hasMany(StockMovement::class, 'reference', 'batch_number');
     }
 
+    /**
+     * Get slaughter batch sources for this batch.
+     *
+     * @return HasMany<SlaughterBatchSource, $this>
+     */
+    public function slaughterSources(): HasMany
+    {
+        return $this->hasMany(SlaughterBatchSource::class);
+    }
+
+    /**
+     * Get live sale records for this batch.
+     *
+     * @return HasMany<LiveSaleRecord, $this>
+     */
+    public function liveSales(): HasMany
+    {
+        return $this->hasMany(LiveSaleRecord::class);
+    }
+
     protected function ageInDays(): Attribute
     {
         return Attribute::make(get: function () {
@@ -114,6 +140,26 @@ class Batch extends Model
     {
         return Attribute::make(get: function () {
             return (float) $this->dailyLogs->sum('feed_consumed_kg');
+        });
+    }
+
+    /**
+     * Get total birds sold live from this batch.
+     */
+    protected function totalLiveSold(): Attribute
+    {
+        return Attribute::make(get: function () {
+            return $this->liveSales->sum('quantity_sold');
+        });
+    }
+
+    /**
+     * Get total birds slaughtered from this batch.
+     */
+    protected function totalSlaughtered(): Attribute
+    {
+        return Attribute::make(get: function () {
+            return $this->slaughterSources->sum('actual_quantity');
         });
     }
 }

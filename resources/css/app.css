@@ -70,103 +70,114 @@
     }
 }
 
-/* === Light (cream / wheat / soil / tractor green) === */
+/* === THEME: "AgTech Modern" ===
+   Concept: Crisp Tech-Forward Agriculture
+   Primary: Emerald Green (Growth)
+   Dark Base: Deep Slate/Gunmetal (Not Brown)
+*/
+
 :root {
-    /* Core surface */
-    --background: oklch(0.98 0.02 95); /* soft cream */
-    --foreground: oklch(0.28 0.06 70); /* deep soil text */
+    /* --- Light Mode: Crisp & Clean --- */
+    --background: oklch(0.99 0 0);          /* Pure White */
+    --foreground: oklch(0.14 0.05 260);     /* Deep Gunmetal Grey (High Legibility) */
 
-    --card: oklch(0.98 0.02 95);
-    --card-foreground: oklch(0.28 0.06 70);
+    --card: oklch(1 0 0);                   /* White */
+    --card-foreground: oklch(0.14 0.05 260);
 
-    --popover: oklch(0.98 0.02 95);
-    --popover-foreground: oklch(0.28 0.06 70);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.14 0.05 260);
 
-    /* Brand */
-    --primary: oklch(0.73 0.1 75); /* wheat-gold (buttons/links) */
-    --primary-foreground: oklch(0.99 0 0); /* near white */
+    /* Brand Primary: Vibrant Emerald */
+    --primary: oklch(0.55 0.18 145);        /* Strong Green (John Deere meets Tech) */
+    --primary-foreground: oklch(0.98 0 0);  /* White text on green buttons */
 
-    --secondary: oklch(0.94 0.03 85); /* sand/beige sections */
-    --secondary-foreground: oklch(0.3 0.05 70);
+    /* Secondary: Soft Cool Grey */
+    --secondary: oklch(0.96 0.01 260);
+    --secondary-foreground: oklch(0.25 0.05 260);
 
-    --muted: oklch(0.96 0.02 85);
-    --muted-foreground: oklch(0.55 0.03 85);
+    --muted: oklch(0.96 0.01 260);
+    --muted-foreground: oklch(0.50 0.04 260); /* Medium Grey */
 
-    --accent: oklch(0.64 0.13 145); /* tractor green accent */
-    --accent-foreground: oklch(0.99 0 0);
+    /* Accent: A subtle gold/wheat for highlights, not dominant */
+    --accent: oklch(0.95 0.04 85);
+    --accent-foreground: oklch(0.35 0.08 70);
 
-    --destructive: oklch(0.56 0.15 35); /* rustic red */
-    --destructive-foreground: oklch(0.99 0 0);
+    --destructive: oklch(0.58 0.20 25);     /* Bright Red */
+    --destructive-foreground: oklch(0.98 0 0);
 
-    /* UI chrome */
-    --border: oklch(0.9 0.01 95);
-    --input: oklch(0.9 0.01 95);
-    --ring: oklch(0.82 0.01 95);
+    --border: oklch(0.90 0.02 260);         /* Cool grey border */
+    --input: oklch(0.90 0.02 260);
+    --ring: oklch(0.55 0.18 145);           /* Matches Primary */
 
-    /* Charts (earthy set) */
-    --chart-1: oklch(0.7 0.12 75); /* wheat */
-    --chart-2: oklch(0.6 0.14 145); /* green */
-    --chart-3: oklch(0.58 0.07 50); /* olive/bark */
-    --chart-4: oklch(0.78 0.06 95); /* sand */
-    --chart-5: oklch(0.48 0.08 70); /* dark soil */
+    --radius: 0.5rem;
 
-    --radius: 0.625rem;
+    /* Sidebar: Slight separation from background */
+    --sidebar: oklch(0.98 0.01 260);
+    --sidebar-foreground: oklch(0.20 0.05 260);
+    --sidebar-primary: oklch(0.55 0.18 145);
+    --sidebar-primary-foreground: oklch(0.98 0 0);
+    --sidebar-accent: oklch(0.94 0.02 260);
+    --sidebar-accent-foreground: oklch(0.20 0.05 260);
+    --sidebar-border: oklch(0.90 0.02 260);
+    --sidebar-ring: oklch(0.55 0.18 145);
 
-    /* Sidebar */
-    --sidebar: oklch(0.97 0.02 95);
-    --sidebar-foreground: oklch(0.28 0.06 70);
-    --sidebar-primary: oklch(0.73 0.1 75);
-    --sidebar-primary-foreground: oklch(0.99 0 0);
-    --sidebar-accent: oklch(0.94 0.03 85);
-    --sidebar-accent-foreground: oklch(0.3 0.05 70);
-    --sidebar-border: oklch(0.9 0.01 95);
-    --sidebar-ring: oklch(0.82 0.01 95);
+    /* Chart Colors (Distinct & Bright) */
+    --chart-1: oklch(0.55 0.18 145); /* Emerald */
+    --chart-2: oklch(0.60 0.15 230); /* Blue/Teal */
+    --chart-3: oklch(0.65 0.15 85);  /* Gold */
+    --chart-4: oklch(0.60 0.18 25);  /* Red/Orange */
+    --chart-5: oklch(0.50 0.10 260); /* Slate */
 }
 
-/* === Dark (soil / cream text / gilded accents) === */
+/* --- Dark Mode: "Command Center" ---
+   Replaces "mud" with "Deep Slate" for better contrast
+*/
 .dark {
-    --background: oklch(0.22 0.04 70); /* near-black soil */
-    --foreground: oklch(0.98 0.01 95); /* cream text */
+    --background: oklch(0.12 0.03 260);     /* Very dark slate/blue (almost black) */
+    --foreground: oklch(0.95 0.02 260);     /* Bright white/grey text */
 
-    --card: oklch(0.22 0.04 70);
-    --card-foreground: oklch(0.98 0.01 95);
+    --card: oklch(0.16 0.03 260);           /* Slightly lighter slate for cards */
+    --card-foreground: oklch(0.95 0.02 260);
 
-    --popover: oklch(0.22 0.04 70);
-    --popover-foreground: oklch(0.98 0.01 95);
+    --popover: oklch(0.16 0.03 260);
+    --popover-foreground: oklch(0.95 0.02 260);
 
-    --primary: oklch(0.8 0.12 75); /* brighter gilded wheat */
-    --primary-foreground: oklch(0.2 0.03 70);
+    /* Primary: Bright Mint/Emerald to pop against dark */
+    --primary: oklch(0.60 0.18 145);
+    --primary-foreground: oklch(0.12 0.03 260); /* Dark text on bright buttons */
 
-    --secondary: oklch(0.3 0.03 70);
-    --secondary-foreground: oklch(0.96 0.02 95);
+    --secondary: oklch(0.22 0.03 260);
+    --secondary-foreground: oklch(0.90 0.02 260);
 
-    --muted: oklch(0.3 0.03 70);
-    --muted-foreground: oklch(0.72 0.02 85);
+    --muted: oklch(0.22 0.03 260);
+    --muted-foreground: oklch(0.65 0.04 260);
 
-    --accent: oklch(0.7 0.15 145); /* lighter tractor green */
-    --accent-foreground: oklch(0.16 0.03 70);
+    --accent: oklch(0.22 0.03 260);
+    --accent-foreground: oklch(0.90 0.02 260);
 
-    --destructive: oklch(0.46 0.14 35);
-    --destructive-foreground: oklch(0.96 0.02 95);
+    --destructive: oklch(0.40 0.15 25);
+    --destructive-foreground: oklch(0.98 0 0);
 
-    --border: oklch(0.3 0.02 70);
-    --input: oklch(0.3 0.02 70);
-    --ring: oklch(0.48 0.02 95);
+    --border: oklch(0.24 0.03 260);         /* Subtle borders */
+    --input: oklch(0.24 0.03 260);
+    --ring: oklch(0.60 0.18 145);
 
-    --chart-1: oklch(0.78 0.12 75);
-    --chart-2: oklch(0.7 0.15 145);
-    --chart-3: oklch(0.62 0.07 50);
-    --chart-4: oklch(0.72 0.05 95);
-    --chart-5: oklch(0.7 0.08 70);
+    /* Sidebar: Matches dark background for immersive feel */
+    --sidebar: oklch(0.10 0.03 260);
+    --sidebar-foreground: oklch(0.90 0.02 260);
+    --sidebar-primary: oklch(0.60 0.18 145);
+    --sidebar-primary-foreground: oklch(0.12 0.03 260);
+    --sidebar-accent: oklch(0.18 0.03 260);
+    --sidebar-accent-foreground: oklch(0.95 0.02 260);
+    --sidebar-border: oklch(0.24 0.03 260);
+    --sidebar-ring: oklch(0.60 0.18 145);
 
-    --sidebar: oklch(0.24 0.03 70);
-    --sidebar-foreground: oklch(0.96 0.02 95);
-    --sidebar-primary: oklch(0.8 0.12 75);
-    --sidebar-primary-foreground: oklch(0.18 0.03 70);
-    --sidebar-accent: oklch(0.3 0.03 70);
-    --sidebar-accent-foreground: oklch(0.96 0.02 95);
-    --sidebar-border: oklch(0.3 0.02 70);
-    --sidebar-ring: oklch(0.48 0.02 95);
+    /* Charts adjusted for Dark Mode visibility */
+    --chart-1: oklch(0.60 0.18 145); /* Mint */
+    --chart-2: oklch(0.55 0.15 230); /* Sky Blue */
+    --chart-3: oklch(0.70 0.15 85);  /* Bright Gold */
+    --chart-4: oklch(0.60 0.18 25);  /* Coral */
+    --chart-5: oklch(0.60 0.05 260); /* Light Slate */
 }
 
 @layer base {
@@ -178,192 +189,40 @@
     }
 }
 
-/* Optional helpers */
-.h1-serif {
-    font-family: var(--font-serif);
-}
-
-/* Palette migration helpers: map common Tailwind v3 color utilities
-   used in legacy code to our semantic tokens without touching pages. */
+/* === Legacy Compatibility Utilities === */
+/* This keeps your existing classes working while applying the new colors */
 @layer utilities {
-    /* Display serif heading */
+    .h1-serif {
+        font-family: var(--font-serif);
+    }
     .display-serif {
         font-family: var(--font-serif);
         letter-spacing: 0.02em;
         font-weight: 700;
     }
-    .subhead {
-        font-variant: small-caps;
-        letter-spacing: 0.08em;
-        color: var(--color-primary);
-    }
 
-    /* Hero background and scrim overlays */
-    .hero-bg {
-        background-image:
-            linear-gradient(to bottom, color-mix(in oklch, var(--color-background) 90%, transparent), transparent 45%), url('/images/hero.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
-    .hero-scrim {
-        background: linear-gradient(
-            to bottom,
-            color-mix(in oklch, var(--color-background) 70%, transparent),
-            transparent 30%,
-            color-mix(in oklch, var(--color-background) 85%, transparent)
-        );
-    }
+    /* Text Color Maps */
+    .text-gray-900, .text-gray-800 { color: var(--color-foreground) !important; }
+    .text-gray-700, .text-gray-600, .text-gray-500 { color: var(--color-muted-foreground) !important; }
 
-    /* Watermark stamp */
-    .stamp {
-        opacity: 0.12;
-        mix-blend-mode: multiply;
-    }
+    /* Brand Color Maps - Mapping old 'blue/indigo' to new Primary Green */
+    .text-blue-600, .text-indigo-600, .text-rose-600 { color: var(--color-primary) !important; }
+    .bg-blue-600, .bg-indigo-600, .bg-rose-600 { background-color: var(--color-primary) !important; }
+    .hover\:bg-blue-700:hover { background-color: oklch(0.50 0.18 145) !important; } /* Slightly darker green */
 
-    /* Text colors */
-    .text-gray-900 {
-        color: var(--color-foreground) !important;
-    }
-    .text-gray-800 {
-        color: var(--color-foreground) !important;
-    }
-    .text-gray-700,
-    .text-gray-600,
-    .text-gray-500,
-    .text-gray-400,
-    .text-gray-300 {
-        color: var(--color-muted-foreground) !important;
-    }
+    /* Background Maps */
+    .bg-white { background-color: var(--color-card) !important; }
+    .bg-gray-50, .bg-gray-100 { background-color: var(--color-muted) !important; }
 
-    /* Brand aliases (rose/blue/indigo → primary) */
-    .text-blue-900,
-    .text-blue-800,
-    .text-blue-700,
-    .text-blue-600,
-    .text-indigo-600,
-    .text-rose-600 {
-        color: var(--color-primary) !important;
-    }
-    .bg-blue-600,
-    .bg-indigo-600,
-    .bg-rose-600 {
-        background-color: var(--color-primary) !important;
-    }
-    .hover\:bg-blue-700:hover,
-    .hover\:bg-rose-700:hover,
-    .hover\:bg-rose-500:hover {
-        background-color: var(--color-primary) !important;
-    }
+    /* Border Maps */
+    .border-gray-200, .border-gray-300, .border-gray-700 { border-color: var(--color-border) !important; }
 
-    /* Accent and destructive aliases */
-    .text-green-600 {
-        color: var(--color-accent) !important;
-    }
-    .bg-green-100 {
-        background-color: var(--color-accent) !important;
-    }
-    .text-red-600,
-    .hover\:text-red-700:hover {
-        color: var(--color-destructive) !important;
-    }
-    .bg-red-100 {
-        background-color: var(--color-destructive) !important;
-    }
+    /* Dark Mode Legacy Fixes */
+    .dark .dark\:bg-gray-800 { background-color: var(--color-card) !important; }
+    .dark .dark\:text-white { color: var(--color-foreground) !important; }
+    .dark .dark\:text-gray-400 { color: var(--color-muted-foreground) !important; }
+    .dark .dark\:border-gray-600 { border-color: var(--color-border) !important; }
 
-    /* Secondary/info-like aliases */
-    .bg-blue-50,
-    .bg-gray-50,
-    .bg-gray-100 {
-        background-color: var(--color-muted) !important;
-    }
-    .border-blue-200 {
-        border-color: var(--color-border) !important;
-    }
-
-    /* Links default to primary */
-
-    /* Links default to primary */
-    a {
-        color: var(--color-primary);
-    }
-    a:hover {
-        text-decoration: underline;
-    }
-
-    /* Backgrounds */
-    .bg-white {
-        background-color: var(--color-card) !important;
-    }
-    .bg-gray-50 {
-        background-color: var(--color-muted) !important;
-    }
-    .hover\:bg-gray-50:hover {
-        background-color: var(--color-muted) !important;
-    }
-    .bg-gray-200 {
-        background-color: var(--color-muted) !important;
-    }
-
-    /* Dividers and borders */
-    .border-gray-200,
-    .border-gray-300,
-    .border-gray-700 {
-        border-color: var(--color-border) !important;
-    }
-    .border-gray-900\/10 {
-        border-color: var(--color-border) !important;
-    }
-    .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
-    .divide-gray-700 > :not([hidden]) ~ :not([hidden]) {
-        border-color: var(--color-border) !important;
-    }
-
-    /* Primary brand (buttons, accents) */
-    .bg-blue-600 {
-        background-color: var(--color-primary) !important;
-    }
-    .hover\:bg-blue-700:hover {
-        background-color: var(--color-primary) !important;
-    }
-    .text-blue-600,
-    .dark\:text-blue-400 {
-        color: var(--color-primary) !important;
-    }
-    .hover\:text-gray-900:hover {
-        color: var(--color-foreground) !important;
-    }
-    .hover\:text-gray-600:hover {
-        color: var(--color-muted-foreground) !important;
-    }
-
-    /* Table headers */
-    .bg-gray-50 {
-        background-color: var(--color-muted) !important;
-    }
-
-    /* Dark-mode specific legacy classes */
-    .dark .dark\:bg-gray-800 {
-        background-color: var(--color-card) !important;
-    }
-    .dark .dark\:text-white {
-        color: var(--color-foreground) !important;
-    }
-    .dark .dark\:text-gray-400,
-    .dark .dark\:text-gray-300 {
-        color: var(--color-muted-foreground) !important;
-    }
-    .dark .dark\:border-gray-600 {
-        border-color: var(--color-border) !important;
-    }
-    .dark .dark\:divide-gray-700 > :not([hidden]) ~ :not([hidden]) {
-        border-color: var(--color-border) !important;
-    }
-    .dark .dark\:hover\:bg-gray-700:hover {
-        background-color: var(--color-muted) !important;
-    }
-
-    /* Selection color for better polish */
     ::selection {
         background: var(--color-primary);
         color: var(--color-primary-foreground);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Domains\Inventory\Seeders;
 
 use Domains\Auth\Models\Team;
+use Domains\Inventory\Enums\PackageUnit;
 use Domains\Inventory\Enums\ProductType;
 use Domains\Inventory\Models\Product;
 use Illuminate\Database\Seeder;
@@ -16,7 +17,8 @@ class ProductSeeder extends Seeder
         // Get all teams
         $teams = Team::all();
 
-        $products = [
+        // Inventory products (feed, medicine, equipment)
+        $inventoryProducts = [
             [
                 'name' => 'Starter Feed 21%',
                 'description' => 'High-protein starter feed for young chicks (0-4 weeks)',
@@ -109,8 +111,123 @@ class ProductSeeder extends Seeder
             ],
         ];
 
+        // Poultry products (for sale)
+        $poultryProducts = [
+            [
+                'name' => 'Live Broiler',
+                'description' => 'Live broiler chicken ready for sale',
+                'type' => ProductType::LiveBird,
+                'unit' => 'bird',
+                'selling_price_cents' => 8200, // BWP 82.00
+                'units_per_package' => 1,
+                'package_unit' => PackageUnit::Single,
+                'yield_per_bird' => 1,
+            ],
+            [
+                'name' => 'Whole Chicken',
+                'description' => 'Dressed whole chicken',
+                'type' => ProductType::WholeChicken,
+                'unit' => 'bird',
+                'selling_price_cents' => 8000, // BWP 80.00
+                'units_per_package' => 1,
+                'package_unit' => PackageUnit::Single,
+                'yield_per_bird' => 1,
+            ],
+            [
+                'name' => 'Chicken Pieces (0.5kg)',
+                'description' => 'Portioned chicken pieces - 0.5kg pack',
+                'type' => ProductType::ChickenPieces,
+                'unit' => 'pack',
+                'selling_price_cents' => 3000, // BWP 30.00
+                'units_per_package' => 1,
+                'package_unit' => PackageUnit::Pack,
+                'yield_per_bird' => 1, // 1 piece pack from portioning (not direct from slaughter)
+            ],
+            [
+                'name' => 'Chicken Feet (Runaways)',
+                'description' => 'Pack of 10 chicken feet',
+                'type' => ProductType::Offal,
+                'unit' => 'pack',
+                'selling_price_cents' => 1200, // BWP 12.00
+                'units_per_package' => 10,
+                'package_unit' => PackageUnit::Pack,
+                'yield_per_bird' => 2, // 2 feet per bird
+            ],
+            [
+                'name' => 'Chicken Necks (Melala)',
+                'description' => 'Pack of 6 chicken necks',
+                'type' => ProductType::Offal,
+                'unit' => 'pack',
+                'selling_price_cents' => 1200, // BWP 12.00
+                'units_per_package' => 6,
+                'package_unit' => PackageUnit::Pack,
+                'yield_per_bird' => 1,
+            ],
+            [
+                'name' => 'Gizzards (Dintshu)',
+                'description' => 'Pack of 6 gizzards',
+                'type' => ProductType::Offal,
+                'unit' => 'pack',
+                'selling_price_cents' => 1500, // BWP 15.00
+                'units_per_package' => 6,
+                'package_unit' => PackageUnit::Pack,
+                'yield_per_bird' => 1,
+            ],
+            [
+                'name' => 'Chicken Livers (Debete)',
+                'description' => 'Pack of 6 livers',
+                'type' => ProductType::Offal,
+                'unit' => 'pack',
+                'selling_price_cents' => 1200, // BWP 12.00
+                'units_per_package' => 6,
+                'package_unit' => PackageUnit::Pack,
+                'yield_per_bird' => 1,
+            ],
+            [
+                'name' => 'Chicken Hearts (Dipelo)',
+                'description' => 'Pack of 10 hearts',
+                'type' => ProductType::Offal,
+                'unit' => 'pack',
+                'selling_price_cents' => 500, // BWP 5.00
+                'units_per_package' => 10,
+                'package_unit' => PackageUnit::Pack,
+                'yield_per_bird' => 1,
+            ],
+            [
+                'name' => 'Intestines (Mala)',
+                'description' => '1 cup of cleaned intestines',
+                'type' => ProductType::Offal,
+                'unit' => 'cup',
+                'selling_price_cents' => 1500, // BWP 15.00
+                'units_per_package' => 1,
+                'package_unit' => PackageUnit::Cup,
+                'yield_per_bird' => 1,
+            ],
+            [
+                'name' => 'Chicken Heads (Dithogo)',
+                'description' => 'Pack of 20 heads',
+                'type' => ProductType::Offal,
+                'unit' => 'pack',
+                'selling_price_cents' => 2000, // BWP 20.00
+                'units_per_package' => 20,
+                'package_unit' => PackageUnit::Pack,
+                'yield_per_bird' => 1,
+            ],
+            [
+                'name' => 'Manure (Motshetelo)',
+                'description' => '50kg bag of chicken manure',
+                'type' => ProductType::ByProduct,
+                'unit' => 'bag',
+                'selling_price_cents' => 5000, // BWP 50.00
+                'units_per_package' => 1,
+                'package_unit' => PackageUnit::Bag,
+                'yield_per_bird' => 0, // Collected at batch closure, not per bird
+            ],
+        ];
+
         foreach ($teams as $team) {
-            foreach ($products as $product) {
+            // Create inventory products
+            foreach ($inventoryProducts as $product) {
                 Product::query()->create([
                     'team_id' => $team->id,
                     'name' => $product['name'],
@@ -120,6 +237,25 @@ class ProductSeeder extends Seeder
                     'quantity_on_hand' => $product['quantity_on_hand'],
                     'reorder_level' => $product['reorder_level'],
                     'unit_cost' => $product['unit_cost'],
+                    'is_active' => true,
+                ]);
+            }
+
+            // Create poultry products
+            foreach ($poultryProducts as $product) {
+                Product::query()->create([
+                    'team_id' => $team->id,
+                    'name' => $product['name'],
+                    'description' => $product['description'],
+                    'type' => $product['type'],
+                    'unit' => $product['unit'],
+                    'quantity_on_hand' => 0, // Start with zero stock
+                    'reorder_level' => 0,
+                    'unit_cost' => null,
+                    'selling_price_cents' => $product['selling_price_cents'],
+                    'units_per_package' => $product['units_per_package'],
+                    'package_unit' => $product['package_unit'],
+                    'yield_per_bird' => $product['yield_per_bird'],
                     'is_active' => true,
                 ]);
             }

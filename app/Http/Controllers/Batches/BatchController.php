@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Domains\Broiler\Enums\BatchStatus;
 use Domains\Broiler\Models\Batch;
 use Domains\Broiler\Services\BatchCalculationService;
+use Domains\CRM\Models\Customer;
+use Domains\Inventory\Enums\ProductType;
+use Domains\Inventory\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -108,6 +111,55 @@ class BatchController extends Controller
                 'humidity_percent' => $lastLog->humidity_percent ? (float) $lastLog->humidity_percent : null,
             ] : null,
             'suggestedDate' => $suggestedDate,
+            // Live sale data for sheet
+            'liveSale' => $this->getLiveSaleData($batch),
         ]);
+    }
+
+    /**
+     * Get live sale data for the batch show page sheet.
+     *
+     * @return array{liveBirdPrice: int|null, customers: array<int, array{id: int, name: string}>}
+     */
+    protected function getLiveSaleData(Batch $batch): array
+    {
+        $teamId = Auth::user()->current_team_id;
+
+        // Only provide data if batch can have live sales
+        $canSellLive = in_array($batch->status, [BatchStatus::Active, BatchStatus::Harvesting])
+            && $batch->current_quantity > 0;
+
+        if (! $canSellLive) {
+            return [
+                'canSell' => false,
+                'liveBirdPrice' => null,
+                'customers' => [],
+            ];
+        }
+
+        // Get live bird product price
+        $liveBirdProduct = Product::query()
+            ->where('team_id', $teamId)
+            ->where('type', ProductType::LiveBird)
+            ->where('is_active', true)
+            ->first();
+
+        // Get customers for optional linking
+        $customers = Customer::query()
+            ->where('team_id', $teamId)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Customer $customer) => [
+                'id' => $customer->id,
+                'name' => $customer->name,
+            ])
+            ->toArray();
+
+        return [
+            'canSell' => true,
+            'liveBirdPrice' => $liveBirdProduct?->selling_price_cents,
+            'customers' => $customers,
+        ];
     }
 }

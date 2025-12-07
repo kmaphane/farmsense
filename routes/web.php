@@ -4,6 +4,10 @@ use App\Http\Controllers\Batches\BatchAnalyticsController;
 use App\Http\Controllers\Batches\BatchController;
 use App\Http\Controllers\Batches\DailyLogController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LiveSales\LiveSaleController;
+use App\Http\Controllers\Portioning\PortioningController;
+use App\Http\Controllers\Products\ProductPricingController;
+use App\Http\Controllers\Slaughter\SlaughterController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -38,4 +42,21 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/environment', [BatchAnalyticsController::class, 'environmentalData'])->name('environment');
         Route::get('/summary', [BatchAnalyticsController::class, 'summary'])->name('summary');
     });
+
+    // Live sales (from batch)
+    Route::get('/batches/{batch}/live-sale/create', [LiveSaleController::class, 'create'])->name('live-sales.create');
+    Route::post('/batches/{batch}/live-sale', [LiveSaleController::class, 'store'])->name('live-sales.store');
+
+    // Slaughter management
+    Route::get('/slaughter/create', [SlaughterController::class, 'create'])->name('slaughter.create');
+    Route::post('/slaughter', [SlaughterController::class, 'store'])->name('slaughter.store');
+    Route::get('/slaughter/{record}', [SlaughterController::class, 'show'])->name('slaughter.show');
+
+    // Portioning management
+    Route::get('/portioning/create', [PortioningController::class, 'create'])->name('portioning.create');
+    Route::post('/portioning', [PortioningController::class, 'store'])->name('portioning.store');
+
+    // Product pricing
+    Route::get('/products/pricing', [ProductPricingController::class, 'index'])->name('products.pricing');
+    Route::patch('/products/{product}/price', [ProductPricingController::class, 'update'])->name('products.update-price');
 });
