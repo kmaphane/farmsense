@@ -75,7 +75,7 @@ class CustomerSeeder extends Seeder
         // Assign customers to each team
         foreach ($teams as $team) {
             foreach ($customerTemplates as $customerData) {
-                Customer::create([
+                Customer::query()->create([
                     ...$customerData,
                     'team_id' => $team->id,
                     'notes' => 'Created for '.$team->name,

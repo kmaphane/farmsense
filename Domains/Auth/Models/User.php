@@ -3,9 +3,11 @@
 namespace Domains\Auth\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Domains\Auth\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -13,15 +15,15 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Domains\Auth\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * Create a new factory instance for the model.
      */
     protected static function newFactory()
     {
-        return \Domains\Auth\Factories\UserFactory::new();
+        return UserFactory::new();
     }
 
     /**
@@ -64,6 +66,8 @@ class User extends Authenticatable
 
     /**
      * Get the teams the user belongs to
+     *
+     * @return BelongsToMany<Team, $this, Pivot>
      */
     public function teams(): BelongsToMany
     {
@@ -74,6 +78,8 @@ class User extends Authenticatable
 
     /**
      * Get the current team the user is working with (relationship)
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function currentTeam(): BelongsTo
     {

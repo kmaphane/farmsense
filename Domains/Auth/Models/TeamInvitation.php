@@ -21,17 +21,10 @@ class TeamInvitation extends Model
         'accepted_at',
     ];
 
-    protected $casts = [
-        'expires_at' => 'datetime',
-        'accepted_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-
     /**
      * Get the team this invitation is for
      *
-     * @return BelongsTo
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -40,8 +33,6 @@ class TeamInvitation extends Model
 
     /**
      * Check if the invitation has expired
-     *
-     * @return bool
      */
     public function isExpired(): bool
     {
@@ -50,11 +41,19 @@ class TeamInvitation extends Model
 
     /**
      * Check if the invitation has been accepted
-     *
-     * @return bool
      */
     public function isAccepted(): bool
     {
         return $this->accepted_at !== null;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'expires_at' => 'datetime',
+            'accepted_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

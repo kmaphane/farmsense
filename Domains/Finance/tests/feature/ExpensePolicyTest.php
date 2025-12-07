@@ -12,21 +12,26 @@ use Tests\TestCase;
 class ExpensePolicyTest extends TestCase
 {
     protected User $superAdmin;
+
     protected User $farmManager;
+
     protected User $partner;
+
     protected User $fieldWorker;
+
     protected Team $team1;
+
     protected Team $team2;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         // Get roles
-        $superAdminRole = Role::where('name', 'Super Admin')->first();
-        $farmManagerRole = Role::where('name', 'Farm Manager')->first();
-        $partnerRole = Role::where('name', 'Partner')->first();
-        $fieldWorkerRole = Role::where('name', 'Field Worker')->first();
+        $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
+        $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
+        $partnerRole = Role::query()->where('name', 'Partner')->first();
+        $fieldWorkerRole = Role::query()->where('name', 'Field Worker')->first();
 
         // Create users
         $this->superAdmin = User::factory()->create();

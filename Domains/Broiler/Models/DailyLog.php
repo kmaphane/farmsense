@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Domains\Broiler\Models;
 
 use Domains\Auth\Models\User;
-use Illuminate\Database\Eloquent\Model;
+use Domains\Broiler\Factories\DailyLogFactory;
 use Domains\Shared\Traits\BelongsToTeam;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DailyLog extends Model
 {
@@ -18,9 +19,9 @@ class DailyLog extends Model
     /**
      * Create a new factory instance for the model.
      */
-    protected static function newFactory(): \Domains\Broiler\Factories\DailyLogFactory
+    protected static function newFactory(): DailyLogFactory
     {
-        return \Domains\Broiler\Factories\DailyLogFactory::new();
+        return DailyLogFactory::new();
     }
 
     protected $fillable = [
@@ -50,11 +51,17 @@ class DailyLog extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Batch, $this>
+     */
     public function batch(): BelongsTo
     {
         return $this->belongsTo(Batch::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function recorder(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by');

@@ -1,11 +1,13 @@
 <?php
 
+use App\Models\User;
 use Domains\CRM\DTOs\CustomerData;
 use Domains\Shared\Enums\CustomerType;
+use Spatie\LaravelData\Exceptions\ValidationException;
 
 beforeEach(function () {
     // Mock authenticated user with team
-    $this->user = \App\Models\User::factory()->create([
+    $this->user = User::factory()->create([
         'current_team_id' => 1,
     ]);
     $this->actingAs($this->user);
@@ -64,7 +66,7 @@ it('validates required fields', function () {
     CustomerData::from([
         'name' => '', // Invalid - required
     ]);
-})->throws(\Spatie\LaravelData\Exceptions\ValidationException::class);
+})->throws(ValidationException::class);
 
 it('validates email format', function () {
     CustomerData::from([
@@ -73,7 +75,7 @@ it('validates email format', function () {
         'email' => 'invalid-email', // Invalid format
         'type' => CustomerType::Retail,
     ]);
-})->throws(\Spatie\LaravelData\Exceptions\ValidationException::class);
+})->throws(ValidationException::class);
 
 it('handles nullable fields', function () {
     $dto = CustomerData::from([

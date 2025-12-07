@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
-    use HasFactory, BelongsToTeam;
+    use BelongsToTeam, HasFactory;
 
     protected $fillable = [
         'team_id',
@@ -38,6 +38,8 @@ class Invoice extends Model
 
     /**
      * Get the customer for this invoice
+     *
+     * @return BelongsTo<Customer, $this>
      */
     public function customer(): BelongsTo
     {
@@ -46,6 +48,8 @@ class Invoice extends Model
 
     /**
      * Get line items for this invoice
+     *
+     * @return HasMany<InvoiceLineItem, $this>
      */
     public function lineItems(): HasMany
     {
@@ -54,6 +58,8 @@ class Invoice extends Model
 
     /**
      * Get payments for this invoice
+     *
+     * @return HasMany<Payment, $this>
      */
     public function payments(): HasMany
     {

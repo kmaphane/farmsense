@@ -12,15 +12,17 @@ use Tests\TestCase;
 class SupplierTest extends TestCase
 {
     protected User $superAdmin;
+
     protected User $farmManager;
+
     protected Team $team;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $superAdminRole = Role::where('name', 'Super Admin')->first();
-        $farmManagerRole = Role::where('name', 'Farm Manager')->first();
+        $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
+        $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
 
         $this->superAdmin = User::factory()->create();
         $this->farmManager = User::factory()->create();
@@ -141,8 +143,8 @@ class SupplierTest extends TestCase
         Supplier::factory(3)->create(['category' => SupplierCategory::Feed]);
         Supplier::factory(2)->create(['category' => SupplierCategory::Chicks]);
 
-        $feedSuppliers = Supplier::where('category', SupplierCategory::Feed->value)->count();
-        $chicksSuppliers = Supplier::where('category', SupplierCategory::Chicks->value)->count();
+        $feedSuppliers = Supplier::query()->where('category', SupplierCategory::Feed->value)->count();
+        $chicksSuppliers = Supplier::query()->where('category', SupplierCategory::Chicks->value)->count();
 
         expect($feedSuppliers)->toBe(3);
         expect($chicksSuppliers)->toBe(2);
@@ -156,7 +158,7 @@ class SupplierTest extends TestCase
         Supplier::factory()->create(['name' => 'Active Supplier', 'is_active' => true]);
         Supplier::factory()->create(['name' => 'Inactive Supplier', 'is_active' => false]);
 
-        $activeSuppliers = Supplier::where('is_active', true)->count();
+        $activeSuppliers = Supplier::query()->where('is_active', true)->count();
 
         expect($activeSuppliers)->toBeGreaterThanOrEqual(1);
     }

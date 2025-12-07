@@ -2,16 +2,24 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CustomerResource\Pages;
+use App\Filament\Resources\CustomerResource\Pages\CreateCustomer;
+use App\Filament\Resources\CustomerResource\Pages\EditCustomer;
+use App\Filament\Resources\CustomerResource\Pages\ListCustomers;
 use BackedEnum;
 use Domains\CRM\Models\Customer;
 use Domains\Shared\Enums\CustomerType;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -34,17 +42,17 @@ class CustomerResource extends Resource
                 Section::make('Customer Information')
                     ->description('Basic customer details')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(255)
                             ->autofocus(),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->email()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('phone')
+                        TextInput::make('phone')
                             ->tel()
                             ->maxLength(20),
-                        Forms\Components\Select::make('type')
+                        Select::make('type')
                             ->options(CustomerType::class)
                             ->required()
                             ->default(CustomerType::Retail),
@@ -53,17 +61,17 @@ class CustomerResource extends Resource
                 Section::make('Financial Terms')
                     ->description('Credit and payment information')
                     ->schema([
-                        Forms\Components\TextInput::make('credit_limit')
+                        TextInput::make('credit_limit')
                             ->numeric()
                             ->minValue(0)
                             ->helperText('Credit limit in cents/thebe'),
-                        Forms\Components\Textarea::make('payment_terms')
+                        Textarea::make('payment_terms')
                             ->helperText('e.g., Net 30, COD, 50% deposit'),
                     ])->columns(2),
 
                 Section::make('Additional Information')
                     ->schema([
-                        Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->maxLength(500)
                             ->columnSpanFull(),
                     ]),
@@ -74,41 +82,41 @@ class CustomerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->searchable()
                     ->icon('heroicon-m-envelope'),
-                Tables\Columns\TextColumn::make('phone')
+                TextColumn::make('phone')
                     ->searchable()
                     ->icon('heroicon-m-phone'),
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->badge()
                     ->colors([
                         'primary' => CustomerType::Wholesale->value,
                         'success' => CustomerType::Retail->value,
                     ]),
-                Tables\Columns\TextColumn::make('credit_limit')
+                TextColumn::make('credit_limit')
                     ->numeric()
                     ->label('Credit Limit')
-                    ->formatStateUsing(fn($state) => $state ? number_format($state / 100, 2) . ' BWP' : '—'),
-                Tables\Columns\TextColumn::make('created_at')
+                    ->formatStateUsing(fn ($state) => $state ? number_format($state / 100, 2).' BWP' : '—'),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type')
+                SelectFilter::make('type')
                     ->options(CustomerType::class),
             ])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -123,9 +131,9 @@ class CustomerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCustomers::route('/'),
-            'create' => Pages\CreateCustomer::route('/create'),
-            'edit' => Pages\EditCustomer::route('/{record}/edit'),
+            'index' => ListCustomers::route('/'),
+            'create' => CreateCustomer::route('/create'),
+            'edit' => EditCustomer::route('/{record}/edit'),
         ];
     }
 }

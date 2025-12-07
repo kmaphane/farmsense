@@ -14,15 +14,11 @@ interface Allocatable
 {
     /**
      * Get the displayable name for the allocatable resource
-     *
-     * @return string
      */
     public function getAllocatableName(): string;
 
     /**
      * Get the type identifier for this allocatable
-     *
-     * @return string
      */
     public function getAllocatableType(): string;
 }

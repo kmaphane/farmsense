@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Domains\Broiler\Factories;
 
+use DateTimeInterface;
 use Domains\Auth\Models\Team;
 use Domains\Auth\Models\User;
 use Domains\Broiler\Models\Batch;
@@ -11,7 +12,7 @@ use Domains\Broiler\Models\DailyLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Domains\Broiler\Models\DailyLog>
+ * @extends Factory<DailyLog>
  */
 class DailyLogFactory extends Factory
 {
@@ -30,7 +31,7 @@ class DailyLogFactory extends Factory
             'humidity_percent' => fake()->randomFloat(1, 55, 75),
             'ammonia_ppm' => fake()->randomFloat(1, 5, 25),
             'notes' => fake()->optional(0.3)->sentence(),
-            'recorded_by' => User::inRandomOrder()->first()?->id,
+            'recorded_by' => User::query()->inRandomOrder()->first()?->id,
         ];
     }
 
@@ -42,7 +43,7 @@ class DailyLogFactory extends Factory
         ]);
     }
 
-    public function forDate(\DateTimeInterface|string $date): static
+    public function forDate(DateTimeInterface|string $date): static
     {
         return $this->state(fn (array $attributes) => [
             'log_date' => $date,

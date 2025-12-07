@@ -6,9 +6,9 @@ use Domains\Auth\Models\Team;
 use Domains\CRM\Models\Customer;
 use Domains\CRM\Models\Supplier;
 use Domains\Finance\Models\Expense;
-use Illuminate\Support\Facades\Auth;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Auth;
 
 class Dashboard extends BaseDashboard
 {
@@ -21,18 +21,18 @@ class Dashboard extends BaseDashboard
             return [];
         }
 
-        $customersCount = Customer::where('team_id', $team->id)->count();
-        $suppliersCount = Supplier::count();
+        $customersCount = Customer::query()->where('team_id', $team->id)->count();
+        $suppliersCount = Supplier::query()->count();
 
-        $totalExpenses = Expense::where('team_id', $team->id)
+        $totalExpenses = Expense::query()->where('team_id', $team->id)
             ->sum('amount') / 100;
 
-        $expensesThisMonth = Expense::where('team_id', $team->id)
+        $expensesThisMonth = Expense::query()->where('team_id', $team->id)
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->sum('amount') / 100;
 
-        $teamsCount = Team::count();
+        $teamsCount = Team::query()->count();
 
         return [
             Stat::make('Team', $team->name)

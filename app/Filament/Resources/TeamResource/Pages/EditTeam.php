@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\TeamResource\Pages;
 
 use App\Filament\Resources\TeamResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTeam extends EditRecord
@@ -13,7 +13,7 @@ class EditTeam extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
+            DeleteAction::make()
                 ->requiresConfirmation()
                 ->modalHeading('Delete Team')
                 ->modalDescription('Are you sure? This will delete the team and all associated data.'),

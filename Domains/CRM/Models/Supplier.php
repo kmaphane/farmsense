@@ -3,6 +3,7 @@
 namespace Domains\CRM\Models;
 
 use Domains\Shared\Enums\SupplierCategory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -29,23 +30,16 @@ class Supplier extends Model
         'is_active',
     ];
 
-    protected $casts = [
-        'category' => SupplierCategory::class,
-        'performance_rating' => 'float',
-        'current_price_per_unit' => 'float',
-        'is_active' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-
     /**
      * Get the supplier category label
      *
      * @return string
      */
-    public function getCategoryLabelAttribute(): string
+    protected function categoryLabel(): Attribute
     {
-        return $this->category?->label() ?? '';
+        return Attribute::make(get: function () {
+            return $this->category?->label() ?? '';
+        });
     }
 
     /**
@@ -53,13 +47,27 @@ class Supplier extends Model
      *
      * @return string
      */
-    public function getRatingStarsAttribute(): string
+    protected function ratingStars(): Attribute
     {
-        if (!$this->performance_rating) {
-            return 'Not rated';
-        }
+        return Attribute::make(get: function () {
+            if (! $this->performance_rating) {
+                return 'Not rated';
+            }
 
-        return str_repeat('★', (int) $this->performance_rating) .
-               str_repeat('☆', 5 - (int) $this->performance_rating);
+            return str_repeat('★', (int) $this->performance_rating).
+                   str_repeat('☆', 5 - (int) $this->performance_rating);
+        });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'category' => SupplierCategory::class,
+            'performance_rating' => 'float',
+            'current_price_per_unit' => 'float',
+            'is_active' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

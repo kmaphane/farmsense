@@ -2,11 +2,18 @@
 
 namespace App\Filament\Resources\BatchResource\RelationManagers;
 
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,34 +29,34 @@ class ExpensesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('expense_date')
+                TextColumn::make('expense_date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category')
+                TextColumn::make('category')
                     ->badge()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->searchable()
                     ->limit(50),
-                Tables\Columns\TextColumn::make('amount_cents')
+                TextColumn::make('amount_cents')
                     ->money('BWP', divideBy: 100)
                     ->label('Amount')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('supplier.name')
+                TextColumn::make('supplier.name')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('expense_date', 'desc')
             ->filters([
-                Tables\Filters\SelectFilter::make('category'),
+                SelectFilter::make('category'),
             ])
             ->recordActions([
-                Actions\ViewAction::make(),
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\CreateAction::make()
+                CreateAction::make()
                     ->mutateDataUsing(function (array $data) {
                         $data['team_id'] = Auth::user()->current_team_id;
                         $data['allocatable_type'] = $this->getOwnerRecord()::class;
@@ -64,11 +71,11 @@ class ExpensesRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('expense_date')
+                DatePicker::make('expense_date')
                     ->required()
                     ->default(now())
                     ->native(false),
-                Forms\Components\Select::make('category')
+                Select::make('category')
                     ->required()
                     ->options([
                         'chicks' => 'Chicks',
@@ -79,20 +86,20 @@ class ExpensesRelationManager extends RelationManager
                         'equipment' => 'Equipment',
                         'other' => 'Other',
                     ]),
-                Forms\Components\TextInput::make('description')
+                TextInput::make('description')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('amount_cents')
+                TextInput::make('amount_cents')
                     ->required()
                     ->numeric()
                     ->prefix('P')
                     ->label('Amount (BWP)')
                     ->helperText('Amount will be stored in cents'),
-                Forms\Components\Select::make('supplier_id')
+                Select::make('supplier_id')
                     ->relationship('supplier', 'name')
                     ->searchable()
                     ->preload(),
-                Forms\Components\Textarea::make('notes')
+                Textarea::make('notes')
                     ->maxLength(500)
                     ->columnSpanFull(),
             ])

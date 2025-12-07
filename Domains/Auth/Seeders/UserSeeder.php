@@ -20,20 +20,17 @@ class UserSeeder extends Seeder
         $teams = Team::all();
 
         // Get roles
-        $superAdminRole = Role::where('name', 'Super Admin')->first();
-        $farmManagerRole = Role::where('name', 'Farm Manager')->first();
-        $partnerRole = Role::where('name', 'Partner')->first();
-        $fieldWorkerRole = Role::where('name', 'Field Worker')->first();
+        $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
+        $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
+        $partnerRole = Role::query()->where('name', 'Partner')->first();
+        $fieldWorkerRole = Role::query()->where('name', 'Field Worker')->first();
 
         // Super Admin - has access to all teams
-        $superAdmin = User::firstOrCreate(
-            ['email' => 'kenna@omkom.com'],
-            [
-                'name' => 'System Admin',
-                'password' => bcrypt('password'),
-                'email_verified_at' => now(),
-            ]
-        );
+        $superAdmin = User::query()->firstOrCreate(['email' => 'kenna@omkom.com'], [
+            'name' => 'System Admin',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
 
         // Assign Super Admin to all teams with Super Admin role
         foreach ($teams as $team) {
@@ -61,14 +58,11 @@ class UserSeeder extends Seeder
             $teamIndex = $managerData['team_index'];
             unset($managerData['team_index']);
 
-            $manager = User::firstOrCreate(
-                ['email' => $managerData['email']],
-                [
-                    ...$managerData,
-                    'password' => bcrypt('password'),
-                    'email_verified_at' => now(),
-                ]
-            );
+            $manager = User::query()->firstOrCreate(['email' => $managerData['email']], [
+                ...$managerData,
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]);
 
             $team = $teams->get($teamIndex);
             if (! $manager->teams()->where('team_id', $team->id)->exists()) {
@@ -95,14 +89,11 @@ class UserSeeder extends Seeder
             $teamIndices = $partnerData['team_indices'];
             unset($partnerData['team_indices']);
 
-            $partner = User::firstOrCreate(
-                ['email' => $partnerData['email']],
-                [
-                    ...$partnerData,
-                    'password' => bcrypt('password'),
-                    'email_verified_at' => now(),
-                ]
-            );
+            $partner = User::query()->firstOrCreate(['email' => $partnerData['email']], [
+                ...$partnerData,
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]);
 
             foreach ($teamIndices as $index) {
                 $team = $teams->get($index);
@@ -138,14 +129,11 @@ class UserSeeder extends Seeder
             $teamIndex = $workerData['team_index'];
             unset($workerData['team_index']);
 
-            $worker = User::firstOrCreate(
-                ['email' => $workerData['email']],
-                [
-                    ...$workerData,
-                    'password' => bcrypt('password'),
-                    'email_verified_at' => now(),
-                ]
-            );
+            $worker = User::query()->firstOrCreate(['email' => $workerData['email']], [
+                ...$workerData,
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]);
 
             $team = $teams->get($teamIndex);
             if (! $worker->teams()->where('team_id', $team->id)->exists()) {

@@ -17,7 +17,7 @@ interface ReceiptScanner
     /**
      * Scan a receipt image and extract data
      *
-     * @param string $imagePath Path to receipt image file
+     * @param  string  $imagePath  Path to receipt image file
      * @return array{
      *     amount: float,
      *     currency: string,
@@ -31,8 +31,6 @@ interface ReceiptScanner
 
     /**
      * Validate if the driver is properly configured
-     *
-     * @return bool
      */
     public function isConfigured(): bool;
 }

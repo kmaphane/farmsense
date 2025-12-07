@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Domains\Broiler\Models;
 
 use Domains\Broiler\Enums\BatchStatus;
+use Domains\Broiler\Factories\BatchFactory;
 use Domains\CRM\Models\Supplier;
 use Domains\Finance\Models\Expense;
 use Domains\Inventory\Models\StockMovement;
 use Domains\Shared\Traits\BelongsToTeam;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,9 +25,9 @@ class Batch extends Model
     /**
      * Create a new factory instance for the model.
      */
-    protected static function newFactory(): \Domains\Broiler\Factories\BatchFactory
+    protected static function newFactory(): BatchFactory
     {
-        return \Domains\Broiler\Factories\BatchFactory::new();
+        return BatchFactory::new();
     }
 
     protected $fillable = [
@@ -57,44 +59,61 @@ class Batch extends Model
         ];
     }
 
+    /**
+     * @return HasMany<DailyLog, $this>
+     */
     public function dailyLogs(): HasMany
     {
         return $this->hasMany(DailyLog::class);
     }
 
+    /**
+     * @return BelongsTo<Supplier, $this>
+     */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
+    /**
+     * @return MorphMany<Expense, $this>
+     */
     public function expenses(): MorphMany
     {
         return $this->morphMany(Expense::class, 'allocatable');
     }
 
+    /**
+     * @return HasMany<StockMovement, $this>
+     */
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'reference', 'batch_number');
     }
 
-    public function getAgeInDaysAttribute(): int
+    protected function ageInDays(): Attribute
     {
-        if (! $this->start_date) {
-            return 0;
-        }
+        return Attribute::make(get: function () {
+            if (! $this->start_date) {
+                return 0;
+            }
+            $endDate = $this->actual_end_date ?? now();
 
-        $endDate = $this->actual_end_date ?? now();
-
-        return (int) $this->start_date->diffInDays($endDate);
+            return (int) $this->start_date->diffInDays($endDate);
+        });
     }
 
-    public function getTotalMortalityAttribute(): int
+    protected function totalMortality(): Attribute
     {
-        return $this->dailyLogs->sum('mortality_count');
+        return Attribute::make(get: function () {
+            return $this->dailyLogs->sum('mortality_count');
+        });
     }
 
-    public function getTotalFeedConsumedAttribute(): float
+    protected function totalFeedConsumed(): Attribute
     {
-        return (float) $this->dailyLogs->sum('feed_consumed_kg');
+        return Attribute::make(get: function () {
+            return (float) $this->dailyLogs->sum('feed_consumed_kg');
+        });
     }
 }

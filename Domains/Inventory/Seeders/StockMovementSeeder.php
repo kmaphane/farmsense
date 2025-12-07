@@ -27,7 +27,7 @@ class StockMovementSeeder extends Seeder
             $user = $users->where('current_team_id', $teamId)->first() ?? $users->first();
 
             if ($warehouse && $user) {
-                StockMovement::create([
+                StockMovement::query()->create([
                     'team_id' => $teamId,
                     'product_id' => $product->id,
                     'warehouse_id' => $warehouse->id,
@@ -47,7 +47,7 @@ class StockMovementSeeder extends Seeder
             $user = $users->where('current_team_id', $teamId)->first() ?? $users->first();
 
             if ($warehouse && $user) {
-                StockMovement::create([
+                StockMovement::query()->create([
                     'team_id' => $teamId,
                     'product_id' => $product->id,
                     'warehouse_id' => $warehouse->id,

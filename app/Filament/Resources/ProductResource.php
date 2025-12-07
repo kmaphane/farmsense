@@ -2,16 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProductResource\Pages;
+use App\Filament\Resources\ProductResource\Pages\CreateProduct;
+use App\Filament\Resources\ProductResource\Pages\EditProduct;
+use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use BackedEnum;
 use Domains\Inventory\Enums\ProductType;
 use Domains\Inventory\Models\Product;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -33,17 +43,17 @@ class ProductResource extends Resource
             Section::make('Product Information')
                 ->description('Define product details and stock parameters')
                 ->schema([
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                         ->required()
                         ->maxLength(255)
                         ->autofocus(),
-                    Forms\Components\TextInput::make('description')
+                    TextInput::make('description')
                         ->maxLength(500),
-                    Forms\Components\Select::make('type')
+                    Select::make('type')
                         ->options(ProductType::class)
                         ->required()
                         ->default(ProductType::Other),
-                    Forms\Components\TextInput::make('unit')
+                    TextInput::make('unit')
                         ->required()
                         ->default('bag')
                         ->maxLength(50),
@@ -51,15 +61,15 @@ class ProductResource extends Resource
 
             Section::make('Stock Management')
                 ->schema([
-                    Forms\Components\TextInput::make('quantity_on_hand')
+                    TextInput::make('quantity_on_hand')
                         ->numeric()
                         ->default(0)
                         ->helperText('Current stock quantity'),
-                    Forms\Components\TextInput::make('reorder_level')
+                    TextInput::make('reorder_level')
                         ->numeric()
                         ->default(0)
                         ->helperText('Alert level for reordering'),
-                    Forms\Components\TextInput::make('unit_cost')
+                    TextInput::make('unit_cost')
                         ->numeric()
                         ->step(0.01)
                         ->helperText('Cost per unit in currency'),
@@ -67,7 +77,7 @@ class ProductResource extends Resource
 
             Section::make('Status')
                 ->schema([
-                    Forms\Components\Toggle::make('is_active')
+                    Toggle::make('is_active')
                         ->default(true)
                         ->helperText('Inactive products won\'t appear in selections'),
                 ]),
@@ -78,45 +88,45 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->badge()
                     ->colors([
                         'primary' => ProductType::Feed->value,
                         'warning' => ProductType::Medicine->value,
                         'info' => ProductType::Packaging->value,
                     ]),
-                Tables\Columns\TextColumn::make('unit')
+                TextColumn::make('unit')
                     ->label('Unit'),
-                Tables\Columns\TextColumn::make('quantity_on_hand')
+                TextColumn::make('quantity_on_hand')
                     ->label('Stock')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('reorder_level')
+                TextColumn::make('reorder_level')
                     ->label('Reorder Level')
                     ->numeric(),
-                Tables\Columns\TextColumn::make('unit_cost')
+                TextColumn::make('unit_cost')
                     ->label('Unit Cost')
                     ->formatStateUsing(fn ($state) => $state ? 'BWP '.number_format($state / 100, 2) : '—'),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type')
+                SelectFilter::make('type')
                     ->options(ProductType::class),
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->nullable(),
             ])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -129,9 +139,9 @@ class ProductResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProducts::route('/'),
-            'create' => Pages\CreateProduct::route('/create'),
-            'edit' => Pages\EditProduct::route('/{record}/edit'),
+            'index' => ListProducts::route('/'),
+            'create' => CreateProduct::route('/create'),
+            'edit' => EditProduct::route('/{record}/edit'),
         ];
     }
 }

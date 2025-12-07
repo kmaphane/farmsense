@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    use HasFactory, BelongsToTeam;
+    use BelongsToTeam, HasFactory;
 
     protected $fillable = [
         'team_id',
@@ -35,6 +35,8 @@ class Product extends Model
 
     /**
      * Get stock movements for this product
+     *
+     * @return HasMany<StockMovement, $this>
      */
     public function stockMovements(): HasMany
     {

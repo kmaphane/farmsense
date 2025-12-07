@@ -9,6 +9,7 @@ use Domains\Broiler\Enums\BatchStatus;
 use Domains\Broiler\Models\Batch;
 use Domains\CRM\Models\Supplier;
 use Domains\Shared\Enums\SupplierCategory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
 
 class BatchSeeder extends Seeder
@@ -19,7 +20,7 @@ class BatchSeeder extends Seeder
     public function run(): void
     {
         $teams = Team::all();
-        $chickSuppliers = Supplier::where('category', SupplierCategory::Chicks)->get();
+        $chickSuppliers = Supplier::query()->where('category', SupplierCategory::Chicks)->get();
 
         foreach ($teams as $team) {
             $this->createBatchesForTeam($team, $chickSuppliers);
@@ -27,14 +28,14 @@ class BatchSeeder extends Seeder
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Collection<int, Supplier>  $chickSuppliers
+     * @param  Collection<int, Supplier>  $chickSuppliers
      */
     private function createBatchesForTeam(Team $team, $chickSuppliers): void
     {
         $supplier = $chickSuppliers->random();
 
         // 1. Planned batch (future start date)
-        Batch::create([
+        Batch::query()->create([
             'team_id' => $team->id,
             'name' => 'January 2026 Batch',
             'batch_number' => 'BRO-2026-'.str_pad((string) $team->id, 3, '0', STR_PAD_LEFT).'-001',
@@ -49,7 +50,7 @@ class BatchSeeder extends Seeder
         ]);
 
         // 2. Active batch (started 20 days ago)
-        Batch::create([
+        Batch::query()->create([
             'team_id' => $team->id,
             'name' => 'December 2025 Batch A',
             'batch_number' => 'BRO-2025-'.str_pad((string) $team->id, 3, '0', STR_PAD_LEFT).'-012',
@@ -64,7 +65,7 @@ class BatchSeeder extends Seeder
         ]);
 
         // 3. Another active batch (started 35 days ago - near harvest)
-        Batch::create([
+        Batch::query()->create([
             'team_id' => $team->id,
             'name' => 'November 2025 Batch',
             'batch_number' => 'BRO-2025-'.str_pad((string) $team->id, 3, '0', STR_PAD_LEFT).'-011',
@@ -79,7 +80,7 @@ class BatchSeeder extends Seeder
         ]);
 
         // 4. Harvesting batch (ready for sale)
-        Batch::create([
+        Batch::query()->create([
             'team_id' => $team->id,
             'name' => 'October 2025 Batch B',
             'batch_number' => 'BRO-2025-'.str_pad((string) $team->id, 3, '0', STR_PAD_LEFT).'-010',
@@ -94,7 +95,7 @@ class BatchSeeder extends Seeder
         ]);
 
         // 5. Closed batch (completed cycle - historical data)
-        Batch::create([
+        Batch::query()->create([
             'team_id' => $team->id,
             'name' => 'September 2025 Batch',
             'batch_number' => 'BRO-2025-'.str_pad((string) $team->id, 3, '0', STR_PAD_LEFT).'-008',
@@ -110,7 +111,7 @@ class BatchSeeder extends Seeder
         ]);
 
         // 6. Another closed batch (excellent performance)
-        Batch::create([
+        Batch::query()->create([
             'team_id' => $team->id,
             'name' => 'August 2025 Batch',
             'batch_number' => 'BRO-2025-'.str_pad((string) $team->id, 3, '0', STR_PAD_LEFT).'-006',

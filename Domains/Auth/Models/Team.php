@@ -5,6 +5,7 @@ namespace Domains\Auth\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class Team extends Model
 {
@@ -14,15 +15,10 @@ class Team extends Model
         'subscription_plan',
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-
     /**
      * Get the owner of the team
      *
-     * @return BelongsTo
+     * @return BelongsTo<User, $this>
      */
     public function owner(): BelongsTo
     {
@@ -32,7 +28,7 @@ class Team extends Model
     /**
      * Get the users in this team
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<User, $this, Pivot>
      */
     public function users(): BelongsToMany
     {
@@ -43,24 +39,17 @@ class Team extends Model
 
     /**
      * Add a user to the team with a specific role
-     *
-     * @param User $user
-     * @param int $roleId
-     * @return void
      */
     public function addUser(User $user, int $roleId): void
     {
         // Only attach if not already a member
-        if (!$this->users()->where('user_id', $user->id)->exists()) {
+        if (! $this->users()->where('user_id', $user->id)->exists()) {
             $this->users()->attach($user->id, ['role_id' => $roleId]);
         }
     }
 
     /**
      * Remove a user from the team
-     *
-     * @param User $user
-     * @return void
      */
     public function removeUser(User $user): void
     {
@@ -74,15 +63,19 @@ class Team extends Model
 
     /**
      * Change a user's role in the team
-     *
-     * @param User $user
-     * @param int $roleId
-     * @return void
      */
     public function changeUserRole(User $user, int $roleId): void
     {
         if ($this->users()->where('user_id', $user->id)->exists()) {
             $this->users()->updateExistingPivot($user->id, ['role_id' => $roleId]);
         }
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

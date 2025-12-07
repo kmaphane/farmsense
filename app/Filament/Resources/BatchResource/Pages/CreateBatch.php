@@ -17,7 +17,7 @@ class CreateBatch extends CreateRecord
 
         // Auto-generate batch number if not provided
         if (empty($data['batch_number'])) {
-            $action = app(CreateBatchAction::class);
+            $action = resolve(CreateBatchAction::class);
             $data['batch_number'] = $action->generateBatchNumber($data['team_id']);
         }
 

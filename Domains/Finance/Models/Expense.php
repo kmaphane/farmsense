@@ -4,6 +4,7 @@ namespace Domains\Finance\Models;
 
 use Domains\Shared\Enums\ExpenseCategory;
 use Domains\Shared\Traits\BelongsToTeam;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -23,17 +24,8 @@ class Expense extends Model
         'receipt_path',
     ];
 
-    protected $casts = [
-        'category' => ExpenseCategory::class,
-        'ocr_data' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-
     /**
      * Get the allocatable resource (Batch or General Farm)
-     *
-     * @return MorphTo
      */
     public function allocatable(): MorphTo
     {
@@ -45,9 +37,11 @@ class Expense extends Model
      *
      * @return string
      */
-    public function getFormattedAmountAttribute(): string
+    protected function formattedAmount(): Attribute
     {
-        return number_format($this->amount / 100, 2) . ' ' . $this->currency;
+        return Attribute::make(get: function () {
+            return number_format($this->amount / 100, 2).' '.$this->currency;
+        });
     }
 
     /**
@@ -55,19 +49,20 @@ class Expense extends Model
      *
      * @return string
      */
-    public function getCategoryLabelAttribute(): string
+    protected function categoryLabel(): Attribute
     {
-        return $this->category?->label() ?? '';
+        return Attribute::make(get: function () {
+            return $this->category?->label() ?? '';
+        });
     }
 
     /**
      * Scope: Get expenses for a specific batch
      *
-     * @param mixed $query
-     * @param int $batchId
+     * @param  mixed  $query
      * @return mixed
      */
-    public function scopeForBatch($query, int $batchId)
+    protected function scopeForBatch($query, int $batchId)
     {
         return $query->where('allocatable_type', 'Domains\\Broiler\\Models\\Batch')
             ->where('allocatable_id', $batchId);
@@ -76,12 +71,22 @@ class Expense extends Model
     /**
      * Scope: Get expenses for general farm (not allocated to specific batch)
      *
-     * @param mixed $query
+     * @param  mixed  $query
      * @return mixed
      */
-    public function scopeForGeneral($query)
+    protected function scopeForGeneral($query)
     {
         return $query->whereNull('allocatable_type')
             ->whereNull('allocatable_id');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'category' => ExpenseCategory::class,
+            'ocr_data' => 'array',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

@@ -14,10 +14,10 @@ class RecordDailyLogAction
     public function execute(DailyLogData $data): DailyLog
     {
         return DB::transaction(function () use ($data) {
-            $batch = Batch::findOrFail($data->batch_id);
+            $batch = Batch::query()->findOrFail($data->batch_id);
 
             // Create the daily log
-            $dailyLog = DailyLog::create($data->toArray());
+            $dailyLog = DailyLog::query()->create($data->toArray());
 
             // Update current quantity based on mortality
             $previousQuantity = $batch->current_quantity ?? $batch->initial_quantity;

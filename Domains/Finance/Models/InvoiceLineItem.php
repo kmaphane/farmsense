@@ -33,6 +33,8 @@ class InvoiceLineItem extends Model
 
     /**
      * Get the invoice for this line item
+     *
+     * @return BelongsTo<Invoice, $this>
      */
     public function invoice(): BelongsTo
     {
@@ -41,6 +43,8 @@ class InvoiceLineItem extends Model
 
     /**
      * Get the product for this line item
+     *
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {

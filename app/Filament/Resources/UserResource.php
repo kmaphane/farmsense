@@ -2,15 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\Pages\CreateUser;
+use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
 use BackedEnum;
 use Domains\Auth\Models\User;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -33,27 +41,27 @@ class UserResource extends Resource
                 Section::make('User Account')
                     ->description('Create or edit user account')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(255)
                             ->autofocus(),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('password')
+                        TextInput::make('password')
                             ->password()
                             ->revealable()
-                            ->required(fn($record) => $record === null)
-                            ->hidden(fn($record) => $record !== null)
+                            ->required(fn ($record) => $record === null)
+                            ->hidden(fn ($record) => $record !== null)
                             ->minLength(8),
                     ])->columns(2),
 
                 Section::make('Team Assignment')
                     ->description('Assign user to teams with specific roles')
                     ->schema([
-                        Forms\Components\Select::make('current_team_id')
+                        Select::make('current_team_id')
                             ->relationship('currentTeam', 'name')
                             ->helperText('Primary team for this user')
                             ->searchable(),
@@ -61,7 +69,7 @@ class UserResource extends Resource
 
                 Section::make('System Settings')
                     ->schema([
-                        Forms\Components\DateTimePicker::make('email_verified_at')
+                        DateTimePicker::make('email_verified_at')
                             ->label('Email Verified At')
                             ->helperText('Leave empty if not verified'),
                     ]),
@@ -72,38 +80,38 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->searchable()
                     ->icon('heroicon-m-envelope'),
-                Tables\Columns\TextColumn::make('currentTeam.name')
+                TextColumn::make('currentTeam.name')
                     ->label('Current Team')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
+                TextColumn::make('email_verified_at')
                     ->label('Email Verified At')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\Filter::make('email_verified')
+                Filter::make('email_verified')
                     ->label('Email Verified')
                     ->toggle()
-                    ->query(fn($query, $value) => $value ? $query->whereNotNull('email_verified_at') : $query->whereNull('email_verified_at')),
+                    ->query(fn ($query, $value) => $value ? $query->whereNotNull('email_verified_at') : $query->whereNull('email_verified_at')),
             ])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -118,9 +126,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

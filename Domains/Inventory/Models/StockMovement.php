@@ -2,6 +2,7 @@
 
 namespace Domains\Inventory\Models;
 
+use Domains\Auth\Models\User;
 use Domains\Shared\Traits\BelongsToTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovement extends Model
 {
-    use HasFactory, BelongsToTeam;
+    use BelongsToTeam, HasFactory;
 
     protected $fillable = [
         'team_id',
@@ -31,6 +32,8 @@ class StockMovement extends Model
 
     /**
      * Get the product for this movement
+     *
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
@@ -39,6 +42,8 @@ class StockMovement extends Model
 
     /**
      * Get the warehouse for this movement
+     *
+     * @return BelongsTo<Warehouse, $this>
      */
     public function warehouse(): BelongsTo
     {
@@ -47,9 +52,11 @@ class StockMovement extends Model
 
     /**
      * Get the user who recorded this movement
+     *
+     * @return BelongsTo<User, $this>
      */
     public function recordedBy(): BelongsTo
     {
-        return $this->belongsTo(\Domains\Auth\Models\User::class, 'recorded_by');
+        return $this->belongsTo(User::class, 'recorded_by');
     }
 }

@@ -1,9 +1,11 @@
 <?php
 
+use App\Models\User;
 use Domains\Inventory\DTOs\ProductData;
+use Spatie\LaravelData\Exceptions\ValidationException;
 
 beforeEach(function () {
-    $this->user = \App\Models\User::factory()->create([
+    $this->user = User::factory()->create([
         'current_team_id' => 1,
     ]);
     $this->actingAs($this->user);
@@ -51,7 +53,7 @@ it('validates product type enum', function () {
         'type' => 'invalid_type', // Invalid
         'unit' => 'kg',
     ]);
-})->throws(\Spatie\LaravelData\Exceptions\ValidationException::class);
+})->throws(ValidationException::class);
 
 it('validates minimum values for quantities', function () {
     ProductData::from([
@@ -61,4 +63,4 @@ it('validates minimum values for quantities', function () {
         'unit' => 'kg',
         'quantity_on_hand' => -10, // Invalid - negative
     ]);
-})->throws(\Spatie\LaravelData\Exceptions\ValidationException::class);
+})->throws(ValidationException::class);

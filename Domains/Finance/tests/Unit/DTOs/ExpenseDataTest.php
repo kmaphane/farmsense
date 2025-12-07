@@ -1,10 +1,12 @@
 <?php
 
+use App\Models\User;
 use Domains\Finance\DTOs\ExpenseData;
 use Domains\Shared\Enums\ExpenseCategory;
+use Spatie\LaravelData\Exceptions\ValidationException;
 
 beforeEach(function () {
-    $this->user = \App\Models\User::factory()->create([
+    $this->user = User::factory()->create([
         'current_team_id' => 1,
     ]);
     $this->actingAs($this->user);
@@ -63,4 +65,4 @@ it('validates required fields', function () {
         'amount' => 50000,
         // Missing required fields
     ]);
-})->throws(\Spatie\LaravelData\Exceptions\ValidationException::class);
+})->throws(ValidationException::class);

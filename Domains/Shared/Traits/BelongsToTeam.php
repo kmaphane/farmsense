@@ -34,8 +34,6 @@ trait BelongsToTeam
 
     /**
      * Get the current team ID from the request context
-     *
-     * @return int|null
      */
     protected static function getCurrentTeamId(): ?int
     {
@@ -44,23 +42,16 @@ trait BelongsToTeam
 
     /**
      * Scope to a specific team
-     *
-     * @param Builder $query
-     * @param int|null $teamId
-     * @return Builder
      */
-    public function scopeBelongsToTeam(Builder $query, ?int $teamId = null): Builder
+    protected function scopeBelongsToTeam(Builder $query, ?int $teamId = null): Builder
     {
         return $query->where('team_id', $teamId ?? static::getCurrentTeamId());
     }
 
     /**
      * Scope to exclude the global team filter (admin use only)
-     *
-     * @param Builder $query
-     * @return Builder
      */
-    public function scopeWithoutTeamScope(Builder $query): Builder
+    protected function scopeWithoutTeamScope(Builder $query): Builder
     {
         return $query->withoutGlobalScope('team');
     }

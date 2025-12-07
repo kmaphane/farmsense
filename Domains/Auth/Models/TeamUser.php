@@ -4,6 +4,7 @@ namespace Domains\Auth\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Spatie\Permission\Models\Role;
 
 class TeamUser extends Pivot
 {
@@ -16,16 +17,10 @@ class TeamUser extends Pivot
         'joined_at',
     ];
 
-    protected $casts = [
-        'joined_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-
     /**
      * Get the user
      *
-     * @return BelongsTo
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -35,7 +30,7 @@ class TeamUser extends Pivot
     /**
      * Get the team
      *
-     * @return BelongsTo
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -45,10 +40,19 @@ class TeamUser extends Pivot
     /**
      * Get the role (from Filament Shield roles table)
      *
-     * @return BelongsTo
+     * @return BelongsTo<Role, $this>
      */
     public function role(): BelongsTo
     {
-        return $this->belongsTo(\Spatie\Permission\Models\Role::class);
+        return $this->belongsTo(Role::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'joined_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

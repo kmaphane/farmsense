@@ -161,7 +161,7 @@ class ExpenseSeeder extends Seeder
         // Create expenses for each team
         foreach ($teams as $team) {
             foreach ($expenseTemplates as $expenseData) {
-                Expense::create([
+                Expense::query()->create([
                     ...$expenseData,
                     'team_id' => $team->id,
                     'ocr_data' => null,

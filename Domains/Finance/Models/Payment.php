@@ -2,6 +2,7 @@
 
 namespace Domains\Finance\Models;
 
+use Domains\Auth\Models\User;
 use Domains\Shared\Traits\BelongsToTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
-    use HasFactory, BelongsToTeam;
+    use BelongsToTeam, HasFactory;
 
     protected $fillable = [
         'team_id',
@@ -32,6 +33,8 @@ class Payment extends Model
 
     /**
      * Get the invoice for this payment
+     *
+     * @return BelongsTo<Invoice, $this>
      */
     public function invoice(): BelongsTo
     {
@@ -40,9 +43,11 @@ class Payment extends Model
 
     /**
      * Get the user who recorded this payment
+     *
+     * @return BelongsTo<User, $this>
      */
     public function recordedBy(): BelongsTo
     {
-        return $this->belongsTo(\Domains\Auth\Models\User::class, 'recorded_by');
+        return $this->belongsTo(User::class, 'recorded_by');
     }
 }

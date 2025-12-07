@@ -13,10 +13,12 @@ use Tests\TestCase;
 class MultiTenancyScopingTest extends TestCase
 {
     protected User $user;
+
     protected Team $team1;
+
     protected Team $team2;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -101,7 +103,7 @@ class MultiTenancyScopingTest extends TestCase
         request()->merge(['team_id' => $this->team1->id]);
 
         // Query without team scope
-        $customers = Customer::withoutTeamScope()->get();
+        $customers = Customer::query()->withoutTeamScope()->get();
 
         expect($customers->count())->toBe(2);
     }
@@ -122,7 +124,7 @@ class MultiTenancyScopingTest extends TestCase
         ]);
 
         // Query with explicit team scope
-        $customers = Customer::belongsToTeam($this->team2->id)->get();
+        $customers = Customer::query()->belongsToTeam($this->team2->id)->get();
 
         expect($customers->count())->toBe(1);
         expect($customers->first()->id)->toBe($customer2->id);

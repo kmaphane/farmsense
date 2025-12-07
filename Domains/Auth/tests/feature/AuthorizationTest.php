@@ -10,16 +10,19 @@ use Tests\TestCase;
 class AuthorizationTest extends TestCase
 {
     protected User $superAdmin;
+
     protected User $farmManager;
+
     protected User $otherUser;
+
     protected Team $team;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $superAdminRole = Role::where('name', 'Super Admin')->first();
-        $farmManagerRole = Role::where('name', 'Farm Manager')->first();
+        $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
+        $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
 
         $this->superAdmin = User::factory()->create();
         $this->farmManager = User::factory()->create();

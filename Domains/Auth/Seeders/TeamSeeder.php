@@ -38,16 +38,13 @@ class TeamSeeder extends Seeder
             unset($teamData['owner_email']);
 
             // Create owner user if doesn't exist
-            $owner = User::firstOrCreate(
-                ['email' => $ownerEmail],
-                [
-                    'name' => ucfirst(explode('@', $ownerEmail)[0]),
-                    'password' => bcrypt('password'),
-                ]
-            );
+            $owner = User::query()->firstOrCreate(['email' => $ownerEmail], [
+                'name' => ucfirst(explode('@', $ownerEmail)[0]),
+                'password' => bcrypt('password'),
+            ]);
 
             // Create team with owner
-            $team = Team::create([
+            $team = Team::query()->create([
                 ...$teamData,
                 'owner_id' => $owner->id,
             ]);

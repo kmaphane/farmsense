@@ -32,7 +32,7 @@ class RoleAndPermissionSeeder extends Seeder
         $superAdmin->syncPermissions($allPermissions);
 
         // Farm Manager: Full team access (financial + operational)
-        $farmManagerPermissions = Permission::whereIn('name', [
+        $farmManagerPermissions = Permission::query()->whereIn('name', [
             // Users in own team
             'view_user',
             'view_any_user',
@@ -71,7 +71,7 @@ class RoleAndPermissionSeeder extends Seeder
         $farmManager->syncPermissions($farmManagerPermissions);
 
         // Partner: Read-only financials, read/write batches
-        $partnerPermissions = Permission::whereIn('name', [
+        $partnerPermissions = Permission::query()->whereIn('name', [
             // View financials
             'view_expense',
             'view_any_expense',
@@ -85,7 +85,7 @@ class RoleAndPermissionSeeder extends Seeder
         $partner->syncPermissions($partnerPermissions);
 
         // Field Worker: Daily logs only
-        $fieldWorkerPermissions = Permission::whereIn('name', [
+        $fieldWorkerPermissions = Permission::query()->whereIn('name', [
             // Batches read only
             'view_batch',
             'view_any_batch',

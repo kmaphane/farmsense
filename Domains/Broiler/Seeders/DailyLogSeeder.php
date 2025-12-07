@@ -9,6 +9,8 @@ use Domains\Auth\Models\User;
 use Domains\Broiler\Enums\BatchStatus;
 use Domains\Broiler\Models\Batch;
 use Domains\Broiler\Models\DailyLog;
+use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
 
 class DailyLogSeeder extends Seeder
@@ -21,12 +23,12 @@ class DailyLogSeeder extends Seeder
         $teams = Team::all();
 
         foreach ($teams as $team) {
-            $batches = Batch::where('team_id', $team->id)
+            $batches = Batch::query()->where('team_id', $team->id)
                 ->whereIn('status', [BatchStatus::Active, BatchStatus::Harvesting, BatchStatus::Closed])
                 ->get();
 
             // Get users from this team to act as recorders
-            $recorders = User::whereHas('teams', fn ($q) => $q->where('team_id', $team->id))->get();
+            $recorders = User::query()->whereHas('teams', fn (Builder $q) => $q->where('team_id', $team->id))->get();
 
             foreach ($batches as $batch) {
                 $this->createDailyLogsForBatch($batch, $recorders);
@@ -35,7 +37,7 @@ class DailyLogSeeder extends Seeder
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Collection<int, User>  $recorders
+     * @param  Collection<int, User>  $recorders
      */
     private function createDailyLogsForBatch(Batch $batch, $recorders): void
     {
@@ -61,7 +63,7 @@ class DailyLogSeeder extends Seeder
             $currentQuantity -= $logData['mortality_count'];
             $totalFeedConsumed += $logData['feed_consumed_kg'];
 
-            DailyLog::create([
+            DailyLog::query()->create([
                 'team_id' => $batch->team_id,
                 'batch_id' => $batch->id,
                 'log_date' => $logDate,

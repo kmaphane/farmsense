@@ -19,7 +19,7 @@ class CreateBatchAction
             $batchData['status'] = BatchStatus::Planned;
             $batchData['current_quantity'] = $data->initial_quantity;
 
-            $batch = Batch::create($batchData);
+            $batch = Batch::query()->create($batchData);
 
             // Optionally create initial expense for chick purchase
             // This can be implemented when Finance integration is complete
@@ -34,7 +34,7 @@ class CreateBatchAction
         $prefix = 'BRO';
 
         // Get the count of batches for this team this year
-        $count = Batch::where('team_id', $teamId)
+        $count = Batch::query()->where('team_id', $teamId)
             ->whereYear('created_at', $year)
             ->count() + 1;
 

@@ -17,6 +17,7 @@
         "spatie/laravel-data": "*"
     },
     "require-dev": {
+        "driftingly/rector-laravel": "^2.1",
         "fakerphp/faker": "^1.23",
         "laravel/boost": "^1.8",
         "laravel/pail": "^1.2.2",
@@ -62,6 +63,19 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "lint": "vendor/bin/pint",
+        "lint:dirty": "vendor/bin/pint --dirty",
+        "lint:test": "vendor/bin/pint --test",
+        "rector": "vendor/bin/rector process",
+        "rector:dry": "vendor/bin/rector process --dry-run",
+        "quality": [
+            "@lint",
+            "@rector:dry"
+        ],
+        "fix": [
+            "@lint",
+            "@rector"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

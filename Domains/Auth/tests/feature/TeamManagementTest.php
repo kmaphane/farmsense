@@ -35,8 +35,8 @@ class TeamManagementTest extends TestCase
         $team1 = Team::factory()->create();
         $team2 = Team::factory()->create();
 
-        $superAdminRole = Role::where('name', 'Super Admin')->first();
-        $farmManagerRole = Role::where('name', 'Farm Manager')->first();
+        $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
+        $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
 
         // Attach with different roles
         $user->teams()->attach($team1->id, ['role_id' => $superAdminRole->id]);

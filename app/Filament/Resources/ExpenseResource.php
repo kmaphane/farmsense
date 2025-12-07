@@ -2,16 +2,27 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ExpenseResource\Pages;
+use App\Filament\Resources\ExpenseResource\Pages\CreateExpense;
+use App\Filament\Resources\ExpenseResource\Pages\EditExpense;
+use App\Filament\Resources\ExpenseResource\Pages\ListExpenses;
 use BackedEnum;
 use Domains\Finance\Models\Expense;
 use Domains\Shared\Enums\ExpenseCategory;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -34,22 +45,22 @@ class ExpenseResource extends Resource
                 Section::make('Expense Details')
                     ->description('Record a new expense transaction')
                     ->schema([
-                        Forms\Components\TextInput::make('description')
+                        TextInput::make('description')
                             ->required()
                             ->maxLength(255)
                             ->autofocus()
                             ->placeholder('e.g., Feed delivery from ABC Supplies'),
-                        Forms\Components\TextInput::make('amount')
+                        TextInput::make('amount')
                             ->required()
                             ->numeric()
                             ->minValue(0)
                             ->inputMode('decimal')
                             ->helperText('Amount in currency units (will be converted to cents internally)'),
-                        Forms\Components\Select::make('currency')
+                        Select::make('currency')
                             ->options(['BWP' => 'BWP (Pula)', 'USD' => 'USD (Dollar)'])
                             ->default('BWP')
                             ->required(),
-                        Forms\Components\Select::make('category')
+                        Select::make('category')
                             ->options(ExpenseCategory::class)
                             ->required()
                             ->searchable(),
@@ -58,10 +69,10 @@ class ExpenseResource extends Resource
                 Section::make('Allocation (Optional)')
                     ->description('Allocate expense to a specific batch or leave blank for general farm expenses')
                     ->schema([
-                        Forms\Components\TextInput::make('allocatable_type')
+                        TextInput::make('allocatable_type')
                             ->disabled()
                             ->helperText('Set automatically when allocating to a batch'),
-                        Forms\Components\TextInput::make('allocatable_id')
+                        TextInput::make('allocatable_id')
                             ->numeric()
                             ->helperText('Batch ID - Phase 3: UI will provide batch selector'),
                     ])->columns(2),
@@ -69,7 +80,7 @@ class ExpenseResource extends Resource
                 Section::make('Receipt & OCR')
                     ->description('OCR functionality in Phase 2')
                     ->schema([
-                        Forms\Components\FileUpload::make('receipt_path')
+                        FileUpload::make('receipt_path')
                             ->directory('expenses/receipts')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(5120)
@@ -78,7 +89,7 @@ class ExpenseResource extends Resource
 
                 Section::make('Notes')
                     ->schema([
-                        Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->maxLength(500),
                     ]),
             ]);
@@ -88,15 +99,15 @@ class ExpenseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label('Amount')
-                    ->formatStateUsing(fn($state) => number_format($state / 100, 2) . ' BWP')
+                    ->formatStateUsing(fn ($state) => number_format($state / 100, 2).' BWP')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category')
+                TextColumn::make('category')
                     ->badge()
                     ->colors([
                         'primary' => ExpenseCategory::Feed->value,
@@ -104,44 +115,44 @@ class ExpenseResource extends Resource
                         'secondary' => ExpenseCategory::Utilities->value,
                         'success' => ExpenseCategory::Equipment->value,
                     ]),
-                Tables\Columns\TextColumn::make('allocatable_type')
+                TextColumn::make('allocatable_type')
                     ->label('Allocated To')
-                    ->formatStateUsing(fn($state) => $state ? str_replace('Domains\\Broiler\\Models\\', '', $state) : 'General')
+                    ->formatStateUsing(fn ($state) => $state ? str_replace('Domains\\Broiler\\Models\\', '', $state) : 'General')
                     ->badge()
                     ->color('gray')
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('category')
+                SelectFilter::make('category')
                     ->options(ExpenseCategory::class),
-                Tables\Filters\Filter::make('created_at')
+                Filter::make('created_at')
                     ->form([
-                        Forms\Components\DatePicker::make('created_from'),
-                        Forms\Components\DatePicker::make('created_until'),
+                        DatePicker::make('created_from'),
+                        DatePicker::make('created_until'),
                     ])
                     ->query(function ($query, array $data): void {
                         $query
                             ->when(
                                 $data['created_from'],
-                                fn($q) => $q->whereDate('created_at', '>=', $data['created_from']),
+                                fn ($q) => $q->whereDate('created_at', '>=', $data['created_from']),
                             )
                             ->when(
                                 $data['created_until'],
-                                fn($q) => $q->whereDate('created_at', '<=', $data['created_until']),
+                                fn ($q) => $q->whereDate('created_at', '<=', $data['created_until']),
                             );
                     }),
             ])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -156,9 +167,9 @@ class ExpenseResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListExpenses::route('/'),
-            'create' => Pages\CreateExpense::route('/create'),
-            'edit' => Pages\EditExpense::route('/{record}/edit'),
+            'index' => ListExpenses::route('/'),
+            'create' => CreateExpense::route('/create'),
+            'edit' => EditExpense::route('/{record}/edit'),
         ];
     }
 }

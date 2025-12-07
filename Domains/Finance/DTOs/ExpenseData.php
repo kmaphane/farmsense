@@ -23,7 +23,7 @@ class ExpenseData extends BaseData
 
         #[Required]
         #[Max(3)]
-        public string $currency = 'BWP',
+        public string $currency,
 
         #[Required]
         public ExpenseCategory $category,

@@ -36,7 +36,7 @@ class ProductData extends BaseData
         #[Nullable]
         #[Numeric]
         #[Min(0)]
-        public ?int $quantity_on_hand = 0,
+        public ?int $quantity_on_hand,
 
         #[Nullable]
         #[Numeric]

@@ -12,7 +12,7 @@ use Domains\Shared\Enums\SupplierCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Domains\Broiler\Models\Batch>
+ * @extends Factory<Batch>
  */
 class BatchFactory extends Factory
 {
@@ -34,7 +34,7 @@ class BatchFactory extends Factory
             'status' => BatchStatus::Active,
             'initial_quantity' => $initialQuantity,
             'current_quantity' => $initialQuantity - $mortality,
-            'supplier_id' => Supplier::where('category', SupplierCategory::Chicks)->inRandomOrder()->first()?->id,
+            'supplier_id' => Supplier::query()->where('category', SupplierCategory::Chicks)->inRandomOrder()->first()?->id,
             'target_weight_kg' => fake()->randomFloat(2, 2.0, 2.8),
             'average_weight_kg' => fake()->randomFloat(2, 0.5, 2.5),
         ];

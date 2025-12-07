@@ -2,16 +2,28 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SupplierResource\Pages;
+use App\Filament\Resources\SupplierResource\Pages\CreateSupplier;
+use App\Filament\Resources\SupplierResource\Pages\EditSupplier;
+use App\Filament\Resources\SupplierResource\Pages\ListSuppliers;
 use BackedEnum;
 use Domains\CRM\Models\Supplier;
 use Domains\Shared\Enums\SupplierCategory;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Slider;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -34,17 +46,17 @@ class SupplierResource extends Resource
                 Section::make('Supplier Information')
                     ->description('Global supplier reference data accessible to all teams')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(255)
                             ->autofocus(),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->email()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('phone')
+                        TextInput::make('phone')
                             ->tel()
                             ->maxLength(20),
-                        Forms\Components\Select::make('category')
+                        Select::make('category')
                             ->options(SupplierCategory::class)
                             ->required()
                             ->default(SupplierCategory::Feed),
@@ -52,24 +64,24 @@ class SupplierResource extends Resource
 
                 Section::make('Performance & Pricing')
                     ->schema([
-                        Forms\Components\Slider::make('performance_rating')
+                        Slider::make('performance_rating')
                             ->minValue(1)
                             ->maxValue(5)
                             ->step(0.5)
                             ->helperText('Rate supplier quality 1-5 stars'),
-                        Forms\Components\TextInput::make('current_price_per_unit')
+                        TextInput::make('current_price_per_unit')
                             ->numeric()
                             ->step(0.01)
                             ->minValue(0)
                             ->helperText('Current market price for budgeting reference (Phase 2+ API integration)'),
-                        Forms\Components\Toggle::make('is_active')
+                        Toggle::make('is_active')
                             ->default(true)
                             ->helperText('Inactive suppliers won\'t appear in selection dropdowns'),
                     ])->columns(2),
 
                 Section::make('Notes')
                     ->schema([
-                        Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->maxLength(500)
                             ->helperText('Payment terms, special handling, contacts, etc.'),
                     ]),
@@ -80,53 +92,53 @@ class SupplierResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->searchable()
                     ->icon('heroicon-m-envelope'),
-                Tables\Columns\TextColumn::make('phone')
+                TextColumn::make('phone')
                     ->searchable()
                     ->icon('heroicon-m-phone'),
-                Tables\Columns\TextColumn::make('category')
+                TextColumn::make('category')
                     ->badge()
                     ->colors([
                         'primary' => SupplierCategory::Feed->value,
                         'success' => SupplierCategory::Chicks->value,
                         'warning' => SupplierCategory::Meds->value,
                     ]),
-                Tables\Columns\TextColumn::make('performance_rating')
+                TextColumn::make('performance_rating')
                     ->label('Rating')
-                    ->formatStateUsing(fn($state) => $state ? str_repeat('★', (int) $state) . str_repeat('☆', 5 - (int) $state) : '—'),
-                Tables\Columns\TextColumn::make('current_price_per_unit')
+                    ->formatStateUsing(fn ($state) => $state ? str_repeat('★', (int) $state).str_repeat('☆', 5 - (int) $state) : '—'),
+                TextColumn::make('current_price_per_unit')
                     ->label('Current Price')
-                    ->formatStateUsing(fn($state) => $state ? 'BWP ' . number_format($state, 2) : '—')
+                    ->formatStateUsing(fn ($state) => $state ? 'BWP '.number_format($state, 2) : '—')
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean()
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('category')
+                SelectFilter::make('category')
                     ->options(SupplierCategory::class),
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->nullable(),
             ])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -141,9 +153,9 @@ class SupplierResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSuppliers::route('/'),
-            'create' => Pages\CreateSupplier::route('/create'),
-            'edit' => Pages\EditSupplier::route('/{record}/edit'),
+            'index' => ListSuppliers::route('/'),
+            'create' => CreateSupplier::route('/create'),
+            'edit' => EditSupplier::route('/{record}/edit'),
         ];
     }
 }

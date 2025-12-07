@@ -51,6 +51,5 @@ class BatchData extends Data
 
         #[Numeric]
         public ?float $average_weight_kg,
-    ) {
-    }
+    ) {}
 }

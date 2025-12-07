@@ -22,7 +22,7 @@ class MortalityChart extends ChartWidget
         }
 
         $dailyLogs = $this->record->dailyLogs()
-            ->orderBy('log_date')
+            ->oldest('log_date')
             ->get();
 
         return [

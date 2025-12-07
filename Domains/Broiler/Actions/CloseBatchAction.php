@@ -14,18 +14,13 @@ class CloseBatchAction
 {
     public function __construct(
         protected BatchCalculationService $calculationService
-    ) {
-    }
+    ) {}
 
     public function execute(Batch $batch, float $averageWeightKg): Batch
     {
         return DB::transaction(function () use ($batch, $averageWeightKg) {
             // Validate that batch can be closed
-            if ($batch->status !== BatchStatus::Harvesting) {
-                throw new InvalidArgumentException(
-                    'Only batches in Harvesting status can be closed.'
-                );
-            }
+            throw_if($batch->status !== BatchStatus::Harvesting, InvalidArgumentException::class, 'Only batches in Harvesting status can be closed.');
 
             // Update batch with final data
             $batch->update([
@@ -46,11 +41,7 @@ class CloseBatchAction
 
     public function transitionToHarvesting(Batch $batch): Batch
     {
-        if ($batch->status !== BatchStatus::Active) {
-            throw new InvalidArgumentException(
-                'Only active batches can transition to Harvesting status.'
-            );
-        }
+        throw_if($batch->status !== BatchStatus::Active, InvalidArgumentException::class, 'Only active batches can transition to Harvesting status.');
 
         $batch->update(['status' => BatchStatus::Harvesting]);
 
@@ -59,18 +50,10 @@ class CloseBatchAction
 
     public function transitionToActive(Batch $batch): Batch
     {
-        if ($batch->status !== BatchStatus::Planned) {
-            throw new InvalidArgumentException(
-                'Only planned batches can transition to Active status.'
-            );
-        }
+        throw_if($batch->status !== BatchStatus::Planned, InvalidArgumentException::class, 'Only planned batches can transition to Active status.');
 
         // Validate that required fields are set
-        if (! $batch->start_date || ! $batch->initial_quantity) {
-            throw new InvalidArgumentException(
-                'Batch must have a start date and initial quantity to become active.'
-            );
-        }
+        throw_if(! $batch->start_date || ! $batch->initial_quantity, InvalidArgumentException::class, 'Batch must have a start date and initial quantity to become active.');
 
         $batch->update([
             'status' => BatchStatus::Active,

@@ -111,7 +111,7 @@ class ProductSeeder extends Seeder
 
         foreach ($teams as $team) {
             foreach ($products as $product) {
-                Product::create([
+                Product::query()->create([
                     'team_id' => $team->id,
                     'name' => $product['name'],
                     'description' => $product['description'],

@@ -18,11 +18,11 @@ class BatchStatsOverview extends BaseWidget
             return [];
         }
 
-        $service = app(BatchCalculationService::class);
+        $service = resolve(BatchCalculationService::class);
         $stats = $service->getBatchStatistics($this->record);
 
         return [
-            Stat::make('Age', $stats['age_in_days'] . ' days')
+            Stat::make('Age', $stats['age_in_days'].' days')
                 ->description('Days since start')
                 ->icon('heroicon-o-calendar')
                 ->color('info'),
@@ -32,12 +32,12 @@ class BatchStatsOverview extends BaseWidget
                 ->icon('heroicon-o-home-modern')
                 ->color('success'),
 
-            Stat::make('Mortality Rate', $stats['mortality_rate'] . '%')
-                ->description($stats['total_mortality'] . ' deaths total')
+            Stat::make('Mortality Rate', $stats['mortality_rate'].'%')
+                ->description($stats['total_mortality'].' deaths total')
                 ->icon('heroicon-o-exclamation-triangle')
                 ->color($stats['mortality_rate'] > 5 ? 'danger' : 'success'),
 
-            Stat::make('Feed Consumed', number_format($stats['total_feed_consumed'], 2) . ' kg')
+            Stat::make('Feed Consumed', number_format($stats['total_feed_consumed'], 2).' kg')
                 ->description('Total feed used')
                 ->icon('heroicon-o-cube')
                 ->color('warning'),

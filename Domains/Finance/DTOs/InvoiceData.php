@@ -2,13 +2,13 @@
 
 namespace Domains\Finance\DTOs;
 
+use Domains\Shared\DTOs\BaseData;
 use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\Numeric;
 use Spatie\LaravelData\Attributes\Validation\Required;
-use Domains\Shared\DTOs\BaseData;
 
 class InvoiceData extends BaseData
 {
@@ -27,7 +27,7 @@ class InvoiceData extends BaseData
 
         #[Required]
         #[In(['draft', 'sent', 'paid', 'overdue', 'cancelled'])]
-        public string $status = 'draft',
+        public string $status,
 
         #[Required]
         #[Numeric]

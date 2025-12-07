@@ -2,14 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\StockMovementResource\Pages;
+use App\Filament\Resources\StockMovementResource\Pages\ListStockMovements;
+use App\Filament\Resources\StockMovementResource\Pages\ViewStockMovement;
 use BackedEnum;
 use Domains\Inventory\Enums\MovementType;
 use Domains\Inventory\Models\StockMovement;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Schemas\Schema\Components\Textarea;
+use Filament\Schemas\Schema\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -31,25 +36,25 @@ class StockMovementResource extends Resource
             Section::make('Movement Details')
                 ->description('Stock movement audit record (read-only)')
                 ->schema([
-                    Schema\Components\TextInput::make('product.name')
+                    TextInput::make('product.name')
                         ->label('Product')
                         ->readOnly(),
-                    Schema\Components\TextInput::make('warehouse.name')
+                    TextInput::make('warehouse.name')
                         ->label('Warehouse')
                         ->readOnly(),
-                    Schema\Components\TextInput::make('quantity')
+                    TextInput::make('quantity')
                         ->numeric()
                         ->readOnly(),
-                    Schema\Components\TextInput::make('movement_type')
+                    TextInput::make('movement_type')
                         ->readOnly(),
-                    Schema\Components\TextInput::make('reason')
+                    TextInput::make('reason')
                         ->readOnly(),
-                    Schema\Components\Textarea::make('notes')
+                    Textarea::make('notes')
                         ->readOnly(),
-                    Schema\Components\TextInput::make('recorded_by.name')
+                    TextInput::make('recorded_by.name')
                         ->label('Recorded By')
                         ->readOnly(),
-                    Schema\Components\TextInput::make('created_at')
+                    TextInput::make('created_at')
                         ->dateTime()
                         ->readOnly(),
                 ])->columns(2),
@@ -60,17 +65,17 @@ class StockMovementResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('product.name')
+                TextColumn::make('product.name')
                     ->label('Product')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('warehouse.name')
+                TextColumn::make('warehouse.name')
                     ->label('Warehouse')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('quantity')
+                TextColumn::make('quantity')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('movement_type')
+                TextColumn::make('movement_type')
                     ->badge()
                     ->colors([
                         'success' => MovementType::In->value,
@@ -79,27 +84,27 @@ class StockMovementResource extends Resource
                         'info' => MovementType::Transfer->value,
                     ])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('reason')
+                TextColumn::make('reason')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('recorded_by.name')
+                TextColumn::make('recorded_by.name')
                     ->label('Recorded By')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('movement_type')
+                SelectFilter::make('movement_type')
                     ->options(MovementType::class),
-                Tables\Filters\SelectFilter::make('product_id')
+                SelectFilter::make('product_id')
                     ->relationship('product', 'name')
                     ->searchable(),
-                Tables\Filters\SelectFilter::make('warehouse_id')
+                SelectFilter::make('warehouse_id')
                     ->relationship('warehouse', 'name'),
-                Tables\Filters\Filter::make('created_at')
+                Filter::make('created_at')
                     ->form([
-                        Tables\Columns\TextColumn::make('from'),
-                        Tables\Columns\TextColumn::make('to'),
+                        TextColumn::make('from'),
+                        TextColumn::make('to'),
                     ])
                     ->query(function ($query, array $data) {
                         return $query
@@ -119,8 +124,8 @@ class StockMovementResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListStockMovements::route('/'),
-            'view' => Pages\ViewStockMovement::route('/{record}'),
+            'index' => ListStockMovements::route('/'),
+            'view' => ViewStockMovement::route('/{record}'),
         ];
     }
 }

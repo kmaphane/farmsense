@@ -2,16 +2,29 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\InvoiceResource\Pages;
+use App\Filament\Resources\InvoiceResource\Pages\CreateInvoice;
+use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
+use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
+use App\Filament\Resources\InvoiceResource\Pages\ViewInvoice;
 use BackedEnum;
 use Domains\Finance\Enums\InvoiceStatus;
 use Domains\Finance\Models\Invoice;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -33,45 +46,45 @@ class InvoiceResource extends Resource
             Section::make('Invoice Information')
                 ->description('Define invoice details and customer information')
                 ->schema([
-                    Forms\Components\TextInput::make('invoice_number')
+                    TextInput::make('invoice_number')
                         ->required()
                         ->unique()
                         ->maxLength(50)
                         ->helperText('Unique invoice identifier')
                         ->autofocus(),
-                    Forms\Components\Select::make('customer_id')
+                    Select::make('customer_id')
                         ->relationship('customer', 'name')
                         ->required()
                         ->searchable(),
-                    Forms\Components\Select::make('status')
+                    Select::make('status')
                         ->options(InvoiceStatus::class)
                         ->required()
                         ->default(InvoiceStatus::Draft),
-                    Forms\Components\DatePicker::make('due_date')
+                    DatePicker::make('due_date')
                         ->helperText('Payment due date'),
                 ])->columns(2),
 
             Section::make('Invoice Items')
                 ->description('Add line items for this invoice')
                 ->schema([
-                    Forms\Components\Repeater::make('lineItems')
+                    Repeater::make('lineItems')
                         ->relationship('lineItems')
                         ->schema([
-                            Forms\Components\Select::make('product_id')
+                            Select::make('product_id')
                                 ->relationship('product', 'name')
                                 ->searchable()
                                 ->helperText('Optional - link to product'),
-                            Forms\Components\TextInput::make('description')
+                            TextInput::make('description')
                                 ->required()
                                 ->maxLength(255)
                                 ->helperText('Item description'),
-                            Forms\Components\TextInput::make('quantity')
+                            TextInput::make('quantity')
                                 ->required()
                                 ->numeric()
                                 ->default(1)
                                 ->minValue(0.01)
                                 ->step(0.01),
-                            Forms\Components\TextInput::make('unit_price')
+                            TextInput::make('unit_price')
                                 ->required()
                                 ->numeric()
                                 ->step(0.01)
@@ -86,22 +99,22 @@ class InvoiceResource extends Resource
 
             Section::make('Totals & Notes')
                 ->schema([
-                    Forms\Components\TextInput::make('subtotal')
+                    TextInput::make('subtotal')
                         ->numeric()
                         ->readOnly()
                         ->helperText('Auto-calculated from line items'),
-                    Forms\Components\TextInput::make('tax_amount')
+                    TextInput::make('tax_amount')
                         ->numeric()
                         ->default(0)
                         ->helperText('Tax or additional charges'),
-                    Forms\Components\TextInput::make('total_amount')
+                    TextInput::make('total_amount')
                         ->numeric()
                         ->readOnly()
                         ->helperText('Subtotal + Tax'),
-                    Forms\Components\Textarea::make('description')
+                    Textarea::make('description')
                         ->maxLength(500)
                         ->helperText('General invoice description'),
-                    Forms\Components\Textarea::make('notes')
+                    Textarea::make('notes')
                         ->maxLength(1000)
                         ->helperText('Additional notes or terms'),
                 ])->columns(2),
@@ -112,13 +125,13 @@ class InvoiceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('invoice_number')
+                TextColumn::make('invoice_number')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('customer.name')
+                TextColumn::make('customer.name')
                     ->label('Customer')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->badge()
                     ->colors([
                         'gray' => InvoiceStatus::Draft->value,
@@ -128,25 +141,25 @@ class InvoiceResource extends Resource
                         'warning' => InvoiceStatus::Cancelled->value,
                     ])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total_amount')
+                TextColumn::make('total_amount')
                     ->label('Total')
                     ->formatStateUsing(fn ($state) => 'BWP '.number_format($state / 100, 2))
                     ->sortable()
                     ->numeric(),
-                Tables\Columns\TextColumn::make('due_date')
+                TextColumn::make('due_date')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options(InvoiceStatus::class),
-                Tables\Filters\Filter::make('due_date')
+                Filter::make('due_date')
                     ->form([
-                        Forms\Components\DatePicker::make('from'),
-                        Forms\Components\DatePicker::make('to'),
+                        DatePicker::make('from'),
+                        DatePicker::make('to'),
                     ])
                     ->query(function ($query, array $data) {
                         return $query
@@ -155,13 +168,13 @@ class InvoiceResource extends Resource
                     }),
             ])
             ->recordActions([
-                Actions\ViewAction::make(),
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -174,10 +187,10 @@ class InvoiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListInvoices::route('/'),
-            'create' => Pages\CreateInvoice::route('/create'),
-            'edit' => Pages\EditInvoice::route('/{record}/edit'),
-            'view' => Pages\ViewInvoice::route('/{record}'),
+            'index' => ListInvoices::route('/'),
+            'create' => CreateInvoice::route('/create'),
+            'edit' => EditInvoice::route('/{record}/edit'),
+            'view' => ViewInvoice::route('/{record}'),
         ];
     }
 }

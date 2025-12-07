@@ -2,13 +2,17 @@
 
 namespace App\Filament\Resources\BatchResource\RelationManagers;
 
-use Domains\Broiler\Actions\RecordDailyLogAction;
-use Domains\Broiler\DTOs\DailyLogData;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,41 +28,41 @@ class DailyLogsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('log_date')
+                TextColumn::make('log_date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mortality_count')
+                TextColumn::make('mortality_count')
                     ->numeric()
                     ->label('Mortality'),
-                Tables\Columns\TextColumn::make('feed_consumed_kg')
+                TextColumn::make('feed_consumed_kg')
                     ->numeric(decimalPlaces: 2)
                     ->label('Feed (kg)'),
-                Tables\Columns\TextColumn::make('water_consumed_liters')
+                TextColumn::make('water_consumed_liters')
                     ->numeric(decimalPlaces: 2)
                     ->label('Water (L)')
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('temperature_celsius')
+                TextColumn::make('temperature_celsius')
                     ->numeric(decimalPlaces: 1)
                     ->label('Temp (°C)')
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('humidity_percent')
+                TextColumn::make('humidity_percent')
                     ->numeric(decimalPlaces: 1)
                     ->label('Humidity (%)')
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('ammonia_ppm')
+                TextColumn::make('ammonia_ppm')
                     ->numeric(decimalPlaces: 1)
                     ->label('Ammonia (PPM)')
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('recorder.name')
+                TextColumn::make('recorder.name')
                     ->label('Recorded By')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('log_date', 'desc')
             ->filters([
-                Tables\Filters\Filter::make('log_date')
+                Filter::make('log_date')
                     ->schema([
-                        Forms\Components\DatePicker::make('from')->native(false),
-                        Forms\Components\DatePicker::make('to')->native(false),
+                        DatePicker::make('from')->native(false),
+                        DatePicker::make('to')->native(false),
                     ])
                     ->query(fn ($query, array $data) => $query
                         ->when($data['from'] ?? null,
@@ -70,14 +74,14 @@ class DailyLogsRelationManager extends RelationManager
                     ),
             ])
             ->recordActions([
-                Actions\ViewAction::make(),
-                Actions\EditAction::make()
+                ViewAction::make(),
+                EditAction::make()
                     ->disabled(fn ($record) => ! $record->isEditable()),
-                Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->disabled(fn ($record) => ! $record->isEditable()),
             ])
             ->toolbarActions([
-                Actions\CreateAction::make()
+                CreateAction::make()
                     ->mutateFormDataUsing(function (array $data) {
                         $data['team_id'] = Auth::user()->current_team_id;
                         $data['batch_id'] = $this->getOwnerRecord()->id;
@@ -99,7 +103,7 @@ class DailyLogsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('log_date')
+                DatePicker::make('log_date')
                     ->required()
                     ->default(now())
                     ->native(false)
@@ -110,40 +114,40 @@ class DailyLogsRelationManager extends RelationManager
                         ignoreRecord: true
                     )
                     ->helperText('One log per day per batch'),
-                Forms\Components\TextInput::make('mortality_count')
+                TextInput::make('mortality_count')
                     ->required()
                     ->numeric()
                     ->default(0)
                     ->minValue(0)
                     ->label('Mortality Count'),
-                Forms\Components\TextInput::make('feed_consumed_kg')
+                TextInput::make('feed_consumed_kg')
                     ->required()
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0)
                     ->label('Feed Consumed (kg)'),
-                Forms\Components\TextInput::make('water_consumed_liters')
+                TextInput::make('water_consumed_liters')
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0)
                     ->label('Water Consumed (Liters)'),
-                Forms\Components\TextInput::make('temperature_celsius')
+                TextInput::make('temperature_celsius')
                     ->numeric()
                     ->step(0.1)
                     ->label('Temperature (°C)'),
-                Forms\Components\TextInput::make('humidity_percent')
+                TextInput::make('humidity_percent')
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0)
                     ->maxValue(100)
                     ->label('Humidity (%)'),
-                Forms\Components\TextInput::make('ammonia_ppm')
+                TextInput::make('ammonia_ppm')
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0)
                     ->label('Ammonia (PPM)')
                     ->helperText('Safe levels: < 25 PPM'),
-                Forms\Components\Textarea::make('notes')
+                Textarea::make('notes')
                     ->maxLength(500)
                     ->columnSpanFull(),
             ])

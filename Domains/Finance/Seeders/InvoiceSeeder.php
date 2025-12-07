@@ -22,7 +22,7 @@ class InvoiceSeeder extends Seeder
         foreach ($customers as $customer) {
             // Create 3-5 invoices per customer
             for ($i = 0; $i < rand(3, 5); $i++) {
-                $invoice = Invoice::create([
+                $invoice = Invoice::query()->create([
                     'team_id' => $customer->team_id,
                     'customer_id' => $customer->id,
                     'invoice_number' => 'INV-'.date('Y').'-'.($invoiceCounter++),
@@ -44,7 +44,7 @@ class InvoiceSeeder extends Seeder
                     $lineTotal = $quantity * $unitPrice;
                     $subtotal += $lineTotal;
 
-                    InvoiceLineItem::create([
+                    InvoiceLineItem::query()->create([
                         'invoice_id' => $invoice->id,
                         'product_id' => $product->id,
                         'description' => $product->name.' - '.$product->unit,

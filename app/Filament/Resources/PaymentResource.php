@@ -2,16 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PaymentResource\Pages;
+use App\Filament\Resources\PaymentResource\Pages\CreatePayment;
+use App\Filament\Resources\PaymentResource\Pages\EditPayment;
+use App\Filament\Resources\PaymentResource\Pages\ListPayments;
 use BackedEnum;
 use Domains\Finance\Enums\PaymentMethod;
 use Domains\Finance\Models\Payment;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -33,37 +43,37 @@ class PaymentResource extends Resource
             Section::make('Payment Information')
                 ->description('Record invoice payment details')
                 ->schema([
-                    Forms\Components\Select::make('invoice_id')
+                    Select::make('invoice_id')
                         ->relationship('invoice', 'invoice_number')
                         ->required()
                         ->searchable()
                         ->helperText('Select invoice to record payment'),
-                    Forms\Components\TextInput::make('amount')
+                    TextInput::make('amount')
                         ->required()
                         ->numeric()
                         ->step(0.01)
                         ->minValue(0)
                         ->helperText('Payment amount in BWP'),
-                    Forms\Components\Select::make('payment_method')
+                    Select::make('payment_method')
                         ->options(PaymentMethod::class)
                         ->required()
                         ->default(PaymentMethod::Cash),
-                    Forms\Components\TextInput::make('reference')
+                    TextInput::make('reference')
                         ->maxLength(100)
                         ->helperText('Reference number (check #, transaction ID, etc.)'),
-                    Forms\Components\DatePicker::make('payment_date')
+                    DatePicker::make('payment_date')
                         ->required()
                         ->default(now()),
                 ])->columns(2),
 
             Section::make('Additional Information')
                 ->schema([
-                    Forms\Components\Select::make('recorded_by')
+                    Select::make('recorded_by')
                         ->relationship('recordedBy', 'name')
                         ->required()
                         ->searchable()
                         ->helperText('User recording this payment'),
-                    Forms\Components\Textarea::make('notes')
+                    Textarea::make('notes')
                         ->maxLength(500)
                         ->helperText('Additional notes or details'),
                 ]),
@@ -74,19 +84,19 @@ class PaymentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('invoice.invoice_number')
+                TextColumn::make('invoice.invoice_number')
                     ->label('Invoice')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('invoice.customer.name')
+                TextColumn::make('invoice.customer.name')
                     ->label('Customer')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label('Amount')
                     ->formatStateUsing(fn ($state) => 'BWP '.number_format($state / 100, 2))
                     ->sortable()
                     ->numeric(),
-                Tables\Columns\TextColumn::make('payment_method')
+                TextColumn::make('payment_method')
                     ->badge()
                     ->colors([
                         'gray' => PaymentMethod::Cash->value,
@@ -95,26 +105,26 @@ class PaymentResource extends Resource
                         'success' => PaymentMethod::Mobile->value,
                     ])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('reference')
+                TextColumn::make('reference')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('recorded_by.name')
+                TextColumn::make('recorded_by.name')
                     ->label('Recorded By')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('payment_date')
+                TextColumn::make('payment_date')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('payment_method')
+                SelectFilter::make('payment_method')
                     ->options(PaymentMethod::class),
-                Tables\Filters\Filter::make('payment_date')
+                Filter::make('payment_date')
                     ->form([
-                        Forms\Components\DatePicker::make('from'),
-                        Forms\Components\DatePicker::make('to'),
+                        DatePicker::make('from'),
+                        DatePicker::make('to'),
                     ])
                     ->query(function ($query, array $data) {
                         return $query
@@ -123,12 +133,12 @@ class PaymentResource extends Resource
                     }),
             ])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -141,9 +151,9 @@ class PaymentResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPayments::route('/'),
-            'create' => Pages\CreatePayment::route('/create'),
-            'edit' => Pages\EditPayment::route('/{record}/edit'),
+            'index' => ListPayments::route('/'),
+            'create' => CreatePayment::route('/create'),
+            'edit' => EditPayment::route('/{record}/edit'),
         ];
     }
 }

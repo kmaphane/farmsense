@@ -47,6 +47,5 @@ class DailyLogData extends Data
 
         #[Required, IntegerType]
         public int $recorded_by,
-    ) {
-    }
+    ) {}
 }

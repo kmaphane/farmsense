@@ -2,15 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\WarehouseResource\Pages;
+use App\Filament\Resources\WarehouseResource\Pages\CreateWarehouse;
+use App\Filament\Resources\WarehouseResource\Pages\EditWarehouse;
+use App\Filament\Resources\WarehouseResource\Pages\ListWarehouses;
 use BackedEnum;
 use Domains\Inventory\Models\Warehouse;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -31,21 +39,21 @@ class WarehouseResource extends Resource
         return $form->schema([
             Section::make('Warehouse Information')
                 ->schema([
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                         ->required()
                         ->maxLength(255)
                         ->autofocus(),
-                    Forms\Components\TextInput::make('location')
+                    TextInput::make('location')
                         ->maxLength(255)
                         ->helperText('Physical address or description'),
-                    Forms\Components\TextInput::make('capacity')
+                    TextInput::make('capacity')
                         ->numeric()
                         ->helperText('Storage capacity in units'),
                 ])->columns(2),
 
             Section::make('Status')
                 ->schema([
-                    Forms\Components\Toggle::make('is_active')
+                    Toggle::make('is_active')
                         ->default(true),
                 ]),
         ]);
@@ -55,28 +63,28 @@ class WarehouseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('location')
+                TextColumn::make('location')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('capacity')
+                TextColumn::make('capacity')
                     ->numeric(),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->nullable(),
             ])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -89,9 +97,9 @@ class WarehouseResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListWarehouses::route('/'),
-            'create' => Pages\CreateWarehouse::route('/create'),
-            'edit' => Pages\EditWarehouse::route('/{record}/edit'),
+            'index' => ListWarehouses::route('/'),
+            'create' => CreateWarehouse::route('/create'),
+            'edit' => EditWarehouse::route('/{record}/edit'),
         ];
     }
 }

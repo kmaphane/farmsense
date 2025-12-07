@@ -2,15 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TeamResource\Pages;
+use App\Filament\Resources\TeamResource\Pages\CreateTeam;
+use App\Filament\Resources\TeamResource\Pages\EditTeam;
+use App\Filament\Resources\TeamResource\Pages\ListTeams;
 use BackedEnum;
 use Domains\Auth\Models\Team;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -33,17 +41,17 @@ class TeamResource extends Resource
                 Section::make('Team Information')
                     ->description('Create or edit team (farm)')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(255)
                             ->autofocus()
                             ->placeholder('e.g., Kenna\'s Farm'),
-                        Forms\Components\Select::make('owner_id')
+                        Select::make('owner_id')
                             ->relationship('owner', 'name')
                             ->required()
                             ->searchable()
                             ->helperText('User who owns/manages this team'),
-                        Forms\Components\Select::make('subscription_plan')
+                        Select::make('subscription_plan')
                             ->options([
                                 'Basic' => 'Basic',
                                 'Pro' => 'Pro',
@@ -57,7 +65,7 @@ class TeamResource extends Resource
                 Section::make('Team Members')
                     ->description('Manage users in this team and their roles')
                     ->schema([
-                        Forms\Components\Placeholder::make('members_info')
+                        Placeholder::make('members_info')
                             ->content('Use the edit page to manage team members and assign roles. Phase 2: Build dedicated UI for role management.')
                             ->columnSpanFull(),
                     ]),
@@ -68,27 +76,27 @@ class TeamResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('owner.name')
+                TextColumn::make('owner.name')
                     ->label('Owner')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subscription_plan')
+                TextColumn::make('subscription_plan')
                     ->badge()
                     ->colors([
                         'gray' => 'Basic',
                         'primary' => 'Pro',
                         'success' => 'Enterprise',
                     ]),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('subscription_plan')
+                SelectFilter::make('subscription_plan')
                     ->options([
                         'Basic' => 'Basic',
                         'Pro' => 'Pro',
@@ -96,15 +104,15 @@ class TeamResource extends Resource
                     ]),
             ])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make()
+                EditAction::make(),
+                DeleteAction::make()
                     ->requiresConfirmation()
                     ->modalHeading('Delete Team')
                     ->modalDescription('Are you sure you want to delete this team? All associated data will be lost.'),
             ])
             ->toolbarActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -119,9 +127,9 @@ class TeamResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTeams::route('/'),
-            'create' => Pages\CreateTeam::route('/create'),
-            'edit' => Pages\EditTeam::route('/{record}/edit'),
+            'index' => ListTeams::route('/'),
+            'create' => CreateTeam::route('/create'),
+            'edit' => EditTeam::route('/{record}/edit'),
         ];
     }
 }

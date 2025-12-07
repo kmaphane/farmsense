@@ -37,7 +37,7 @@ class PaymentSeeder extends Seeder
 
                     $user = $users->where('current_team_id', $invoice->team_id)->first() ?? $users->first();
 
-                    Payment::create([
+                    Payment::query()->create([
                         'team_id' => $invoice->team_id,
                         'invoice_id' => $invoice->id,
                         'amount' => $amount,
