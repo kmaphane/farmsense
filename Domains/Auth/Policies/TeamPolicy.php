@@ -21,7 +21,7 @@ class TeamPolicy
     public function view(User $user, Team $team): bool
     {
         // Can view if super admin or member of team
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
@@ -33,7 +33,7 @@ class TeamPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -42,7 +42,7 @@ class TeamPolicy
     public function update(User $user, Team $team): bool
     {
         // Super Admin or team owner
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
@@ -55,7 +55,7 @@ class TeamPolicy
     public function delete(User $user, Team $team): bool
     {
         // Super Admin or team owner
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
@@ -67,7 +67,7 @@ class TeamPolicy
      */
     public function restore(User $user, Team $team): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -75,6 +75,6 @@ class TeamPolicy
      */
     public function forceDelete(User $user, Team $team): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 }

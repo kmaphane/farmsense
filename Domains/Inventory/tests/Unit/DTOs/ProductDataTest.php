@@ -1,19 +1,26 @@
 <?php
 
-use App\Models\User;
+use Domains\Auth\Models\Team;
+use Domains\Auth\Models\User;
 use Domains\Inventory\DTOs\ProductData;
 use Spatie\LaravelData\Exceptions\ValidationException;
 
 beforeEach(function () {
-    $this->user = User::factory()->create([
-        'current_team_id' => 1,
-    ]);
+    // Create user first
+    $this->user = User::factory()->create();
+
+    // Create team owned by user
+    $this->team = Team::factory()->create(['owner_id' => $this->user->id]);
+
+    // Update user with current team
+    $this->user->update(['current_team_id' => $this->team->id]);
+
     $this->actingAs($this->user);
 });
 
 it('creates product DTO from array', function () {
     $dto = ProductData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'name' => 'Broiler Starter Feed',
         'description' => 'High protein starter feed',
         'type' => 'feed',
@@ -41,14 +48,14 @@ it('creates product DTO using fromFilament method with defaults', function () {
     ]);
 
     expect($dto->name)->toBe('New Product')
-        ->and($dto->team_id)->toBe(1)
+        ->and($dto->team_id)->toBe($this->team->id)
         ->and($dto->quantity_on_hand)->toBe(0)
         ->and($dto->is_active)->toBeTrue();
 });
 
 it('validates product type enum', function () {
     ProductData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'name' => 'Test Product',
         'type' => 'invalid_type', // Invalid
         'unit' => 'kg',
@@ -57,7 +64,7 @@ it('validates product type enum', function () {
 
 it('validates minimum values for quantities', function () {
     ProductData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'name' => 'Test Product',
         'type' => 'feed',
         'unit' => 'kg',

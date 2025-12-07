@@ -12,7 +12,7 @@ class ExpensePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'Farm Manager', 'Partner']);
+        return $user->hasRole(['Super Admin', 'Farm Manager', 'Partner']);
     }
 
     /**
@@ -20,12 +20,12 @@ class ExpensePolicy
      */
     public function view(User $user, Expense $expense): bool
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
         // Team-scoped: user must be in the expense's team
-        return $user->currentTeam()?->id === $expense->team_id;
+        return $user->current_team_id === $expense->team_id;
     }
 
     /**
@@ -33,7 +33,7 @@ class ExpensePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'Farm Manager']);
+        return $user->hasRole(['Super Admin', 'Farm Manager']);
     }
 
     /**
@@ -41,13 +41,13 @@ class ExpensePolicy
      */
     public function update(User $user, Expense $expense): bool
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
         // Only Farm Manager in the same team
         return $user->hasRole('Farm Manager') &&
-               $user->currentTeam()?->id === $expense->team_id;
+               $user->current_team_id === $expense->team_id;
     }
 
     /**
@@ -55,12 +55,12 @@ class ExpensePolicy
      */
     public function delete(User $user, Expense $expense): bool
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
         return $user->hasRole('Farm Manager') &&
-               $user->currentTeam()?->id === $expense->team_id;
+               $user->current_team_id === $expense->team_id;
     }
 
     /**
@@ -68,7 +68,7 @@ class ExpensePolicy
      */
     public function restore(User $user, Expense $expense): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -76,6 +76,6 @@ class ExpensePolicy
      */
     public function forceDelete(User $user, Expense $expense): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 }

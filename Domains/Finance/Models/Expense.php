@@ -2,14 +2,18 @@
 
 namespace Domains\Finance\Models;
 
+use Domains\Finance\Factories\ExpenseFactory;
 use Domains\Shared\Enums\ExpenseCategory;
 use Domains\Shared\Traits\BelongsToTeam;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Expense extends Model
 {
+    /** @use HasFactory<ExpenseFactory> */
+    use HasFactory;
     use BelongsToTeam;
 
     protected $fillable = [
@@ -23,6 +27,14 @@ class Expense extends Model
         'ocr_data',
         'receipt_path',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): ExpenseFactory
+    {
+        return ExpenseFactory::new();
+    }
 
     /**
      * Get the allocatable resource (Batch or General Farm)

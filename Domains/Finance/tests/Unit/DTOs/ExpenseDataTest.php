@@ -1,20 +1,27 @@
 <?php
 
-use App\Models\User;
+use Domains\Auth\Models\Team;
+use Domains\Auth\Models\User;
 use Domains\Finance\DTOs\ExpenseData;
 use Domains\Shared\Enums\ExpenseCategory;
 use Spatie\LaravelData\Exceptions\ValidationException;
 
 beforeEach(function () {
-    $this->user = User::factory()->create([
-        'current_team_id' => 1,
-    ]);
+    // Create user first
+    $this->user = User::factory()->create();
+
+    // Create team owned by user
+    $this->team = Team::factory()->create(['owner_id' => $this->user->id]);
+
+    // Update user with current team
+    $this->user->update(['current_team_id' => $this->team->id]);
+
     $this->actingAs($this->user);
 });
 
 it('creates expense DTO from array', function () {
     $dto = ExpenseData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'amount' => 50000,
         'currency' => 'BWP',
         'category' => ExpenseCategory::Feed,
@@ -39,13 +46,13 @@ it('creates expense DTO using fromFilament method', function () {
     ]);
 
     expect($dto->amount)->toBe(100000)
-        ->and($dto->team_id)->toBe(1)
+        ->and($dto->team_id)->toBe($this->team->id)
         ->and($dto->currency)->toBe('BWP'); // Default value
 });
 
 it('sets allocatable polymorphic relationship', function () {
     $dto = ExpenseData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'amount' => 25000,
         'currency' => 'BWP',
         'category' => ExpenseCategory::Feed,

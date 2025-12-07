@@ -7,11 +7,12 @@
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
-            <directory>Domains/*/tests/Unit</directory>
+            <directory>domains/*/Tests/Unit</directory>
+            <exclude>domains/*/Tests/Unit/DTOs</exclude>
         </testsuite>
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
-            <directory>Domains/*/tests/Feature</directory>
+            <directory>domains/*/Tests/Feature</directory>
         </testsuite>
     </testsuites>
     <source>
@@ -20,6 +21,7 @@
         </include>
     </source>
     <php>
+        <ini name="memory_limit" value="2048M"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

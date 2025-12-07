@@ -31,7 +31,7 @@ class SupplierPolicy
     public function create(User $user): bool
     {
         // Only Super Admin manages global supplier catalog
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -39,7 +39,7 @@ class SupplierPolicy
      */
     public function update(User $user, Supplier $supplier): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -47,7 +47,7 @@ class SupplierPolicy
      */
     public function delete(User $user, Supplier $supplier): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -55,7 +55,7 @@ class SupplierPolicy
      */
     public function restore(User $user, Supplier $supplier): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -63,6 +63,6 @@ class SupplierPolicy
      */
     public function forceDelete(User $user, Supplier $supplier): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 }

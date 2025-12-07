@@ -4,11 +4,15 @@ namespace Domains\Auth\Tests\Feature;
 
 use Domains\Auth\Models\Team;
 use Domains\Auth\Models\User;
+use Domains\Auth\Seeders\RoleAndPermissionSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AuthorizationTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected User $superAdmin;
 
     protected User $farmManager;
@@ -21,6 +25,8 @@ class AuthorizationTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(RoleAndPermissionSeeder::class);
+
         $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
         $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
 
@@ -28,6 +34,10 @@ class AuthorizationTest extends TestCase
         $this->farmManager = User::factory()->create();
         $this->otherUser = User::factory()->create();
         $this->team = Team::factory()->create(['owner_id' => $this->superAdmin->id]);
+
+        // Assign Spatie roles to users
+        $this->superAdmin->assignRole($superAdminRole);
+        $this->farmManager->assignRole($farmManagerRole);
 
         $this->superAdmin->teams()->attach($this->team->id, ['role_id' => $superAdminRole->id]);
         $this->superAdmin->update(['current_team_id' => $this->team->id]);

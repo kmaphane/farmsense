@@ -2,8 +2,10 @@
 
 namespace Domains\CRM\Models;
 
+use Domains\CRM\Factories\SupplierFactory;
 use Domains\Shared\Enums\SupplierCategory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -19,6 +21,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Supplier extends Model
 {
+    /** @use HasFactory<SupplierFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'email',
@@ -29,6 +34,14 @@ class Supplier extends Model
         'notes',
         'is_active',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): SupplierFactory
+    {
+        return SupplierFactory::new();
+    }
 
     /**
      * Get the supplier category label

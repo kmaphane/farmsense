@@ -1,21 +1,27 @@
 <?php
 
-use App\Models\User;
+use Domains\Auth\Models\Team;
+use Domains\Auth\Models\User;
 use Domains\CRM\DTOs\CustomerData;
 use Domains\Shared\Enums\CustomerType;
 use Spatie\LaravelData\Exceptions\ValidationException;
 
 beforeEach(function () {
-    // Mock authenticated user with team
-    $this->user = User::factory()->create([
-        'current_team_id' => 1,
-    ]);
+    // Create user first
+    $this->user = User::factory()->create();
+
+    // Create team owned by user
+    $this->team = Team::factory()->create(['owner_id' => $this->user->id]);
+
+    // Update user with current team
+    $this->user->update(['current_team_id' => $this->team->id]);
+
     $this->actingAs($this->user);
 });
 
 it('creates customer DTO from array', function () {
     $dto = CustomerData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'name' => 'Test Customer',
         'email' => 'test@example.com',
         'phone' => '1234567890',
@@ -44,12 +50,12 @@ it('creates customer DTO using fromFilament method', function () {
     expect($dto->name)->toBe('Filament Customer')
         ->and($dto->email)->toBe('filament@example.com')
         ->and($dto->type)->toBe(CustomerType::Retail)
-        ->and($dto->team_id)->toBe(1); // Auto-filled from current user
+        ->and($dto->team_id)->toBe($this->team->id); // Auto-filled from current user
 });
 
 it('converts customer DTO to array', function () {
     $dto = CustomerData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'name' => 'Array Test',
         'email' => 'array@example.com',
         'type' => CustomerType::Wholesale,
@@ -70,7 +76,7 @@ it('validates required fields', function () {
 
 it('validates email format', function () {
     CustomerData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'name' => 'Test',
         'email' => 'invalid-email', // Invalid format
         'type' => CustomerType::Retail,
@@ -79,7 +85,7 @@ it('validates email format', function () {
 
 it('handles nullable fields', function () {
     $dto = CustomerData::from([
-        'team_id' => 1,
+        'team_id' => $this->team->id,
         'name' => 'Minimal Customer',
         'email' => null,
         'phone' => null,

@@ -4,13 +4,17 @@ namespace Domains\CRM\Tests\Feature;
 
 use Domains\Auth\Models\Team;
 use Domains\Auth\Models\User;
+use Domains\Auth\Seeders\RoleAndPermissionSeeder;
 use Domains\CRM\Models\Supplier;
 use Domains\Shared\Enums\SupplierCategory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class SupplierTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected User $superAdmin;
 
     protected User $farmManager;
@@ -21,12 +25,18 @@ class SupplierTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(RoleAndPermissionSeeder::class);
+
         $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
         $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
 
         $this->superAdmin = User::factory()->create();
         $this->farmManager = User::factory()->create();
         $this->team = Team::factory()->create();
+
+        // Assign Spatie roles
+        $this->superAdmin->assignRole($superAdminRole);
+        $this->farmManager->assignRole($farmManagerRole);
 
         $this->superAdmin->teams()->attach($this->team->id, ['role_id' => $superAdminRole->id]);
         $this->superAdmin->update(['current_team_id' => $this->team->id]);
@@ -53,7 +63,7 @@ class SupplierTest extends TestCase
         $suppliers = Supplier::query()->get();
 
         expect($suppliers->count())->toBeGreaterThan(0);
-        expect($suppliers->pluck('id')->toContain($supplier->id))->toBeTrue();
+        expect($suppliers->pluck('id')->contains($supplier->id))->toBeTrue();
     }
 
     /**
@@ -61,13 +71,15 @@ class SupplierTest extends TestCase
      */
     public function test_all_authenticated_users_can_view_suppliers(): void
     {
-        Supplier::factory()->create([
+        $supplier = Supplier::factory()->create([
             'name' => 'Test Supplier',
             'category' => SupplierCategory::Feed,
         ]);
 
-        expect($this->farmManager->can('view', Supplier::class))->toBeTrue();
-        expect($this->superAdmin->can('view', Supplier::class))->toBeTrue();
+        expect($this->farmManager->can('viewAny', Supplier::class))->toBeTrue();
+        expect($this->superAdmin->can('viewAny', Supplier::class))->toBeTrue();
+        expect($this->farmManager->can('view', $supplier))->toBeTrue();
+        expect($this->superAdmin->can('view', $supplier))->toBeTrue();
     }
 
     /**

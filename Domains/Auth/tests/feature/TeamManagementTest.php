@@ -4,11 +4,21 @@ namespace Domains\Auth\Tests\Feature;
 
 use Domains\Auth\Models\Team;
 use Domains\Auth\Models\User;
+use Domains\Auth\Seeders\RoleAndPermissionSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class TeamManagementTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(RoleAndPermissionSeeder::class);
+    }
+
     /**
      * Test that a user can belong to multiple teams.
      */
@@ -18,9 +28,11 @@ class TeamManagementTest extends TestCase
         $team1 = Team::factory()->create();
         $team2 = Team::factory()->create();
 
+        $role = Role::query()->where('name', 'Farm Manager')->first();
+
         // Attach user to teams
-        $user->teams()->attach($team1->id, ['role_id' => 1]);
-        $user->teams()->attach($team2->id, ['role_id' => 2]);
+        $user->teams()->attach($team1->id, ['role_id' => $role->id]);
+        $user->teams()->attach($team2->id, ['role_id' => $role->id]);
 
         expect($user->teams->count())->toBe(2);
         expect($user->teams->pluck('id')->toArray())->toContain($team1->id, $team2->id);
@@ -59,9 +71,12 @@ class TeamManagementTest extends TestCase
         $user2 = User::factory()->create();
         $user3 = User::factory()->create();
 
-        $team->users()->attach($user1->id, ['role_id' => 1]);
-        $team->users()->attach($user2->id, ['role_id' => 2]);
-        $team->users()->attach($user3->id, ['role_id' => 1]);
+        $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
+        $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
+
+        $team->users()->attach($user1->id, ['role_id' => $superAdminRole->id]);
+        $team->users()->attach($user2->id, ['role_id' => $farmManagerRole->id]);
+        $team->users()->attach($user3->id, ['role_id' => $superAdminRole->id]);
 
         expect($team->users->count())->toBe(3);
     }
@@ -75,13 +90,15 @@ class TeamManagementTest extends TestCase
         $team1 = Team::factory()->create();
         $team2 = Team::factory()->create();
 
-        $user->teams()->attach($team1->id, ['role_id' => 1]);
-        $user->teams()->attach($team2->id, ['role_id' => 1]);
+        $role = Role::query()->where('name', 'Farm Manager')->first();
+
+        $user->teams()->attach($team1->id, ['role_id' => $role->id]);
+        $user->teams()->attach($team2->id, ['role_id' => $role->id]);
 
         $user->setCurrentTeam($team2);
 
         expect($user->current_team_id)->toBe($team2->id);
-        expect($user->currentTeam()->id)->toBe($team2->id);
+        expect($user->currentTeam->id)->toBe($team2->id);
     }
 
     /**
@@ -108,7 +125,9 @@ class TeamManagementTest extends TestCase
         $team = Team::factory()->create();
         $otherTeam = Team::factory()->create();
 
-        $user->teams()->attach($team->id, ['role_id' => 1]);
+        $role = Role::query()->where('name', 'Farm Manager')->first();
+
+        $user->teams()->attach($team->id, ['role_id' => $role->id]);
 
         expect($user->hasTeamAccess($team))->toBeTrue();
         expect($user->hasTeamAccess($otherTeam))->toBeFalse();

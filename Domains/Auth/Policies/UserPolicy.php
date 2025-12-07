@@ -12,7 +12,7 @@ class UserPolicy
     public function viewAny(User $user): bool
     {
         // Super Admin and Farm Manager can view users
-        return $user->hasRole(['super_admin', 'Farm Manager']);
+        return $user->hasRole(['Super Admin', 'Farm Manager']);
     }
 
     /**
@@ -21,7 +21,7 @@ class UserPolicy
     public function view(User $user, User $model): bool
     {
         // Can view if super admin or same user
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
@@ -33,7 +33,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'Farm Manager']);
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -42,7 +42,7 @@ class UserPolicy
     public function update(User $user, User $model): bool
     {
         // Super Admin can update anyone
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
@@ -56,7 +56,7 @@ class UserPolicy
     public function delete(User $user, User $model): bool
     {
         // Super Admin only
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -64,7 +64,7 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -72,6 +72,6 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 }

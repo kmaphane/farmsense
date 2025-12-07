@@ -4,13 +4,17 @@ namespace Domains\Finance\Tests\Feature;
 
 use Domains\Auth\Models\Team;
 use Domains\Auth\Models\User;
+use Domains\Auth\Seeders\RoleAndPermissionSeeder;
 use Domains\Finance\Models\Expense;
 use Domains\Shared\Enums\ExpenseCategory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ExpensePolicyTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected User $superAdmin;
 
     protected User $farmManager;
@@ -27,6 +31,8 @@ class ExpensePolicyTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(RoleAndPermissionSeeder::class);
+
         // Get roles
         $superAdminRole = Role::query()->where('name', 'Super Admin')->first();
         $farmManagerRole = Role::query()->where('name', 'Farm Manager')->first();
@@ -38,6 +44,12 @@ class ExpensePolicyTest extends TestCase
         $this->farmManager = User::factory()->create();
         $this->partner = User::factory()->create();
         $this->fieldWorker = User::factory()->create();
+
+        // Assign Spatie roles
+        $this->superAdmin->assignRole($superAdminRole);
+        $this->farmManager->assignRole($farmManagerRole);
+        $this->partner->assignRole($partnerRole);
+        $this->fieldWorker->assignRole($fieldWorkerRole);
 
         // Create teams
         $this->team1 = Team::factory()->create();

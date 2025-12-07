@@ -4,14 +4,18 @@ namespace Domains\Shared\Tests\Feature;
 
 use Domains\Auth\Models\Team;
 use Domains\Auth\Models\User;
+use Domains\Auth\Seeders\RoleAndPermissionSeeder;
 use Domains\CRM\Models\Customer;
 use Domains\Finance\Models\Expense;
 use Domains\Shared\Enums\CustomerType;
 use Domains\Shared\Enums\ExpenseCategory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class MultiTenancyScopingTest extends TestCase
 {
+    use RefreshDatabase;
     protected User $user;
 
     protected Team $team1;
@@ -21,14 +25,19 @@ class MultiTenancyScopingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(RoleAndPermissionSeeder::class);
+
+        $superAdminRole = Role::findByName('Super Admin', 'web');
 
         $this->user = User::factory()->create();
+        $this->user->assignRole($superAdminRole);
+
         $this->team1 = Team::factory()->create();
         $this->team2 = Team::factory()->create();
 
         // Assign user to both teams
-        $this->user->teams()->attach($this->team1->id, ['role_id' => 1]);
-        $this->user->teams()->attach($this->team2->id, ['role_id' => 1]);
+        $this->user->teams()->attach($this->team1->id, ['role_id' => $superAdminRole->id]);
+        $this->user->teams()->attach($this->team2->id, ['role_id' => $superAdminRole->id]);
     }
 
     /**

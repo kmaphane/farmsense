@@ -12,7 +12,7 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'Farm Manager', 'Partner']);
+        return $user->hasRole(['Super Admin', 'Farm Manager', 'Partner']);
     }
 
     /**
@@ -20,12 +20,12 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
         // Team-scoped: user must be in the customer's team
-        return $user->currentTeam()?->id === $customer->team_id;
+        return $user->current_team_id === $customer->team_id;
     }
 
     /**
@@ -33,7 +33,7 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'Farm Manager']);
+        return $user->hasRole(['Super Admin', 'Farm Manager']);
     }
 
     /**
@@ -41,13 +41,13 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
         // Only Farm Manager in the same team
         return $user->hasRole('Farm Manager') &&
-               $user->currentTeam()?->id === $customer->team_id;
+               $user->current_team_id === $customer->team_id;
     }
 
     /**
@@ -55,12 +55,12 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
 
         return $user->hasRole('Farm Manager') &&
-               $user->currentTeam()?->id === $customer->team_id;
+               $user->current_team_id === $customer->team_id;
     }
 
     /**
@@ -68,7 +68,7 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 
     /**
@@ -76,6 +76,6 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('Super Admin');
     }
 }
