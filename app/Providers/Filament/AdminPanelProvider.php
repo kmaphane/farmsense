@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Domains\Auth\Models\Team;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -29,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->registration(false)  // Disable public registration - admin-only user creation
+            ->tenant(Team::class)
             ->colors([
                 'primary' => Color::Amber,
             ])

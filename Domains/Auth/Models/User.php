@@ -4,16 +4,22 @@ namespace Domains\Auth\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Domains\Auth\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasDefaultTenant;
+use Filament\Models\Contracts\HasTenants;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser, HasDefaultTenant, HasTenants
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
@@ -110,5 +116,39 @@ class User extends Authenticatable
     public function isTeamOwner(Team $team): bool
     {
         return $this->id === $team->owner_id;
+    }
+
+    /**
+     * Determine if the user can access the given Filament panel.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the tenants (teams) this user belongs to for Filament.
+     *
+     * @return Collection<int, Team>
+     */
+    public function getTenants(Panel $panel): Collection
+    {
+        return $this->teams;
+    }
+
+    /**
+     * Check if the user can access the given tenant.
+     */
+    public function canAccessTenant(Model $tenant): bool
+    {
+        return $this->teams()->whereKey($tenant)->exists();
+    }
+
+    /**
+     * Get the default tenant when logging in.
+     */
+    public function getDefaultTenant(Panel $panel): ?Model
+    {
+        return $this->currentTeam ?? $this->teams->first();
     }
 }

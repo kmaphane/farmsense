@@ -3,13 +3,14 @@
 namespace Domains\Auth\Models;
 
 use Domains\Auth\Factories\TeamFactory;
+use Filament\Models\Contracts\HasCurrentTenantLabel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class Team extends Model
+class Team extends Model implements HasCurrentTenantLabel
 {
     /** @use HasFactory<TeamFactory> */
     use HasFactory;
@@ -90,5 +91,13 @@ class Team extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the label shown above the current tenant in the tenant switcher.
+     */
+    public function getCurrentTenantLabel(): string
+    {
+        return 'Active Farm';
     }
 }
