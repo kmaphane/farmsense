@@ -3,6 +3,7 @@
 use App\Http\Controllers\Batches\BatchAnalyticsController;
 use App\Http\Controllers\Batches\BatchController;
 use App\Http\Controllers\Batches\DailyLogController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,6 +18,9 @@ Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
     // Batch management
     Route::get('/batches', [BatchController::class, 'index'])->name('batches.index');
     Route::get('/batches/{batch}', [BatchController::class, 'show'])->name('batches.show');

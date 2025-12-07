@@ -73,6 +73,7 @@ class DailyLogSeeder extends Seeder
                 'temperature_celsius' => $logData['temperature_celsius'],
                 'humidity_percent' => $logData['humidity_percent'],
                 'ammonia_ppm' => $logData['ammonia_ppm'],
+                'rainfall_mm' => $logData['rainfall_mm'],
                 'notes' => $logData['notes'],
                 'recorded_by' => $recorders->random()->id,
             ]);
@@ -89,7 +90,7 @@ class DailyLogSeeder extends Seeder
     }
 
     /**
-     * @return array{mortality_count: int, feed_consumed_kg: float, water_consumed_liters: float, temperature_celsius: float, humidity_percent: float, ammonia_ppm: float, notes: string|null}
+     * @return array{mortality_count: int, feed_consumed_kg: float, water_consumed_liters: float, temperature_celsius: float, humidity_percent: float, ammonia_ppm: float, rainfall_mm: float|null, notes: string|null}
      */
     private function calculateDailyLogData(int $dayNumber, int $birdCount, int $initialCount): array
     {
@@ -156,6 +157,7 @@ class DailyLogSeeder extends Seeder
             'temperature_celsius' => round($idealTemp + fake()->randomFloat(1, -1.5, 1.5), 1),
             'humidity_percent' => round(fake()->randomFloat(1, 58, 68), 1),
             'ammonia_ppm' => round(min(25, 5 + ($dayNumber * 0.4) + fake()->randomFloat(1, -2, 2)), 1),
+            'rainfall_mm' => fake()->boolean(25) ? round(fake()->randomFloat(1, 0.5, 45), 1) : null,
             'notes' => $notes,
         ];
     }

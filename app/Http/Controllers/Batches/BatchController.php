@@ -56,6 +56,14 @@ class BatchController extends Controller
 
         $stats = $this->calculationService->getBatchStatistics($batch);
 
+        // Get last log for reference when creating new logs
+        $lastLog = $batch->dailyLogs->first();
+
+        // Calculate suggested date (day after last log, or today if no logs)
+        $suggestedDate = $lastLog
+            ? $lastLog->log_date->addDay()->toDateString()
+            : now()->toDateString();
+
         return Inertia::render('Batches/Show', [
             'batch' => [
                 'id' => $batch->id,
@@ -87,8 +95,19 @@ class BatchController extends Controller
                 'water_consumed_liters' => $log->water_consumed_liters ? (float) $log->water_consumed_liters : null,
                 'temperature_celsius' => $log->temperature_celsius ? (float) $log->temperature_celsius : null,
                 'humidity_percent' => $log->humidity_percent ? (float) $log->humidity_percent : null,
+                'ammonia_ppm' => $log->ammonia_ppm ? (float) $log->ammonia_ppm : null,
+                'rainfall_mm' => $log->rainfall_mm ? (float) $log->rainfall_mm : null,
                 'isEditable' => $log->isEditable(),
             ]),
+            'lastLog' => $lastLog ? [
+                'log_date' => $lastLog->log_date->toDateString(),
+                'mortality_count' => $lastLog->mortality_count,
+                'feed_consumed_kg' => (float) $lastLog->feed_consumed_kg,
+                'water_consumed_liters' => $lastLog->water_consumed_liters ? (float) $lastLog->water_consumed_liters : null,
+                'temperature_celsius' => $lastLog->temperature_celsius ? (float) $lastLog->temperature_celsius : null,
+                'humidity_percent' => $lastLog->humidity_percent ? (float) $lastLog->humidity_percent : null,
+            ] : null,
+            'suggestedDate' => $suggestedDate,
         ]);
     }
 }

@@ -30,6 +30,7 @@ class DailyLogFactory extends Factory
             'temperature_celsius' => fake()->randomFloat(1, 28, 35),
             'humidity_percent' => fake()->randomFloat(1, 55, 75),
             'ammonia_ppm' => fake()->randomFloat(1, 5, 25),
+            'rainfall_mm' => fake()->optional(0.25)->randomFloat(1, 0.5, 50),
             'notes' => fake()->optional(0.3)->sentence(),
             'recorded_by' => User::query()->inRandomOrder()->first()?->id,
         ];

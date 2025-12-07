@@ -34,6 +34,7 @@ class DailyLog extends Model
         'temperature_celsius',
         'humidity_percent',
         'ammonia_ppm',
+        'rainfall_mm',
         'notes',
         'recorded_by',
     ];
@@ -48,6 +49,7 @@ class DailyLog extends Model
             'temperature_celsius' => 'decimal:1',
             'humidity_percent' => 'decimal:1',
             'ammonia_ppm' => 'decimal:1',
+            'rainfall_mm' => 'decimal:1',
         ];
     }
 

@@ -74,7 +74,7 @@ function FormField({
     );
 }
 
-interface LastLogData {
+export interface LastLogData {
     log_date: string;
     mortality_count: number;
     feed_consumed_kg: number;
@@ -83,7 +83,7 @@ interface LastLogData {
     humidity_percent: number | null;
 }
 
-interface DailyLogFormData {
+export interface DailyLogFormData {
     id?: number;
     log_date: string;
     mortality_count: number;
@@ -101,6 +101,7 @@ interface DailyLogFormProps {
     lastLog?: LastLogData | null;
     suggestedDate?: string;
     isEdit?: boolean;
+    compact?: boolean;
 }
 
 export function DailyLogForm({
@@ -109,17 +110,20 @@ export function DailyLogForm({
     lastLog,
     suggestedDate,
     isEdit = false,
+    compact = false,
 }: DailyLogFormProps) {
-    const formAction = isEdit && dailyLog
-        ? update.form({ batch: batchId, dailyLog: dailyLog.id! })
-        : store.form(batchId);
+    const formUrl = isEdit && dailyLog
+        ? update.url({ batch: batchId, dailyLog: dailyLog.id! })
+        : store.url(batchId);
+
+    const formMethod = isEdit ? 'put' : 'post';
 
     return (
-        <Form {...formAction}>
+        <Form action={formUrl} method={formMethod}>
             {({ errors, processing }) => (
-                <div className="space-y-6">
+                <div className={compact ? 'space-y-4' : 'space-y-6'}>
                     {/* Last Log Reference */}
-                    {lastLog && !isEdit && (
+                    {lastLog && !isEdit && !compact && (
                         <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm text-blue-800 dark:text-blue-200">
@@ -142,7 +146,7 @@ export function DailyLogForm({
                     )}
 
                     {/* Edit Warning */}
-                    {isEdit && (
+                    {isEdit && !compact && (
                         <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm text-amber-800 dark:text-amber-200">
@@ -156,6 +160,123 @@ export function DailyLogForm({
                     )}
 
                     {/* Form Fields */}
+                    {compact ? (
+                        <div className="space-y-4">
+                            <FormField
+                                icon={Calendar}
+                                label="Log Date"
+                                name="log_date"
+                                type="date"
+                                required
+                                defaultValue={dailyLog?.log_date ?? suggestedDate}
+                                error={errors.log_date}
+                            />
+
+                            <FormField
+                                icon={AlertTriangle}
+                                label="Mortality Count"
+                                name="mortality_count"
+                                type="number"
+                                placeholder="0"
+                                required
+                                min={0}
+                                defaultValue={dailyLog?.mortality_count}
+                                hint="Number of birds that died"
+                                error={errors.mortality_count}
+                            />
+
+                            <FormField
+                                icon={Utensils}
+                                label="Feed Consumed (kg)"
+                                name="feed_consumed_kg"
+                                type="number"
+                                placeholder="0.00"
+                                required
+                                min={0}
+                                step="0.01"
+                                defaultValue={dailyLog?.feed_consumed_kg}
+                                error={errors.feed_consumed_kg}
+                            />
+
+                            <FormField
+                                icon={Droplets}
+                                label="Water Consumed (L)"
+                                name="water_consumed_liters"
+                                type="number"
+                                placeholder="0.00"
+                                min={0}
+                                step="0.01"
+                                defaultValue={dailyLog?.water_consumed_liters}
+                                error={errors.water_consumed_liters}
+                            />
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <FormField
+                                    icon={Thermometer}
+                                    label="Temp (°C)"
+                                    name="temperature_celsius"
+                                    type="number"
+                                    placeholder="25"
+                                    min={-10}
+                                    max={60}
+                                    step="0.1"
+                                    defaultValue={dailyLog?.temperature_celsius}
+                                    error={errors.temperature_celsius}
+                                />
+
+                                <FormField
+                                    icon={Gauge}
+                                    label="Humidity (%)"
+                                    name="humidity_percent"
+                                    type="number"
+                                    placeholder="65"
+                                    min={0}
+                                    max={100}
+                                    step="0.1"
+                                    defaultValue={dailyLog?.humidity_percent}
+                                    error={errors.humidity_percent}
+                                />
+                            </div>
+
+                            <FormField
+                                icon={Wind}
+                                label="Ammonia (ppm)"
+                                name="ammonia_ppm"
+                                type="number"
+                                placeholder="0"
+                                min={0}
+                                max={100}
+                                step="0.1"
+                                defaultValue={dailyLog?.ammonia_ppm}
+                                error={errors.ammonia_ppm}
+                            />
+
+                            <div className="space-y-2">
+                                <Label htmlFor="notes">Notes</Label>
+                                <textarea
+                                    id="notes"
+                                    name="notes"
+                                    rows={2}
+                                    className="border-input flex min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800"
+                                    placeholder="Any observations..."
+                                    defaultValue={dailyLog?.notes ?? ''}
+                                />
+                                {errors.notes && (
+                                    <p className="text-xs text-red-500">{errors.notes}</p>
+                                )}
+                            </div>
+
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={processing}
+                            >
+                                <Save className="h-4 w-4" />
+                                {processing ? 'Saving...' : isEdit ? 'Update Log' : 'Save Log'}
+                            </Button>
+                        </div>
+                    ) : (
+                    <>
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-base">Log Details</CardTitle>
@@ -303,6 +424,8 @@ export function DailyLogForm({
                             {processing ? 'Saving...' : isEdit ? 'Update Log' : 'Save Log'}
                         </Button>
                     </div>
+                    </>
+                    )}
                 </div>
             )}
         </Form>

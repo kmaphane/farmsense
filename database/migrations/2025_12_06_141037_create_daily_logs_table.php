@@ -22,6 +22,7 @@ return new class extends Migration
             $table->decimal('temperature_celsius', 5, 1)->nullable();
             $table->decimal('humidity_percent', 5, 1)->nullable();
             $table->decimal('ammonia_ppm', 5, 1)->nullable();
+            $table->decimal('rainfall_mm', 6, 1)->nullable();
             $table->text('notes')->nullable();
             $table->foreignId('recorded_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();

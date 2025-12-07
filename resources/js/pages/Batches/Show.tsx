@@ -1,35 +1,30 @@
+import { DailyLogCalendar, type DailyLogData } from '@/components/broiler/DailyLogCalendar';
+import { DailyLogForm } from '@/components/broiler/DailyLogForm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FieldLayout } from '@/layouts/app/field-layout';
-import { Head, Link } from '@inertiajs/react';
-import { create } from '@/actions/App/Http/Controllers/Batches/DailyLogController';
-import { index } from '@/actions/App/Http/Controllers/Batches/BatchController';
+import {
+    Drawer,
+    DrawerBody,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTrigger,
+} from '@/components/ui/drawer';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/react';
 import {
     Activity,
-    AlertTriangle,
     Bird,
     Calendar,
     ClipboardList,
-    Droplets,
     Edit,
     Plus,
     Scale,
-    Thermometer,
     TrendingUp,
     Utensils,
 } from 'lucide-react';
-
-interface DailyLogData {
-    id: number;
-    log_date: string;
-    mortality_count: number;
-    feed_consumed_kg: number;
-    water_consumed_liters: number | null;
-    temperature_celsius: number | null;
-    humidity_percent: number | null;
-    isEditable: boolean;
-}
+import * as React from 'react';
 
 interface BatchStats {
     fcr: number | null;
@@ -53,10 +48,21 @@ interface BatchData {
     supplier: { name: string } | null;
 }
 
+interface LastLogData {
+    log_date: string;
+    mortality_count: number;
+    feed_consumed_kg: number;
+    water_consumed_liters: number | null;
+    temperature_celsius: number | null;
+    humidity_percent: number | null;
+}
+
 interface Props {
     batch: BatchData;
     stats: BatchStats;
     dailyLogs: DailyLogData[];
+    lastLog: LastLogData | null;
+    suggestedDate: string;
 }
 
 function StatCard({
@@ -87,68 +93,26 @@ function StatCard({
     );
 }
 
-function LogEntry({ log, batchId }: { log: DailyLogData; batchId: number }) {
-    const logDate = new Date(log.log_date);
-
-    return (
-        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex items-center gap-4">
-                <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        {logDate.getDate()}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {logDate.toLocaleDateString('en-US', { month: 'short' })}
-                    </p>
-                </div>
-                <div className="h-12 w-px bg-gray-200 dark:bg-gray-700" />
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">
-                    <div className="flex items-center gap-1.5">
-                        <AlertTriangle className="h-3.5 w-3.5 text-gray-400" />
-                        <span className="text-gray-600 dark:text-gray-400">{log.mortality_count}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <Utensils className="h-3.5 w-3.5 text-gray-400" />
-                        <span className="text-gray-600 dark:text-gray-400">{log.feed_consumed_kg}kg</span>
-                    </div>
-                    {log.temperature_celsius && (
-                        <div className="flex items-center gap-1.5">
-                            <Thermometer className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="text-gray-600 dark:text-gray-400">{log.temperature_celsius}°C</span>
-                        </div>
-                    )}
-                    {log.humidity_percent && (
-                        <div className="flex items-center gap-1.5">
-                            <Droplets className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="text-gray-600 dark:text-gray-400">{log.humidity_percent}%</span>
-                        </div>
-                    )}
-                </div>
-            </div>
-            {log.isEditable && (
-                <Link
-                    href={`/batches/${batchId}/logs/${log.id}/edit`}
-                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                >
-                    <Edit className="h-4 w-4" />
-                </Link>
-            )}
-        </div>
-    );
-}
-
-export default function Show({ batch, stats, dailyLogs }: Props) {
+export default function Show({ batch, stats, dailyLogs, lastLog, suggestedDate }: Props) {
     const isHighMortality = stats.mortalityRate > 5;
+    const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+    const [editingLog, setEditingLog] = React.useState<DailyLogData | null>(null);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Dashboard', href: '/dashboard' },
+        { title: 'Batches', href: '/batches' },
+        { title: batch.name, href: `/batches/${batch.id}` },
+    ];
+
+    const handleEditLog = (log: DailyLogData) => {
+        setEditingLog(log);
+    };
 
     return (
-        <FieldLayout
-            title={batch.name}
-            backHref={index.url()}
-            backLabel="Batches"
-        >
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={batch.name} />
 
-            <div className="space-y-6">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 {/* Batch Header */}
                 <Card>
                     <CardHeader className="pb-2">
@@ -194,48 +158,84 @@ export default function Show({ batch, stats, dailyLogs }: Props) {
                     </CardContent>
                 </Card>
 
-                {/* Daily Logs */}
+                {/* Daily Logs Calendar */}
                 <Card>
                     <CardHeader className="flex-row items-center justify-between space-y-0">
                         <div className="flex items-center gap-2">
                             <ClipboardList className="h-5 w-5 text-gray-500" />
                             <CardTitle className="text-base">Daily Logs</CardTitle>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                ({dailyLogs.length} logged)
+                            </span>
                         </div>
                         {batch.status === 'active' && (
-                            <Link href={create.url(batch.id)}>
-                                <Button size="sm">
-                                    <Plus className="h-4 w-4" />
-                                    Add Log
-                                </Button>
-                            </Link>
+                            <Drawer open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                                <DrawerTrigger>
+                                    <Button size="sm">
+                                        <Plus className="h-4 w-4" />
+                                        Add Log
+                                    </Button>
+                                </DrawerTrigger>
+                                <DrawerContent size="lg">
+                                    <DrawerHeader
+                                        title="Record Daily Log"
+                                        description={`${batch.name} • Day ${batch.age_in_days} • ${batch.current_bird_count.toLocaleString()} birds`}
+                                        icon={<ClipboardList className="h-5 w-5" />}
+                                    />
+                                    <DrawerBody>
+                                        <DailyLogForm
+                                            batchId={batch.id}
+                                            lastLog={lastLog}
+                                            suggestedDate={suggestedDate}
+                                            compact
+                                        />
+                                    </DrawerBody>
+                                </DrawerContent>
+                            </Drawer>
                         )}
                     </CardHeader>
                     <CardContent>
-                        {dailyLogs.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-8 text-center">
-                                <ClipboardList className="h-10 w-10 text-gray-400" />
-                                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                                    No daily logs recorded yet.
+                        <DailyLogCalendar
+                            logs={dailyLogs}
+                            batchStartDate={batch.start_date}
+                            batchAgeInDays={batch.age_in_days}
+                            onEditLog={handleEditLog}
+                        />
+                        {dailyLogs.length === 0 && batch.status === 'active' && (
+                            <div className="flex flex-col items-center justify-center py-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    No daily logs recorded yet. Start by adding your first log.
                                 </p>
-                                {batch.status === 'active' && (
-                                    <Link href={create.url(batch.id)} className="mt-3">
-                                        <Button variant="outline" size="sm">
-                                            <Plus className="h-4 w-4" />
-                                            Record First Log
-                                        </Button>
-                                    </Link>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {dailyLogs.map((log) => (
-                                    <LogEntry key={log.id} log={log} batchId={batch.id} />
-                                ))}
                             </div>
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Edit Log Drawer */}
+                <Drawer open={!!editingLog} onOpenChange={(open) => !open && setEditingLog(null)}>
+                    <DrawerContent size="lg">
+                        <DrawerHeader
+                            title="Edit Daily Log"
+                            description={editingLog ? `Log for ${new Date(editingLog.log_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}` : ''}
+                            icon={<Edit className="h-5 w-5" />}
+                        />
+                        <DrawerBody>
+                            {editingLog && (
+                                <DailyLogForm
+                                    batchId={batch.id}
+                                    dailyLog={{
+                                        ...editingLog,
+                                        ammonia_ppm: editingLog.ammonia_ppm ?? null,
+                                        notes: null,
+                                    }}
+                                    isEdit
+                                    compact
+                                />
+                            )}
+                        </DrawerBody>
+                    </DrawerContent>
+                </Drawer>
             </div>
-        </FieldLayout>
+        </AppLayout>
     );
 }
