@@ -80,7 +80,7 @@ class BatchCalculationService
      */
     public function calculateCostPerBird(Batch $batch): int
     {
-        $totalCostCents = $batch->expenses->sum('amount_cents');
+        $totalCostCents = $batch->expenses->sum('amount');
         $currentQuantity = $batch->current_quantity ?? 0;
 
         if ($currentQuantity <= 0) {
@@ -96,7 +96,7 @@ class BatchCalculationService
      */
     public function calculateCostPerKg(Batch $batch): int
     {
-        $totalCostCents = $batch->expenses->sum('amount_cents');
+        $totalCostCents = $batch->expenses->sum('amount');
         $totalWeight = ($batch->average_weight_kg ?? 0) * ($batch->current_quantity ?? 0);
 
         if ($totalWeight <= 0) {

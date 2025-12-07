@@ -65,7 +65,7 @@ class BatchAnalyticsController extends Controller
         $cumulativeMortality = 0;
         $data = $logs->map(function ($log) use (&$cumulativeMortality, $batch) {
             $cumulativeMortality += $log->mortality_count;
-            $mortalityRate = ($cumulativeMortality / $batch->initial_bird_count) * 100;
+            $mortalityRate = ($cumulativeMortality / $batch->initial_quantity) * 100;
 
             return [
                 'date' => $log->log_date->format('M d'),
