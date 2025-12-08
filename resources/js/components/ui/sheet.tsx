@@ -113,7 +113,7 @@ function SheetHeader({
     // Enhanced header with icon support
     return (
         <div data-slot="sheet-header" className={cn('flex flex-col gap-1.5 border-b p-4', className)} {...props}>
-            <div className="flex items-start gap-3 pr-8">
+            <div className="flex items-center gap-3 pr-8">
                 {icon && (
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                         {icon}

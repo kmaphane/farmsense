@@ -512,7 +512,14 @@ function SidebarMenuButton({
       data-sidebar="menu-button"
       data-size={size}
       data-active={isActive}
-      className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      className={cn(
+        sidebarMenuButtonVariants({ variant, size }),
+        // Remove background and border for logo button in collapsed state
+        props.children && typeof props.children === 'object' && props.children.type && props.children.type.name === 'AppLogo'
+          ? 'bg-transparent border-none shadow-none hover:bg-transparent focus:bg-transparent active:bg-transparent'
+          : '',
+        className
+      )}
       {...props}
     />
   )

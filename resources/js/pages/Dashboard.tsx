@@ -13,9 +13,6 @@ import {
     Activity,
     AlertTriangle,
     Bird,
-    DollarSign,
-    Package,
-    Scissors,
     TrendingUp,
     Utensils,
 } from 'lucide-react';
@@ -136,68 +133,6 @@ export default function Dashboard({ stats, recentBatches }: Props) {
                         alert={stats.pendingAlerts > 0}
                     />
                 </div>
-
-                {/* Quick Actions */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Quick Actions</CardTitle>
-                        <CardDescription>
-                            Common operations for processing and sales
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            <Link
-                                href="/slaughter/create"
-                                className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-red-200 hover:bg-red-50 dark:border-gray-800 dark:hover:border-red-900 dark:hover:bg-red-950"
-                            >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                                    <Scissors className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">
-                                        Slaughter
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        Process birds
-                                    </p>
-                                </div>
-                            </Link>
-                            <Link
-                                href="/portioning/create"
-                                className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-purple-200 hover:bg-purple-50 dark:border-gray-800 dark:hover:border-purple-900 dark:hover:bg-purple-950"
-                            >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
-                                    <Package className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">
-                                        Portioning
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        Cut into packs
-                                    </p>
-                                </div>
-                            </Link>
-                            <Link
-                                href="/products/pricing"
-                                className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-blue-200 hover:bg-blue-50 dark:border-gray-800 dark:hover:border-blue-900 dark:hover:bg-blue-950"
-                            >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                                    <DollarSign className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">
-                                        Pricing
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        Update prices
-                                    </p>
-                                </div>
-                            </Link>
-                        </div>
-                    </CardContent>
-                </Card>
 
                 {/* Active Batches */}
                 <Card className="flex-1">

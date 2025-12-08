@@ -38,12 +38,9 @@ export function FieldLayout({
                         ) : (
                             <Link
                                 href="/batches"
-                                className="flex items-center gap-2"
+                                className="inline-flex items-center gap-2"
                             >
                                 <AppLogoIcon className="size-8 object-contain" />
-                                <span className="font-semibold text-gray-900 dark:text-gray-100">
-                                    FarmSense
-                                </span>
                             </Link>
                         )}
                     </div>
