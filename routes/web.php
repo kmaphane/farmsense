@@ -3,6 +3,7 @@
 use App\Http\Controllers\Batches\BatchAnalyticsController;
 use App\Http\Controllers\Batches\BatchController;
 use App\Http\Controllers\Batches\DailyLogController;
+use App\Http\Controllers\CRM\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LiveSales\LiveSaleController;
 use App\Http\Controllers\Portioning\PortioningController;
@@ -43,18 +44,24 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/summary', [BatchAnalyticsController::class, 'summary'])->name('summary');
     });
 
-    // Live sales (from batch)
-    Route::get('/batches/{batch}/live-sale/create', [LiveSaleController::class, 'create'])->name('live-sales.create');
+    // Live sales (Sheet-based from batch show page)
     Route::post('/batches/{batch}/live-sale', [LiveSaleController::class, 'store'])->name('live-sales.store');
 
-    // Slaughter management
-    Route::get('/slaughter/create', [SlaughterController::class, 'create'])->name('slaughter.create');
+    // Slaughter management (JSON endpoint for Quick Actions sheet data)
+    Route::get('/api/slaughter/data', [SlaughterController::class, 'data'])->name('slaughter.data');
     Route::post('/slaughter', [SlaughterController::class, 'store'])->name('slaughter.store');
-    Route::get('/slaughter/{record}', [SlaughterController::class, 'show'])->name('slaughter.show');
 
-    // Portioning management
-    Route::get('/portioning/create', [PortioningController::class, 'create'])->name('portioning.create');
+    // Portioning management (JSON endpoint for Quick Actions sheet data)
+    Route::get('/api/portioning/data', [PortioningController::class, 'data'])->name('portioning.data');
     Route::post('/portioning', [PortioningController::class, 'store'])->name('portioning.store');
+
+    // Batch management (JSON endpoints for Quick Actions sheet)
+    Route::get('/api/batches/data', [BatchController::class, 'data'])->name('batches.data');
+    Route::post('/api/batches/store', [BatchController::class, 'store'])->name('batches.store');
+
+    // Customer management (JSON endpoints for Quick Actions sheet)
+    Route::get('/api/customers/data', [CustomerController::class, 'data'])->name('customers.data');
+    Route::post('/api/customers/store', [CustomerController::class, 'store'])->name('customers.store');
 
     // Product pricing
     Route::get('/products/pricing', [ProductPricingController::class, 'index'])->name('products.pricing');

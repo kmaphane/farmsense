@@ -1,13 +1,7 @@
 import { update } from '@/actions/App/Http/Controllers/Products/ProductPricingController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -27,16 +21,10 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { FieldLayout } from '@/layouts/app/field-layout';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import {
-    ChevronDown,
-    ChevronUp,
-    DollarSign,
-    History,
-    Pencil,
-    Tag,
-} from 'lucide-react';
+import { DollarSign, Pencil, Tag } from 'lucide-react';
 import { useState } from 'react';
 
 interface PriceHistory {
@@ -111,7 +99,6 @@ export default function Pricing({ products }: Props) {
         null,
     );
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [expandedHistory, setExpandedHistory] = useState<number | null>(null);
     const [newPrice, setNewPrice] = useState('');
     const [reason, setReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -157,15 +144,16 @@ export default function Pricing({ products }: Props) {
         );
     };
 
-    const toggleHistory = (productId: number) => {
-        setExpandedHistory(expandedHistory === productId ? null : productId);
-    };
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Dashboard', href: '/dashboard' },
+        { title: 'Product Pricing', href: '/products/pricing' },
+    ];
 
     return (
-        <FieldLayout title="Pricing" backHref="/batches" backLabel="Back">
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Product Pricing" />
 
-            <div className="space-y-6">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 {/* Header */}
                 <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -181,7 +169,7 @@ export default function Pricing({ products }: Props) {
                     </div>
                 </div>
 
-                {/* Products List */}
+                {/* Products Table */}
                 {products.length === 0 ? (
                     <Card>
                         <CardContent className="flex flex-col items-center justify-center py-12">
@@ -196,140 +184,85 @@ export default function Pricing({ products }: Props) {
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="space-y-4">
-                        {products.map((product) => (
-                            <Card key={product.id}>
-                                <CardHeader className="pb-2">
-                                    <div className="flex items-start justify-between">
-                                        <div className="space-y-1">
-                                            <CardTitle className="text-base">
-                                                {product.name}
-                                                {product.local_name && (
-                                                    <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
-                                                        ({product.local_name})
+                    <Card>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Product</TableHead>
+                                        <TableHead>Type</TableHead>
+                                        <TableHead>Package</TableHead>
+                                        <TableHead className="text-right">
+                                            Current Price
+                                        </TableHead>
+                                        <TableHead className="w-[100px]"></TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {products.map((product) => (
+                                        <TableRow key={product.id}>
+                                            <TableCell>
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                                        {product.name}
                                                     </span>
-                                                )}
-                                            </CardTitle>
-                                            <CardDescription className="flex items-center gap-2">
+                                                    {product.local_name && (
+                                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {product.local_name}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
                                                 <ProductTypeBadge
                                                     type={product.type}
                                                     label={product.type_label}
                                                 />
-                                                {product.package_unit_label && (
-                                                    <span className="text-xs">
-                                                        {
-                                                            product.units_per_package
-                                                        }{' '}
-                                                        {
-                                                            product.package_unit_label
-                                                        }
+                                            </TableCell>
+                                            <TableCell>
+                                                {product.package_unit_label ? (
+                                                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                                                        {product.units_per_package}{' '}
+                                                        {product.package_unit_label}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-sm text-gray-400">
+                                                        -
                                                     </span>
                                                 )}
-                                            </CardDescription>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() =>
-                                                openEditDialog(product)
-                                            }
-                                        >
-                                            <Pencil className="mr-1 h-3 w-3" />
-                                            Edit
-                                        </Button>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                                {product.selling_price_formatted ||
-                                                    'Not set'}
-                                            </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                Current price
-                                            </p>
-                                        </div>
-
-                                        {product.price_history.length > 0 && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() =>
-                                                    toggleHistory(product.id)
-                                                }
-                                                className="text-xs"
-                                            >
-                                                <History className="mr-1 h-3 w-3" />
-                                                History
-                                                {expandedHistory ===
-                                                product.id ? (
-                                                    <ChevronUp className="ml-1 h-3 w-3" />
-                                                ) : (
-                                                    <ChevronDown className="ml-1 h-3 w-3" />
-                                                )}
-                                            </Button>
-                                        )}
-                                    </div>
-
-                                    {/* Price History Table */}
-                                    {expandedHistory === product.id &&
-                                        product.price_history.length > 0 && (
-                                            <div className="mt-4 rounded-lg border">
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow>
-                                                            <TableHead>
-                                                                Price
-                                                            </TableHead>
-                                                            <TableHead>
-                                                                Effective
-                                                            </TableHead>
-                                                            <TableHead>
-                                                                Changed By
-                                                            </TableHead>
-                                                            <TableHead>
-                                                                Reason
-                                                            </TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {product.price_history.map(
-                                                            (history) => (
-                                                                <TableRow
-                                                                    key={
-                                                                        history.id
-                                                                    }
-                                                                >
-                                                                    <TableCell className="font-medium">
-                                                                        {
-                                                                            history.price_formatted
-                                                                        }
-                                                                    </TableCell>
-                                                                    <TableCell className="text-xs">
-                                                                        {new Date(
-                                                                            history.effective_from,
-                                                                        ).toLocaleDateString()}
-                                                                    </TableCell>
-                                                                    <TableCell className="text-xs text-gray-500 dark:text-gray-400">
-                                                                        {history.changed_by ||
-                                                                            '-'}
-                                                                    </TableCell>
-                                                                    <TableCell className="max-w-[150px] truncate text-xs text-gray-500 dark:text-gray-400">
-                                                                        {history.reason ||
-                                                                            '-'}
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            ),
-                                                        )}
-                                                    </TableBody>
-                                                </Table>
-                                            </div>
-                                        )}
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                                        {product.selling_price_formatted ||
+                                                            '-'}
+                                                    </span>
+                                                    {product.selling_price_formatted && (
+                                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                            Current price
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        openEditDialog(product)
+                                                    }
+                                                    className="h-8"
+                                                >
+                                                    <Pencil className="mr-1 h-3 w-3" />
+                                                    Edit
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
                 )}
             </div>
 
@@ -413,6 +346,6 @@ export default function Pricing({ products }: Props) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </FieldLayout>
+        </AppLayout>
     );
 }

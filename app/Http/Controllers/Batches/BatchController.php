@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Batches;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use Domains\Broiler\DTOs\BatchData;
 use Domains\Broiler\Enums\BatchStatus;
 use Domains\Broiler\Models\Batch;
+use Domains\Broiler\Resources\BatchFormDataResource;
 use Domains\Broiler\Services\BatchCalculationService;
 use Domains\CRM\Models\Customer;
+use Domains\CRM\Models\Supplier;
 use Domains\Inventory\Enums\ProductType;
 use Domains\Inventory\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -161,5 +166,56 @@ class BatchController extends Controller
             'liveBirdPrice' => $liveBirdProduct?->selling_price_cents,
             'customers' => $customers,
         ];
+    }
+
+    /**
+     * Get form data for Quick Actions sheet (JSON API).
+     */
+    public function data(): BatchFormDataResource
+    {
+        $suppliers = Supplier::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        // Generate suggested batch number
+        $year = now()->year;
+        $latestBatch = Batch::query()
+            ->where('team_id', Auth::user()->current_team_id)
+            ->whereYear('created_at', $year)
+            ->latest('id')
+            ->first();
+
+        $nextNumber = $latestBatch ? ((int) substr($latestBatch->batch_number, -3)) + 1 : 1;
+        $suggestedBatchNumber = sprintf('B-%d-%03d', $year, $nextNumber);
+
+        return new BatchFormDataResource([
+            'suppliers' => $suppliers,
+            'suggestedBatchNumber' => $suggestedBatchNumber,
+            'suggestedStartDate' => now()->toDateString(),
+        ]);
+    }
+
+    /**
+     * Store a newly created batch record.
+     */
+    public function store(BatchData $data): JsonResponse
+    {
+        $batch = Batch::create([
+            'team_id' => Auth::user()->current_team_id,
+            'name' => $data->name,
+            'batch_number' => $data->batch_number,
+            'start_date' => $data->start_date,
+            'status' => BatchStatus::Planned,
+            'initial_quantity' => $data->initial_quantity,
+            'current_quantity' => $data->initial_quantity,
+            'supplier_id' => $data->supplier_id,
+            'target_weight_kg' => $data->target_weight_kg,
+        ]);
+
+        return response()->json([
+            'message' => 'Batch created successfully',
+            'batch_id' => $batch->id,
+        ], 201);
     }
 }
