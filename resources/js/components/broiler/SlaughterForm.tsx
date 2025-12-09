@@ -11,13 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { router } from '@inertiajs/react';
-import {
-    AlertCircle,
-    Bird,
-    Minus,
-    Plus,
-    Scissors,
-} from 'lucide-react';
+import { AlertCircle, Bird, Minus, Plus, Scissors } from 'lucide-react';
 import { useState } from 'react';
 
 interface Batch {
@@ -41,7 +35,6 @@ interface BatchSource {
     discrepancy_reason: string | null;
     discrepancy_notes: string;
 }
-
 
 interface SlaughterFormProps {
     batches: Batch[];
@@ -317,7 +310,8 @@ export function SlaughterForm({
                                                     >
                                                         {batch.name} (
                                                         {batch.current_quantity}{' '}
-                                                        birds, {batch.age_in_days}{' '}
+                                                        birds,{' '}
+                                                        {batch.age_in_days}{' '}
                                                         days)
                                                     </SelectItem>
                                                 ),
@@ -336,7 +330,9 @@ export function SlaughterForm({
                                             <Input
                                                 type="number"
                                                 min={0}
-                                                max={selectedBatch?.current_quantity}
+                                                max={
+                                                    selectedBatch?.current_quantity
+                                                }
                                                 value={
                                                     source.expected_quantity ||
                                                     ''
@@ -356,7 +352,9 @@ export function SlaughterForm({
                                             {selectedBatch && (
                                                 <p className="text-xs text-gray-500">
                                                     Available:{' '}
-                                                    {selectedBatch.current_quantity}{' '}
+                                                    {
+                                                        selectedBatch.current_quantity
+                                                    }{' '}
                                                     birds
                                                 </p>
                                             )}

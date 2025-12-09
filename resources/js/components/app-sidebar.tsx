@@ -1,5 +1,6 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
+import { NavSection } from '@/components/nav-section';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
@@ -10,9 +11,24 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { type NavGroup, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Bird, BookOpen, LayoutGrid, Settings } from 'lucide-react';
+import {
+    Bird,
+    BookOpen,
+    Building2,
+    ClipboardList,
+    FileText,
+    Layers,
+    LayoutGrid,
+    Package,
+    Settings,
+    ShoppingCart,
+    Scissors,
+    TrendingUp,
+    Users,
+    Weight,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -21,10 +37,83 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
+];
+
+const navGroups: NavGroup[] = [
     {
         title: 'Batches',
-        href: '/batches',
-        icon: Bird,
+        items: [
+            {
+                title: 'Active Batches',
+                href: '/batches',
+                icon: Bird,
+            },
+            {
+                title: 'Batch History',
+                href: '/batches/history',
+                icon: ClipboardList,
+            },
+            {
+                title: 'Daily Logs',
+                href: '/batches/logs',
+                icon: FileText,
+            },
+            {
+                title: 'Slaughter',
+                href: '/batches/slaughter',
+                icon: Scissors,
+            },
+            {
+                title: 'Product Yield',
+                href: '/batches/product-yield',
+                icon: Weight,
+            },
+        ],
+    },
+    {
+        title: 'Inventory',
+        items: [
+            {
+                title: 'Products',
+                href: '/inventory/products',
+                icon: Package,
+            },
+            {
+                title: 'Stock Movements',
+                href: '/inventory/movements',
+                icon: TrendingUp,
+            },
+            {
+                title: 'Warehouses',
+                href: '/inventory/warehouses',
+                icon: Building2,
+            },
+        ],
+    },
+    {
+        title: 'CRM',
+        items: [
+            {
+                title: 'Customers',
+                href: '/crm/customers',
+                icon: Users,
+            },
+            {
+                title: 'Suppliers',
+                href: '/crm/suppliers',
+                icon: Layers,
+            },
+        ],
+    },
+    {
+        title: 'Sales',
+        items: [
+            {
+                title: 'Live Sales',
+                href: '/live-sales',
+                icon: ShoppingCart,
+            },
+        ],
     },
 ];
 
@@ -58,6 +147,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <NavSection groups={navGroups} />
             </SidebarContent>
 
             <SidebarFooter>

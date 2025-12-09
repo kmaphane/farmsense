@@ -54,7 +54,8 @@ export function BatchForm({
             newErrors.batch_number = 'Batch number is required';
         if (!startDate) newErrors.start_date = 'Start date is required';
         if (!initialQuantity || initialQuantity <= 0)
-            newErrors.initial_quantity = 'Initial quantity must be greater than 0';
+            newErrors.initial_quantity =
+                'Initial quantity must be greater than 0';
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -92,7 +93,9 @@ export function BatchForm({
                 if (data.errors) {
                     setErrors(data.errors);
                 } else {
-                    setErrors({ form: data.message || 'Failed to create batch' });
+                    setErrors({
+                        form: data.message || 'Failed to create batch',
+                    });
                 }
                 setProcessing(false);
                 return;
@@ -147,7 +150,9 @@ export function BatchForm({
                     className={`h-9 text-sm ${errors.batch_number ? 'border-red-500' : ''}`}
                 />
                 {errors.batch_number && (
-                    <p className="text-xs text-red-500">{errors.batch_number}</p>
+                    <p className="text-xs text-red-500">
+                        {errors.batch_number}
+                    </p>
                 )}
             </div>
 
@@ -171,7 +176,8 @@ export function BatchForm({
             {/* Initial Quantity */}
             <div className="space-y-2">
                 <Label htmlFor="initial_quantity" className="text-xs">
-                    Initial Quantity (Chicks) <span className="text-red-500">*</span>
+                    Initial Quantity (Chicks){' '}
+                    <span className="text-red-500">*</span>
                 </Label>
                 <Input
                     id="initial_quantity"

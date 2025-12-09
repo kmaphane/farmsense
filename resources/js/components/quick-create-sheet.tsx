@@ -263,12 +263,7 @@ export function QuickCreateSheet() {
 
         if (activeSheet === 'customer' && sheetData) {
             const data = sheetData as CustomerData;
-            return (
-                <CustomerForm
-                    customerTypes={data.customerTypes}
-                    compact
-                />
-            );
+            return <CustomerForm customerTypes={data.customerTypes} compact />;
         }
 
         return null;
@@ -353,7 +348,9 @@ export function QuickCreateSheet() {
                                             <Link
                                                 href={action.href}
                                                 className="flex items-center gap-3 rounded p-2 hover:bg-primary/10"
-                                                onClick={() => setMenuOpen(false)}
+                                                onClick={() =>
+                                                    setMenuOpen(false)
+                                                }
                                             >
                                                 <action.icon
                                                     className={`h-5 w-5 ${action.color}`}

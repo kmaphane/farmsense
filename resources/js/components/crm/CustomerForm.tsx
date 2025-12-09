@@ -214,7 +214,9 @@ export function CustomerForm({
                     className={`h-9 text-sm ${errors.credit_limit ? 'border-red-500' : ''}`}
                 />
                 {errors.credit_limit && (
-                    <p className="text-xs text-red-500">{errors.credit_limit}</p>
+                    <p className="text-xs text-red-500">
+                        {errors.credit_limit}
+                    </p>
                 )}
                 <p className="text-xs text-gray-500">
                     Maximum outstanding balance allowed

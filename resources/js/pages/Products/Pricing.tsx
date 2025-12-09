@@ -222,8 +222,12 @@ export default function Pricing({ products }: Props) {
                                             <TableCell>
                                                 {product.package_unit_label ? (
                                                     <span className="text-sm text-gray-600 dark:text-gray-300">
-                                                        {product.units_per_package}{' '}
-                                                        {product.package_unit_label}
+                                                        {
+                                                            product.units_per_package
+                                                        }{' '}
+                                                        {
+                                                            product.package_unit_label
+                                                        }
                                                     </span>
                                                 ) : (
                                                     <span className="text-sm text-gray-400">
