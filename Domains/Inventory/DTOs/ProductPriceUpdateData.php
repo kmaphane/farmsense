@@ -17,22 +17,9 @@ class ProductPriceUpdateData extends Data
         public int $new_price_cents,
 
         #[StringType]
-        public ?string $reason = null,
+        public ?string $reason,
+
+        #[Required, IntegerType]
+        public int $changed_by,
     ) {}
-
-    /**
-     * Get the price in BWP (Pula).
-     */
-    public function getPriceInPula(): float
-    {
-        return $this->new_price_cents / 100;
-    }
-
-    /**
-     * Format price as BWP string.
-     */
-    public function getFormattedPrice(): string
-    {
-        return 'P '.number_format($this->getPriceInPula(), 2);
-    }
 }

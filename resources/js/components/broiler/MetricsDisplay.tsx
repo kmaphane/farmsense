@@ -18,13 +18,22 @@ export function StatCard({
 }: StatCardProps) {
     return (
         <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
-            <div className={`rounded-full p-2 ${alert ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                <Icon className={`h-4 w-4 ${alert ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`} />
+            <div
+                className={`rounded-full p-2 ${alert ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}
+            >
+                <Icon
+                    className={`h-4 w-4 ${alert ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}
+                />
             </div>
-            <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-                <p className={`font-semibold truncate ${alert ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}>
-                    {value ?? '-'}{unit && value !== null ? ` ${unit}` : ''}
+            <div className="min-w-0 flex-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {label}
+                </p>
+                <p
+                    className={`truncate font-semibold ${alert ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}
+                >
+                    {value ?? '-'}
+                    {unit && value !== null ? ` ${unit}` : ''}
                 </p>
             </div>
         </div>
@@ -107,9 +116,15 @@ export function MetricsDisplay({
             </div>
 
             {/* Metric Explanations */}
-            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                <p><strong>FCR</strong> (Feed Conversion Ratio): Total feed ÷ weight gain. Lower is better (target: 1.6-1.9)</p>
-                <p><strong>EPEF</strong> (European Production Efficiency Factor): Higher is better (target: 300-400)</p>
+            <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
+                <p>
+                    <strong>FCR</strong> (Feed Conversion Ratio): Total feed ÷
+                    weight gain. Lower is better (target: 1.6-1.9)
+                </p>
+                <p>
+                    <strong>EPEF</strong> (European Production Efficiency
+                    Factor): Higher is better (target: 300-400)
+                </p>
             </div>
         </div>
     );

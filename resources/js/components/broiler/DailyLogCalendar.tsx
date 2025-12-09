@@ -1,4 +1,16 @@
-import { AlertTriangle, Calendar, ChevronLeft, ChevronRight, CloudRain, Droplets, Edit, Gauge, Thermometer, Utensils, Wind } from 'lucide-react';
+import {
+    AlertTriangle,
+    Calendar,
+    ChevronLeft,
+    ChevronRight,
+    CloudRain,
+    Droplets,
+    Edit,
+    Gauge,
+    Thermometer,
+    Utensils,
+    Wind,
+} from 'lucide-react';
 import * as React from 'react';
 
 export interface DailyLogData {
@@ -32,11 +44,23 @@ interface DayLogSummary {
     weekNumber: number;
 }
 
-export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeInDays, onEditLog }: DailyLogCalendarProps) {
+export function DailyLogCalendar({
+    logs,
+    batchStartDate,
+    batchEndDate,
+    batchAgeInDays,
+    onEditLog,
+}: DailyLogCalendarProps) {
     // Memoize date objects to prevent unnecessary recalculations
     const today = React.useMemo(() => new Date(), []);
-    const batchStart = React.useMemo(() => new Date(batchStartDate), [batchStartDate]);
-    const batchEnd = React.useMemo(() => batchEndDate ? new Date(batchEndDate) : null, [batchEndDate]);
+    const batchStart = React.useMemo(
+        () => new Date(batchStartDate),
+        [batchStartDate],
+    );
+    const batchEnd = React.useMemo(
+        () => (batchEndDate ? new Date(batchEndDate) : null),
+        [batchEndDate],
+    );
 
     // Calculate current week of the batch
     const currentWeek = Math.ceil(batchAgeInDays / 7) || 1;
@@ -48,7 +72,7 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
     // Create a map of logs by date for quick lookup
     const logsByDate = React.useMemo(() => {
         const map = new Map<string, DailyLogData>();
-        logs.forEach(log => {
+        logs.forEach((log) => {
             const dateKey = log.log_date.split('T')[0];
             map.set(dateKey, log);
         });
@@ -57,7 +81,8 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
 
     // Calculate all batch days
     const allBatchDays = React.useMemo(() => {
-        const days: { date: Date; dayNumber: number; weekNumber: number }[] = [];
+        const days: { date: Date; dayNumber: number; weekNumber: number }[] =
+            [];
         const endDate = batchEnd || (today > batchStart ? today : batchStart);
         const currentDate = new Date(batchStart);
         let dayNumber = 1;
@@ -82,18 +107,24 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
     const filteredDays = React.useMemo(() => {
         switch (viewMode) {
             case 'today':
-                return allBatchDays.filter(d =>
-                    d.date.toDateString() === today.toDateString()
+                return allBatchDays.filter(
+                    (d) => d.date.toDateString() === today.toDateString(),
                 );
             case 'week':
-                return allBatchDays.filter(d => d.weekNumber === selectedWeek);
+                return allBatchDays.filter(
+                    (d) => d.weekNumber === selectedWeek,
+                );
             case 'all':
             default:
                 return allBatchDays;
         }
     }, [viewMode, selectedWeek, allBatchDays, today]);
 
-    const getDayInfo = (date: Date, dayNumber: number, weekNumber: number): DayLogSummary => {
+    const getDayInfo = (
+        date: Date,
+        dayNumber: number,
+        weekNumber: number,
+    ): DayLogSummary => {
         const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         const log = logsByDate.get(dateKey);
 
@@ -108,29 +139,29 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
 
     const goToPreviousWeek = () => {
         if (selectedWeek > 1) {
-            setSelectedWeek(prev => prev - 1);
+            setSelectedWeek((prev) => prev - 1);
         }
     };
 
     const goToNextWeek = () => {
         if (selectedWeek < totalWeeks) {
-            setSelectedWeek(prev => prev + 1);
+            setSelectedWeek((prev) => prev + 1);
         }
     };
 
     return (
         <div className="w-full space-y-4">
             {/* Header with filters */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 {/* View Mode Tabs */}
-                <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
                     <button
                         type="button"
                         onClick={() => setViewMode('today')}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                        className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                             viewMode === 'today'
-                                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
                         }`}
                     >
                         Today
@@ -141,10 +172,10 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
                             setViewMode('week');
                             setSelectedWeek(currentWeek);
                         }}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                        className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                             viewMode === 'week'
-                                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
                         }`}
                     >
                         Week
@@ -152,10 +183,10 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
                     <button
                         type="button"
                         onClick={() => setViewMode('all')}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                        className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                             viewMode === 'all'
-                                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
                         }`}
                     >
                         All
@@ -169,18 +200,18 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
                             type="button"
                             onClick={goToPreviousWeek}
                             disabled={selectedWeek <= 1}
-                            className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-gray-400 dark:hover:bg-gray-800"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </button>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[100px] text-center">
+                        <span className="min-w-[100px] text-center text-sm font-medium text-gray-700 dark:text-gray-300">
                             Week {selectedWeek} of {totalWeeks}
                         </span>
                         <button
                             type="button"
                             onClick={goToNextWeek}
                             disabled={selectedWeek >= totalWeeks}
-                            className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-gray-400 dark:hover:bg-gray-800"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </button>
@@ -189,15 +220,16 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
 
                 {/* Summary info */}
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {filteredDays.length} {filteredDays.length === 1 ? 'day' : 'days'}
+                    {filteredDays.length}{' '}
+                    {filteredDays.length === 1 ? 'day' : 'days'}
                     {viewMode === 'all' && ` • ${totalWeeks} weeks`}
                 </div>
             </div>
 
             {/* Days Display */}
             {filteredDays.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+                    <Calendar className="mx-auto mb-2 h-8 w-8 opacity-50" />
                     <p className="text-sm">No logs for this period</p>
                 </div>
             ) : viewMode === 'today' ? (
@@ -219,14 +251,17 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
                 </div>
             ) : (
                 // Grid view for week/all
-                <div className={`grid gap-2 ${
-                    viewMode === 'week'
-                        ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7'
-                        : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7'
-                }`}>
+                <div
+                    className={`grid gap-2 ${
+                        viewMode === 'week'
+                            ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7'
+                            : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7'
+                    }`}
+                >
                     {filteredDays.map(({ date, dayNumber, weekNumber }) => {
                         const dayInfo = getDayInfo(date, dayNumber, weekNumber);
-                        const isToday = date.toDateString() === today.toDateString();
+                        const isToday =
+                            date.toDateString() === today.toDateString();
 
                         return (
                             <DayCard
@@ -245,17 +280,17 @@ export function DailyLogCalendar({ logs, batchStartDate, batchEndDate, batchAgeI
             )}
 
             {/* Legend */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-gray-200 pt-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
                 <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
                     <span>Logged</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
                     <span>High mortality</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <CloudRain className="w-3 h-3 text-blue-500" />
+                    <CloudRain className="h-3 w-3 text-blue-500" />
                     <span>Rain</span>
                 </div>
             </div>
@@ -274,7 +309,15 @@ interface DayCardProps {
     compact?: boolean;
 }
 
-function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, compact = false }: DayCardProps) {
+function DayCard({
+    date,
+    dayNumber,
+    weekNumber,
+    dayInfo,
+    isToday,
+    onEditLog,
+    compact = false,
+}: DayCardProps) {
     const { hasLog, log, isFuture } = dayInfo;
     const isHighMortality = log && log.mortality_count > 10;
     const hasRain = log && log.rainfall_mm && log.rainfall_mm > 0;
@@ -286,8 +329,11 @@ function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, com
     };
 
     const getCellClasses = () => {
-        const base = 'relative rounded-lg border transition-all flex flex-col overflow-hidden';
-        const height = compact ? 'min-h-[80px]' : 'min-h-[110px] sm:min-h-[130px]';
+        const base =
+            'relative rounded-lg border transition-all flex flex-col overflow-hidden';
+        const height = compact
+            ? 'min-h-[80px]'
+            : 'min-h-[110px] sm:min-h-[130px]';
 
         if (isFuture) {
             return `${base} ${height} border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20`;
@@ -310,28 +356,40 @@ function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, com
     return (
         <div className={getCellClasses()} onClick={handleClick}>
             {/* Header */}
-            <div className={`flex items-center justify-between px-2 py-1.5 border-b ${
-                isToday
-                    ? 'bg-green-500 border-green-600 text-white'
-                    : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800'
-            }`}>
+            <div
+                className={`flex items-center justify-between border-b px-2 py-1.5 ${
+                    isToday
+                        ? 'border-green-600 bg-green-500 text-white'
+                        : 'border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50'
+                }`}
+            >
                 <div className="flex items-center gap-1.5">
-                    <span className={`text-[11px] font-bold ${isToday ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                    <span
+                        className={`text-[11px] font-bold ${isToday ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                    >
                         D{dayNumber}
                     </span>
                     {!compact && (
-                        <span className={`text-[10px] px-1 py-0.5 rounded ${
-                            isToday
-                                ? 'bg-green-400/30 text-green-100'
-                                : 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                        }`}>
+                        <span
+                            className={`rounded px-1 py-0.5 text-[10px] ${
+                                isToday
+                                    ? 'bg-green-400/30 text-green-100'
+                                    : 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                            }`}
+                        >
                             W{weekNumber}
                         </span>
                     )}
                 </div>
                 <div className="flex items-center gap-1">
-                    {hasRain && <CloudRain className={`h-3 w-3 ${isToday ? 'text-blue-200' : 'text-blue-500'}`} />}
-                    <span className={`text-[10px] ${isToday ? 'text-green-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {hasRain && (
+                        <CloudRain
+                            className={`h-3 w-3 ${isToday ? 'text-blue-200' : 'text-blue-500'}`}
+                        />
+                    )}
+                    <span
+                        className={`text-[10px] ${isToday ? 'text-green-100' : 'text-gray-500 dark:text-gray-400'}`}
+                    >
                         {monthDay} {month}
                     </span>
                 </div>
@@ -339,16 +397,22 @@ function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, com
 
             {/* Content */}
             {hasLog && log ? (
-                <div className="flex-1 p-2 space-y-1.5">
+                <div className="flex-1 space-y-1.5 p-2">
                     {/* Primary metrics - always visible */}
                     <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1">
-                            <AlertTriangle className={`h-3.5 w-3.5 ${isHighMortality ? 'text-amber-500' : 'text-gray-400'}`} />
-                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{log.mortality_count}</span>
+                            <AlertTriangle
+                                className={`h-3.5 w-3.5 ${isHighMortality ? 'text-amber-500' : 'text-gray-400'}`}
+                            />
+                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                {log.mortality_count}
+                            </span>
                         </div>
                         <div className="flex items-center gap-1">
                             <Utensils className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="text-xs text-gray-600 dark:text-gray-400">{log.feed_consumed_kg}kg</span>
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                                {log.feed_consumed_kg}kg
+                            </span>
                         </div>
                     </div>
 
@@ -358,33 +422,54 @@ function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, com
                             {log.water_consumed_liters && (
                                 <div className="flex items-center gap-1">
                                     <Droplets className="h-3 w-3 text-blue-400" />
-                                    <span className="text-[10px] text-gray-500 dark:text-gray-400">{log.water_consumed_liters}L water</span>
+                                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                                        {log.water_consumed_liters}L water
+                                    </span>
                                 </div>
                             )}
-                            <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex flex-wrap items-center gap-2">
                                 {log.temperature_celsius && (
-                                    <div className="flex items-center gap-0.5" title="Temperature">
+                                    <div
+                                        className="flex items-center gap-0.5"
+                                        title="Temperature"
+                                    >
                                         <Thermometer className="h-3 w-3 text-orange-400" />
-                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">{log.temperature_celsius}°</span>
+                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                                            {log.temperature_celsius}°
+                                        </span>
                                     </div>
                                 )}
                                 {log.humidity_percent && (
-                                    <div className="flex items-center gap-0.5" title="Humidity">
+                                    <div
+                                        className="flex items-center gap-0.5"
+                                        title="Humidity"
+                                    >
                                         <Gauge className="h-3 w-3 text-cyan-500" />
-                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">{log.humidity_percent}%</span>
+                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                                            {log.humidity_percent}%
+                                        </span>
                                     </div>
                                 )}
                                 {log.ammonia_ppm && (
-                                    <div className="flex items-center gap-0.5" title="Ammonia">
-                                        <Wind className={`h-3 w-3 ${log.ammonia_ppm > 20 ? 'text-red-500' : 'text-emerald-500'}`} />
-                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">{log.ammonia_ppm}ppm</span>
+                                    <div
+                                        className="flex items-center gap-0.5"
+                                        title="Ammonia"
+                                    >
+                                        <Wind
+                                            className={`h-3 w-3 ${log.ammonia_ppm > 20 ? 'text-red-500' : 'text-emerald-500'}`}
+                                        />
+                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                                            {log.ammonia_ppm}ppm
+                                        </span>
                                     </div>
                                 )}
                             </div>
                             {hasRain && (
                                 <div className="flex items-center gap-1">
                                     <CloudRain className="h-3 w-3 text-blue-500" />
-                                    <span className="text-[10px] text-blue-600 dark:text-blue-400">{log.rainfall_mm}mm rain</span>
+                                    <span className="text-[10px] text-blue-600 dark:text-blue-400">
+                                        {log.rainfall_mm}mm rain
+                                    </span>
                                 </div>
                             )}
                         </div>
@@ -392,18 +477,18 @@ function DayCard({ date, dayNumber, weekNumber, dayInfo, isToday, onEditLog, com
 
                     {/* Edit indicator */}
                     {log.isEditable && (
-                        <div className="absolute bottom-1.5 right-1.5">
+                        <div className="absolute right-1.5 bottom-1.5">
                             <Edit className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                         </div>
                     )}
                 </div>
             ) : isFuture ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-2 text-gray-400 dark:text-gray-600">
+                <div className="flex flex-1 flex-col items-center justify-center p-2 text-gray-400 dark:text-gray-600">
                     <span className="text-[10px]">{weekday}</span>
                     <span className="text-xs">Future</span>
                 </div>
             ) : (
-                <div className="flex-1 flex flex-col items-center justify-center p-2 text-gray-400 dark:text-gray-500">
+                <div className="flex flex-1 flex-col items-center justify-center p-2 text-gray-400 dark:text-gray-500">
                     <span className="text-[10px]">{weekday}</span>
                     <span className="text-xs">No log</span>
                 </div>
@@ -421,7 +506,13 @@ interface DayCardExpandedProps {
     onEditLog: (log: DailyLogData) => void;
 }
 
-function DayCardExpanded({ date, dayNumber, weekNumber, dayInfo, onEditLog }: DayCardExpandedProps) {
+function DayCardExpanded({
+    date,
+    dayNumber,
+    weekNumber,
+    dayInfo,
+    onEditLog,
+}: DayCardExpandedProps) {
     const { hasLog, log, isFuture } = dayInfo;
     const isHighMortality = log && log.mortality_count > 10;
     const hasRain = log && log.rainfall_mm && log.rainfall_mm > 0;
@@ -433,19 +524,25 @@ function DayCardExpanded({ date, dayNumber, weekNumber, dayInfo, onEditLog }: Da
     };
 
     const weekday = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const fullDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const fullDate = date.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    });
 
     if (!hasLog) {
         return (
-            <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 text-center">
-                <div className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-900">
+                <div className="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Day {dayNumber} • Week {weekNumber}
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
                     {weekday}, {fullDate}
                 </div>
                 <p className="text-gray-500 dark:text-gray-400">
-                    {isFuture ? 'This day is in the future' : 'No log recorded for today'}
+                    {isFuture
+                        ? 'This day is in the future'
+                        : 'No log recorded for today'}
                 </p>
             </div>
         );
@@ -455,23 +552,23 @@ function DayCardExpanded({ date, dayNumber, weekNumber, dayInfo, onEditLog }: Da
         <div
             className={`rounded-xl border-2 ${
                 isHighMortality
-                    ? 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20'
-                    : 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
-            } ${log?.isEditable ? 'cursor-pointer hover:shadow-lg transition-shadow' : ''}`}
+                    ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
+                    : 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+            } ${log?.isEditable ? 'cursor-pointer transition-shadow hover:shadow-lg' : ''}`}
             onClick={handleClick}
         >
             {/* Header */}
-            <div className="px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/50 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200/50 px-4 py-3 dark:border-gray-700/50">
                 <div>
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-wrap items-center gap-2">
                         <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                             Day {dayNumber}
                         </span>
-                        <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded">
+                        <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                             Week {weekNumber}
                         </span>
                         {hasRain && (
-                            <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded">
+                            <span className="flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                                 <CloudRain className="h-3 w-3" />
                                 {log?.rainfall_mm}mm
                             </span>
@@ -482,7 +579,7 @@ function DayCardExpanded({ date, dayNumber, weekNumber, dayInfo, onEditLog }: Da
                     </div>
                 </div>
                 {log?.isEditable && (
-                    <div className="flex items-center gap-1 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                    <div className="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
                         <Edit className="h-3.5 w-3.5" />
                         Tap to edit
                     </div>
@@ -490,12 +587,14 @@ function DayCardExpanded({ date, dayNumber, weekNumber, dayInfo, onEditLog }: Da
             </div>
 
             {/* Metrics Grid */}
-            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
                 <MetricItem
                     icon={AlertTriangle}
                     label="Mortality"
                     value={log!.mortality_count.toString()}
-                    iconColor={isHighMortality ? 'text-amber-500' : 'text-gray-400'}
+                    iconColor={
+                        isHighMortality ? 'text-amber-500' : 'text-gray-400'
+                    }
                     alert={isHighMortality}
                 />
                 <MetricItem
@@ -533,7 +632,11 @@ function DayCardExpanded({ date, dayNumber, weekNumber, dayInfo, onEditLog }: Da
                         icon={Wind}
                         label="Ammonia"
                         value={`${log!.ammonia_ppm} ppm`}
-                        iconColor={log!.ammonia_ppm > 20 ? 'text-red-500' : 'text-emerald-500'}
+                        iconColor={
+                            log!.ammonia_ppm > 20
+                                ? 'text-red-500'
+                                : 'text-emerald-500'
+                        }
                         alert={log!.ammonia_ppm > 20}
                     />
                 )}
@@ -551,19 +654,33 @@ interface MetricItemProps {
     alert?: boolean;
 }
 
-function MetricItem({ icon: Icon, label, value, iconColor, alert }: MetricItemProps) {
+function MetricItem({
+    icon: Icon,
+    label,
+    value,
+    iconColor,
+    alert,
+}: MetricItemProps) {
     return (
-        <div className={`flex items-center gap-3 p-3 rounded-lg ${
-            alert ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-white/60 dark:bg-gray-800/50'
-        }`}>
+        <div
+            className={`flex items-center gap-3 rounded-lg p-3 ${
+                alert
+                    ? 'bg-amber-100 dark:bg-amber-900/30'
+                    : 'bg-white/60 dark:bg-gray-800/50'
+            }`}
+        >
             <Icon className={`h-5 w-5 shrink-0 ${iconColor}`} />
             <div className="min-w-0">
-                <div className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <div className="text-[10px] tracking-wide text-gray-500 uppercase dark:text-gray-400">
                     {label}
                 </div>
-                <div className={`text-sm font-semibold truncate ${
-                    alert ? 'text-amber-700 dark:text-amber-300' : 'text-gray-900 dark:text-gray-100'
-                }`}>
+                <div
+                    className={`truncate text-sm font-semibold ${
+                        alert
+                            ? 'text-amber-700 dark:text-amber-300'
+                            : 'text-gray-900 dark:text-gray-100'
+                    }`}
+                >
                     {value}
                 </div>
             </div>

@@ -120,8 +120,20 @@ function SheetHeader({
                     </div>
                 )}
                 <div className="min-w-0 flex-1">
-                    {title && <h2 className="text-foreground truncate font-semibold">{title}</h2>}
-                    {description && <p className="text-muted-foreground mt-1 text-sm">{description}</p>}
+                    {title && (
+                        <SheetPrimitive.Title className="text-foreground truncate font-semibold">
+                            {title}
+                        </SheetPrimitive.Title>
+                    )}
+                    {description ? (
+                        <SheetPrimitive.Description className="text-muted-foreground mt-1 text-sm">
+                            {description}
+                        </SheetPrimitive.Description>
+                    ) : (
+                        <SheetPrimitive.Description className="sr-only">
+                            {title}
+                        </SheetPrimitive.Description>
+                    )}
                     {children}
                 </div>
             </div>

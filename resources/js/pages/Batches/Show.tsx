@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/sheet';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import {
     Activity,
     Bird,
@@ -32,7 +32,6 @@ import {
     Edit,
     Plus,
     Scale,
-    Scissors,
     TrendingUp,
     Utensils,
 } from 'lucide-react';
@@ -243,12 +242,6 @@ export default function Show({
                                         </SheetContent>
                                     </Sheet>
                                 )}
-                                <Link href="/slaughter/create">
-                                    <Button variant="outline" size="sm">
-                                        <Scissors className="mr-1.5 h-4 w-4" />
-                                        Process Slaughter
-                                    </Button>
-                                </Link>
                             </div>
                         )}
                     </CardContent>

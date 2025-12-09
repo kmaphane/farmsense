@@ -23,25 +23,9 @@ class SlaughterBatchSourceData extends Data
         #[Required, IntegerType, Min(0)]
         public int $actual_quantity,
 
-        public ?DiscrepancyReason $discrepancy_reason = null,
+        public ?DiscrepancyReason $discrepancy_reason,
 
         #[StringType]
-        public ?string $discrepancy_notes = null,
+        public ?string $discrepancy_notes,
     ) {}
-
-    /**
-     * Check if there's a discrepancy between expected and actual.
-     */
-    public function hasDiscrepancy(): bool
-    {
-        return $this->actual_quantity < $this->expected_quantity;
-    }
-
-    /**
-     * Get the discrepancy amount.
-     */
-    public function getDiscrepancyAmount(): int
-    {
-        return max(0, $this->expected_quantity - $this->actual_quantity);
-    }
 }

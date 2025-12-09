@@ -1,9 +1,14 @@
-import { DailyLogForm, type LastLogData } from '@/components/broiler/DailyLogForm';
+import {
+    index,
+    show,
+} from '@/actions/App/Http/Controllers/Batches/BatchController';
+import {
+    DailyLogForm,
+    type LastLogData,
+} from '@/components/broiler/DailyLogForm';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { index } from '@/actions/App/Http/Controllers/Batches/BatchController';
-import { show } from '@/actions/App/Http/Controllers/Batches/BatchController';
 
 interface BatchData {
     id: number;
@@ -37,7 +42,8 @@ export default function Create({ batch, lastLog, suggestedDate }: Props) {
                         Record Daily Log
                     </h1>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {batch.name} • Day {batch.age_in_days} • {batch.current_bird_count.toLocaleString()} birds
+                        {batch.name} • Day {batch.age_in_days} •{' '}
+                        {batch.current_bird_count.toLocaleString()} birds
                     </p>
                 </div>
 

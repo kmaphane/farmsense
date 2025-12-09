@@ -6,7 +6,9 @@ export default function AppLogo() {
                 alt="FarmSense Logo"
                 className="size-8 object-contain"
             />
-            <span className="font-semibold text-sm leading-tight truncate">FarmSense</span>
+            <span className="truncate text-sm leading-tight font-semibold">
+                FarmSense
+            </span>
         </span>
     );
 }

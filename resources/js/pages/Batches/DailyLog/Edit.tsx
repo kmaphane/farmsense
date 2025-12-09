@@ -1,9 +1,14 @@
-import { DailyLogForm, type DailyLogFormData } from '@/components/broiler/DailyLogForm';
+import {
+    index,
+    show,
+} from '@/actions/App/Http/Controllers/Batches/BatchController';
+import {
+    DailyLogForm,
+    type DailyLogFormData,
+} from '@/components/broiler/DailyLogForm';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { index } from '@/actions/App/Http/Controllers/Batches/BatchController';
-import { show } from '@/actions/App/Http/Controllers/Batches/BatchController';
 
 interface BatchData {
     id: number;
@@ -33,7 +38,8 @@ export default function Edit({ batch, dailyLog }: Props) {
                         Edit Daily Log
                     </h1>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {batch.name} • {new Date(dailyLog.log_date).toLocaleDateString()}
+                        {batch.name} •{' '}
+                        {new Date(dailyLog.log_date).toLocaleDateString()}
                     </p>
                 </div>
 

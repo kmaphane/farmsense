@@ -16,6 +16,7 @@ use Tests\TestCase;
 class MultiTenancyScopingTest extends TestCase
 {
     use RefreshDatabase;
+
     protected User $user;
 
     protected Team $team1;

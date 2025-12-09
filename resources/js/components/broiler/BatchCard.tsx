@@ -1,8 +1,20 @@
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from '@inertiajs/react';
 import { show } from '@/actions/App/Http/Controllers/Batches/BatchController';
-import { Activity, AlertTriangle, Bird, ChevronRight, TrendingUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Link } from '@inertiajs/react';
+import {
+    Activity,
+    AlertTriangle,
+    Bird,
+    ChevronRight,
+    TrendingUp,
+} from 'lucide-react';
 
 export interface BatchCardData {
     id: number;
@@ -22,7 +34,9 @@ interface BatchCardProps {
     variant?: 'card' | 'list';
 }
 
-function getStatusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
+function getStatusVariant(
+    status: string,
+): 'default' | 'secondary' | 'destructive' | 'outline' {
     switch (status) {
         case 'active':
             return 'default';
@@ -35,7 +49,11 @@ function getStatusVariant(status: string): 'default' | 'secondary' | 'destructiv
     }
 }
 
-export function BatchCard({ batch, showLink = true, variant = 'card' }: BatchCardProps) {
+export function BatchCard({
+    batch,
+    showLink = true,
+    variant = 'card',
+}: BatchCardProps) {
     const isAlert = batch.mortality_rate > 5;
 
     if (variant === 'list') {
@@ -45,13 +63,20 @@ export function BatchCard({ batch, showLink = true, variant = 'card' }: BatchCar
                 className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
             >
                 <div className="flex items-center gap-4">
-                    <div className={`rounded-full p-2 ${isAlert ? 'bg-red-100 dark:bg-red-900/30' : 'bg-green-100 dark:bg-green-900/30'}`}>
-                        <Bird className={`h-5 w-5 ${isAlert ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`} />
+                    <div
+                        className={`rounded-full p-2 ${isAlert ? 'bg-red-100 dark:bg-red-900/30' : 'bg-green-100 dark:bg-green-900/30'}`}
+                    >
+                        <Bird
+                            className={`h-5 w-5 ${isAlert ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}
+                        />
                     </div>
                     <div>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">{batch.name}</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">
+                            {batch.name}
+                        </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Day {batch.age_in_days} • {batch.current_bird_count.toLocaleString()} birds
+                            Day {batch.age_in_days} •{' '}
+                            {batch.current_bird_count.toLocaleString()} birds
                         </p>
                     </div>
                 </div>
@@ -60,7 +85,9 @@ export function BatchCard({ batch, showLink = true, variant = 'card' }: BatchCar
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                             FCR: {batch.fcr?.toFixed(2) ?? '-'}
                         </p>
-                        <p className={`text-xs ${isAlert ? 'text-red-600' : 'text-gray-500 dark:text-gray-400'}`}>
+                        <p
+                            className={`text-xs ${isAlert ? 'text-red-600' : 'text-gray-500 dark:text-gray-400'}`}
+                        >
                             Mortality: {batch.mortality_rate.toFixed(1)}%
                         </p>
                     </div>
@@ -76,7 +103,9 @@ export function BatchCard({ batch, showLink = true, variant = 'card' }: BatchCar
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
                         <CardTitle className="text-lg">{batch.name}</CardTitle>
-                        <CardDescription>Day {batch.age_in_days}</CardDescription>
+                        <CardDescription>
+                            Day {batch.age_in_days}
+                        </CardDescription>
                     </div>
                     <Badge variant={getStatusVariant(batch.status)}>
                         {batch.statusLabel}
@@ -88,15 +117,23 @@ export function BatchCard({ batch, showLink = true, variant = 'card' }: BatchCar
                     <div className="flex items-center gap-2">
                         <Bird className="h-4 w-4 text-gray-500" />
                         <div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Birds</p>
-                            <p className="font-medium">{batch.current_bird_count.toLocaleString()}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Birds
+                            </p>
+                            <p className="font-medium">
+                                {batch.current_bird_count.toLocaleString()}
+                            </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <TrendingUp className="h-4 w-4 text-gray-500" />
                         <div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">FCR</p>
-                            <p className="font-medium">{batch.fcr?.toFixed(2) ?? '-'}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                FCR
+                            </p>
+                            <p className="font-medium">
+                                {batch.fcr?.toFixed(2) ?? '-'}
+                            </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -106,8 +143,12 @@ export function BatchCard({ batch, showLink = true, variant = 'card' }: BatchCar
                             <Activity className="h-4 w-4 text-gray-500" />
                         )}
                         <div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Mortality</p>
-                            <p className={`font-medium ${isAlert ? 'text-red-600' : ''}`}>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Mortality
+                            </p>
+                            <p
+                                className={`font-medium ${isAlert ? 'text-red-600' : ''}`}
+                            >
                                 {batch.mortality_rate.toFixed(1)}%
                             </p>
                         </div>
@@ -174,7 +215,13 @@ export function BatchList({
     }
 
     return (
-        <div className={variant === 'card' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'space-y-3'}>
+        <div
+            className={
+                variant === 'card'
+                    ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3'
+                    : 'space-y-3'
+            }
+        >
             {batches.map((batch) => (
                 <BatchCard key={batch.id} batch={batch} variant={variant} />
             ))}

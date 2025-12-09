@@ -15,18 +15,10 @@ class SlaughterYieldData extends Data
         #[Required, IntegerType]
         public int $product_id,
 
-        #[Required, IntegerType, Min(0)]
+        #[Required, IntegerType]
         public int $estimated_quantity,
 
         #[Required, IntegerType, Min(0)]
         public int $actual_quantity,
     ) {}
-
-    /**
-     * Get the household consumed amount (estimated - actual).
-     */
-    public function getHouseholdConsumed(): int
-    {
-        return max(0, $this->estimated_quantity - $this->actual_quantity);
-    }
 }

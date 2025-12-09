@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(composer dump-autoload:*)",
-      "Bash(php artisan test:*)"
+      "Bash(php artisan test:*)",
+      "Bash(\"/c/Users/Kenna Maphane/.config/herd/bin/composer\" --version)",
+      "Bash(\"/c/Users/Kenna Maphane/.config/herd/bin/php.bat\" artisan wayfinder:generate --no-interaction)",
+      "Bash(\"/c/Users/Kenna Maphane/.config/herd/bin/php.bat\" vendor/bin/pint)",
+      "Bash(\"/c/Users/Kenna Maphane/.config/herd/bin/php.bat\" artisan test --parallel --filter=\"\")",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

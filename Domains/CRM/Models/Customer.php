@@ -11,9 +11,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
+    use BelongsToTeam;
+
     /** @use HasFactory<CustomerFactory> */
     use HasFactory;
-    use BelongsToTeam;
 
     protected $fillable = [
         'team_id',

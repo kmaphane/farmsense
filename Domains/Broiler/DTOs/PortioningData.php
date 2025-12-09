@@ -28,30 +28,13 @@ class PortioningData extends Data
         #[Required, IntegerType, Min(1)]
         public int $packs_produced,
 
-        #[Numeric, Min(0.1)]
-        public float $pack_weight_kg = 0.5,
+        #[Numeric]
+        public float $pack_weight_kg,
 
         #[StringType]
-        public ?string $notes = null,
+        public ?string $notes,
+
+        #[Required, IntegerType]
+        public int $recorded_by,
     ) {}
-
-    /**
-     * Calculate total weight produced in kg.
-     */
-    public function getTotalWeightProduced(): float
-    {
-        return $this->packs_produced * $this->pack_weight_kg;
-    }
-
-    /**
-     * Calculate average yield per bird in kg.
-     */
-    public function getAverageYieldPerBird(): float
-    {
-        if ($this->whole_birds_used === 0) {
-            return 0;
-        }
-
-        return round($this->getTotalWeightProduced() / $this->whole_birds_used, 2);
-    }
 }

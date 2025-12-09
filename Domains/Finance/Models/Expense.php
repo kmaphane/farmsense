@@ -12,9 +12,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Expense extends Model
 {
+    use BelongsToTeam;
+
     /** @use HasFactory<ExpenseFactory> */
     use HasFactory;
-    use BelongsToTeam;
 
     protected $fillable = [
         'team_id',

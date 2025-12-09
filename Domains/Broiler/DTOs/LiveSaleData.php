@@ -27,40 +27,16 @@ class LiveSaleData extends Data
         #[Required, IntegerType, Min(1)]
         public int $quantity_sold,
 
-        #[IntegerType, Min(1)]
-        public ?int $unit_price_cents = null,
+        #[IntegerType]
+        public ?int $unit_price_cents,
 
         #[IntegerType]
-        public ?int $customer_id = null,
+        public ?int $customer_id,
 
         #[StringType]
-        public ?string $notes = null,
+        public ?string $notes,
+
+        #[Required, IntegerType]
+        public int $recorded_by,
     ) {}
-
-    /**
-     * Calculate total amount in cents.
-     * Returns null if unit price is not set.
-     */
-    public function getTotalAmountCents(): ?int
-    {
-        if ($this->unit_price_cents === null) {
-            return null;
-        }
-
-        return $this->quantity_sold * $this->unit_price_cents;
-    }
-
-    /**
-     * Format total amount as BWP string.
-     */
-    public function getFormattedTotal(): ?string
-    {
-        $total = $this->getTotalAmountCents();
-
-        if ($total === null) {
-            return null;
-        }
-
-        return 'P '.number_format($total / 100, 2);
-    }
 }
