@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, Package, ShoppingCart } from 'lucide-react';
+import { DollarSign, Package } from 'lucide-react';
 
 interface ProcessedProduct {
     name: string;
@@ -9,15 +9,10 @@ interface ProcessedProduct {
     value: number;
 }
 
-interface CashflowMetrics {
+interface Props {
     stockValue: number;
-    monthlySales: number;
     carcassPrice: number | null;
     processedProducts: ProcessedProduct[];
-}
-
-interface Props {
-    cashflow: CashflowMetrics;
 }
 
 function formatCurrency(cents: number): string {
@@ -27,36 +22,27 @@ function formatCurrency(cents: number): string {
     })}`;
 }
 
-export function CashflowStatsWidget({ cashflow }: Props) {
+export function StockOverviewWidget({ stockValue, carcassPrice, processedProducts }: Props) {
     const stats = [
         {
             title: 'Processed Stock Value',
-            value: formatCurrency(cashflow.stockValue),
+            value: formatCurrency(stockValue),
             description: 'Carcass, cuts & offal ready for sale',
             icon: DollarSign,
-            trend: null,
-        },
-        {
-            title: 'Monthly Sales',
-            value: formatCurrency(cashflow.monthlySales),
-            description: 'Revenue this month',
-            icon: ShoppingCart,
-            trend: null,
         },
         {
             title: 'Carcass Price',
-            value: cashflow.carcassPrice
-                ? formatCurrency(cashflow.carcassPrice)
+            value: carcassPrice
+                ? formatCurrency(carcassPrice)
                 : '-',
             description: 'Current whole chicken price',
             icon: Package,
-            trend: null,
         },
     ];
 
     return (
         <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
                 {stats.map((stat) => (
                     <Card key={stat.title}>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -80,7 +66,7 @@ export function CashflowStatsWidget({ cashflow }: Props) {
             </div>
 
             {/* Stock Breakdown */}
-            {cashflow.processedProducts.length > 0 && (
+            {processedProducts.length > 0 && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-sm font-medium">
@@ -89,7 +75,7 @@ export function CashflowStatsWidget({ cashflow }: Props) {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-2">
-                            {cashflow.processedProducts.map((product, i) => (
+                            {processedProducts.map((product, i) => (
                                 <div
                                     key={i}
                                     className="flex items-center justify-between rounded-md border p-2"

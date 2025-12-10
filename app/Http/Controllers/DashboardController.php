@@ -29,6 +29,16 @@ class DashboardController extends Controller
     {
         $teamId = Auth::user()->current_team_id;
 
+        // Get filter dates from request
+        $startDate = request('start_date') ? \Carbon\Carbon::parse(request('start_date')) : null;
+        $endDate = request('end_date') ? \Carbon\Carbon::parse(request('end_date')) : null;
+
+        // Default to last 7 days if no dates provided
+        if (! $startDate || ! $endDate) {
+            $startDate = now()->subDays(6)->startOfDay();
+            $endDate = now()->endOfDay();
+        }
+
         // Get active batches
         $activeBatches = Batch::query()
             ->where('team_id', $teamId)
@@ -88,7 +98,7 @@ class DashboardController extends Controller
             ],
             'recentBatches' => $recentBatches,
             'cashflow' => $this->calculateCashflowMetrics($teamId),
-            'cashflowHistory' => $this->getCashflowHistory($teamId, 7),
+            'cashflowHistory' => $this->getCashflowHistory($teamId, $startDate, $endDate),
             'lowStockAlerts' => $this->getLowStockAlerts($teamId),
             'plannedBatches' => $this->getPlannedBatchTimeline($teamId),
         ]);
@@ -139,13 +149,10 @@ class DashboardController extends Controller
     }
 
     /**
-     * Get cashflow history for the last N days (cash in vs cash out).
+     * Get cashflow history for the specified date range.
      */
-    protected function getCashflowHistory(int $teamId, int $days = 7): array
+    protected function getCashflowHistory(int $teamId, \Carbon\Carbon $startDate, \Carbon\Carbon $endDate): array
     {
-        $startDate = now()->subDays($days - 1)->startOfDay();
-        $endDate = now()->endOfDay();
-
         // Get cash IN (sales revenue) grouped by date
         $cashIn = LiveSaleRecord::query()
             ->where('team_id', $teamId)
@@ -172,24 +179,70 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('date');
 
+        // Calculate number of days
+        $days = (int) ($startDate->diffInDays($endDate) + 1);
+
         // Build array for each day
         $history = [];
-        for ($i = $days - 1; $i >= 0; $i--) {
-            $date = now()->subDays($i)->format('Y-m-d');
-            $dateLabel = now()->subDays($i)->format('M d');
+        for ($i = 0; $i < $days; $i++) {
+            $currentDate = (clone $startDate)->addDays($i);
+            $dateString = $currentDate->format('Y-m-d');
+            $dateLabel = $currentDate->format('M d');
 
             $history[] = [
-                'date' => $date,
+                'date' => $dateString,
                 'date_label' => $dateLabel,
-                'cash_in' => $cashIn->get($date)?->amount ?? 0,
-                'cash_out' => $cashOut->get($date)?->amount ?? 0,
-                'net' => ($cashIn->get($date)?->amount ?? 0) - ($cashOut->get($date)?->amount ?? 0),
+                'cash_in' => $cashIn->get($dateString)?->amount ?? 0,
+                'cash_out' => $cashOut->get($dateString)?->amount ?? 0,
+                'net' => ($cashIn->get($dateString)?->amount ?? 0) - ($cashOut->get($dateString)?->amount ?? 0),
             ];
         }
 
         // Calculate totals
         $totalCashIn = collect($history)->sum('cash_in');
         $totalCashOut = collect($history)->sum('cash_out');
+
+        // Fetch detailed transactions for the table
+        $sales = LiveSaleRecord::query()
+            ->where('team_id', $teamId)
+            ->whereBetween('sale_date', [$startDate, $endDate])
+            ->with(['customer', 'batch'])
+            ->latest('sale_date')
+            ->limit(50)
+            ->get()
+            ->map(function ($sale) {
+                return [
+                    'id' => 'sale_' . $sale->id,
+                    'date' => $sale->sale_date->format('Y-m-d'),
+                    'description' => $sale->customer ? 'Sale to ' . $sale->customer->name : 'Walk-in Sale',
+                    'category' => 'Product Sale',
+                    'amount' => $sale->total_amount_cents,
+                    'type' => 'in',
+                ];
+            });
+
+        $expenses = Expense::query()
+            ->where('team_id', $teamId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->latest('created_at')
+            ->limit(50)
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'id' => 'expense_' . $expense->id,
+                    'date' => $expense->created_at->format('Y-m-d'),
+                    'description' => $expense->description ?? 'Expense',
+                    'category' => $expense->category?->label() ?? 'General',
+                    'amount' => $expense->amount,
+                    'type' => 'out',
+                ];
+            });
+
+        $transactions = $sales->concat($expenses)
+            ->sortByDesc('date')
+            ->values()
+            ->take(50)
+            ->toArray();
 
         return [
             'daily' => $history,
@@ -199,10 +252,11 @@ class DashboardController extends Controller
                 'net' => $totalCashIn - $totalCashOut,
             ],
             'period' => [
-                'start' => now()->subDays($days - 1)->format('M d'),
-                'end' => now()->format('M d'),
+                'start' => $startDate->format('M d'),
+                'end' => $endDate->format('M d'),
                 'days' => $days,
             ],
+            'transactions' => $transactions,
         ];
     }
 

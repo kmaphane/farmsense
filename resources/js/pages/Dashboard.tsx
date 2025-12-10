@@ -1,8 +1,8 @@
 import { BatchCard, type BatchCardData } from '@/components/broiler/BatchCard';
-import { CashflowStatsWidget } from '@/components/dashboard/CashflowStatsWidget';
 import { CashflowChartWidget } from '@/components/dashboard/CashflowChartWidget';
 import { LowStockAlertWidget } from '@/components/dashboard/LowStockAlertWidget';
 import { PlannedBatchTimelineWidget } from '@/components/dashboard/PlannedBatchTimelineWidget';
+import { StockOverviewWidget } from '@/components/dashboard/StockOverviewWidget';
 import {
     Card,
     CardContent,
@@ -155,24 +155,33 @@ export default function Dashboard({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
-                {/* Zone A: Cashflow & Sales Snapshot */}
+                {/* Zone A: Cashflow Snapshot */}
                 <section>
-                    <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                        Cashflow & Sales
+                    <h2 className="mb-3 flex items-center gap-2 border-l-4 border-yellow-500 pl-3 text-lg font-bold uppercase tracking-wide text-yellow-600 dark:text-yellow-400">
+                        Cash Flow
                     </h2>
 
                     {/* 7-Day Cash Flow Tracker */}
                     <div className="mb-4">
                         <CashflowChartWidget history={cashflowHistory} />
                     </div>
-
-                    {/* Stock Value & Breakdown */}
-                    <CashflowStatsWidget cashflow={cashflow} />
                 </section>
 
-                {/* Zone B: Live Pulse (Production) */}
+                {/* Zone B: Processed Stock Breakdown */}
                 <section>
-                    <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h2 className="mb-3 flex items-center gap-2 border-l-4 border-yellow-500 pl-3 text-lg font-bold uppercase tracking-wide text-yellow-600 dark:text-yellow-400">
+                        Stock & Inventory
+                    </h2>
+                     <StockOverviewWidget
+                        stockValue={cashflow.stockValue}
+                        carcassPrice={cashflow.carcassPrice}
+                        processedProducts={cashflow.processedProducts}
+                    />
+                </section>
+
+                {/* Zone C: Live Pulse (Production) */}
+                <section>
+                    <h2 className="mb-3 flex items-center gap-2 border-l-4 border-yellow-500 pl-3 text-lg font-bold uppercase tracking-wide text-yellow-600 dark:text-yellow-400">
                         Production Pulse
                     </h2>
 
