@@ -8,7 +8,9 @@
       "Bash(\"/c/Users/Kenna Maphane/.config/herd/bin/php.bat\" vendor/bin/pint)",
       "Bash(\"/c/Users/Kenna Maphane/.config/herd/bin/php.bat\" artisan test --parallel --filter=\"\")",
       "Bash(npm run build:*)",
-      "Bash(npm run format:*)"
+      "Bash(npm run format:*)",
+      "Bash(find:*)",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": []

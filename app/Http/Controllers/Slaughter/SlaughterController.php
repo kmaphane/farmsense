@@ -25,6 +25,41 @@ class SlaughterController extends Controller
     ) {}
 
     /**
+     * Display a listing of slaughter records.
+     */
+    public function index(): Response
+    {
+        $teamId = Auth::user()->current_team_id;
+
+        $slaughterRecords = SlaughterRecord::query()
+            ->where('team_id', $teamId)
+            ->with(['batchSources.batch', 'recorder'])
+            ->withCount('yields')
+            ->orderBy('slaughter_date', 'desc')
+            ->paginate(15);
+
+        return Inertia::render('Slaughter/Index', [
+            'slaughterRecords' => $slaughterRecords->through(fn ($record) => [
+                'id' => $record->id,
+                'slaughter_date' => $record->slaughter_date->toDateString(),
+                'slaughter_date_formatted' => $record->slaughter_date->format('M d, Y'),
+                'total_birds_slaughtered' => $record->total_birds_slaughtered,
+                'batches_count' => $record->batchSources->count(),
+                'batches_names' => $record->batchSources->pluck('batch.name')->implode(', '),
+                'yields_count' => $record->yields_count,
+                'has_discrepancies' => $record->batchSources->contains(fn ($source) => $source->actual_quantity < $source->expected_quantity),
+                'recorded_by' => $record->recorder->name,
+            ]),
+            'pagination' => [
+                'current_page' => $slaughterRecords->currentPage(),
+                'last_page' => $slaughterRecords->lastPage(),
+                'per_page' => $slaughterRecords->perPage(),
+                'total' => $slaughterRecords->total(),
+            ],
+        ]);
+    }
+
+    /**
      * Get form data for Quick Actions sheet (JSON API).
      */
     public function data(): SlaughterFormDataResource

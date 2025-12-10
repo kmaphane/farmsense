@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProductResource\Pages\CreateProduct;
-use App\Filament\Resources\ProductResource\Pages\EditProduct;
 use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use BackedEnum;
 use Domains\Inventory\Enums\ProductType;
@@ -57,6 +55,24 @@ class ProductResource extends Resource
                         ->required()
                         ->default('bag')
                         ->maxLength(50),
+                    TextInput::make('selling_price_cents')
+                        ->numeric()
+                        ->step(1)
+                        ->label('Selling Price (thebe)')
+                        ->helperText('Current selling price in thebe'),
+                    TextInput::make('units_per_package')
+                        ->numeric()
+                        ->step(1)
+                        ->label('Units per Package')
+                        ->helperText('How many units per package (e.g., 10 feet per pack)'),
+                    Select::make('package_unit')
+                        ->options(\Domains\Inventory\Enums\PackageUnit::class)
+                        ->label('Package Unit'),
+                    TextInput::make('yield_per_bird')
+                        ->numeric()
+                        ->step(1)
+                        ->label('Yield per Bird')
+                        ->helperText('How many of this item per bird (feet=2, others=1)'),
                 ])->columns(2),
 
             Section::make('Stock Management')
@@ -100,6 +116,17 @@ class ProductResource extends Resource
                     ]),
                 TextColumn::make('unit')
                     ->label('Unit'),
+                TextColumn::make('selling_price_cents')
+                    ->label('Selling Price')
+                    ->formatStateUsing(fn ($state) => $state ? 'BWP '.number_format($state / 100, 2) : '—'),
+                TextColumn::make('units_per_package')
+                    ->label('Units/Package')
+                    ->numeric(),
+                TextColumn::make('package_unit')
+                    ->label('Package Unit'),
+                TextColumn::make('yield_per_bird')
+                    ->label('Yield/Bird')
+                    ->numeric(),
                 TextColumn::make('quantity_on_hand')
                     ->label('Stock')
                     ->numeric()
@@ -140,8 +167,6 @@ class ProductResource extends Resource
     {
         return [
             'index' => ListProducts::route('/'),
-            'create' => CreateProduct::route('/create'),
-            'edit' => EditProduct::route('/{record}/edit'),
         ];
     }
 }

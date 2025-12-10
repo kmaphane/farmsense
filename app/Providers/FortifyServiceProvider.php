@@ -43,13 +43,30 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Configure Fortify views.
      *
-     * Disabled - Authentication views are now handled by Filament admin panel.
-     * All auth routes redirect to /admin/login
+     * Use Inertia for frontend authentication.
+     * Filament admin panel has separate auth at /admin/login
      */
     private function configureViews(): void
     {
-        // Views are disabled in config/fortify.php
-        // Filament handles all authentication
+        Fortify::loginView(function () {
+            return inertia('auth/login', [
+                'canResetPassword' => \Laravel\Fortify\Features::enabled(\Laravel\Fortify\Features::resetPasswords()),
+                'status' => session('status'),
+            ]);
+        });
+
+        Fortify::requestPasswordResetLinkView(function () {
+            return inertia('auth/forgot-password', [
+                'status' => session('status'),
+            ]);
+        });
+
+        Fortify::resetPasswordView(function ($request) {
+            return inertia('auth/reset-password', [
+                'email' => $request->email,
+                'token' => $request->route('token'),
+            ]);
+        });
     }
 
     /**

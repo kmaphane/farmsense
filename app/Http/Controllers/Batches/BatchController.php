@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Batches;
 
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Domains\Broiler\DTOs\BatchData;
 use Domains\Broiler\Enums\BatchStatus;
 use Domains\Broiler\Models\Batch;
@@ -118,6 +117,44 @@ class BatchController extends Controller
             'suggestedDate' => $suggestedDate,
             // Live sale data for sheet
             'liveSale' => $this->getLiveSaleData($batch),
+        ]);
+    }
+
+    /**
+     * Display batch history (all batches including closed).
+     */
+    public function history(): Response
+    {
+        $teamId = Auth::user()->current_team_id;
+
+        $batches = Batch::query()
+            ->where('team_id', $teamId)
+            ->with(['supplier'])
+            ->orderBy('start_date', 'desc')
+            ->paginate(15);
+
+        return Inertia::render('Batches/History', [
+            'batches' => $batches->through(fn (Batch $batch) => [
+                'id' => $batch->id,
+                'name' => $batch->name,
+                'start_date' => $batch->start_date->format('M d, Y'),
+                'end_date' => $batch->end_date?->format('M d, Y'),
+                'age_in_days' => $batch->age_in_days,
+                'initial_quantity' => $batch->initial_quantity,
+                'current_quantity' => $batch->current_quantity,
+                'status' => $batch->status->value,
+                'statusLabel' => $batch->status->label(),
+                'statusColor' => $batch->status->color(),
+                'supplier_name' => $batch->supplier?->name,
+                'fcr' => $this->calculationService->calculateFCR($batch) ?: null,
+                'mortality_rate' => $this->calculationService->calculateMortalityRate($batch),
+            ]),
+            'pagination' => [
+                'current_page' => $batches->currentPage(),
+                'last_page' => $batches->lastPage(),
+                'per_page' => $batches->perPage(),
+                'total' => $batches->total(),
+            ],
         ]);
     }
 

@@ -49,7 +49,25 @@ class ProductData extends BaseData
         public ?int $unit_cost,
 
         #[BooleanType]
-        public bool $is_active = true,
+        public bool $is_active,
+
+        #[Nullable]
+        #[Numeric]
+        #[Min(0)]
+        public ?int $selling_price_cents,
+
+        #[Nullable]
+        #[Numeric]
+        #[Min(0)]
+        public ?int $units_per_package,
+
+        #[Nullable]
+        public ?string $package_unit,
+
+        #[Nullable]
+        #[Numeric]
+        #[Min(0)]
+        public ?int $yield_per_bird,
     ) {}
 
     /**

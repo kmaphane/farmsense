@@ -14,6 +14,40 @@ use Inertia\Response;
 class DailyLogController extends Controller
 {
     /**
+     * Display a listing of all daily logs.
+     */
+    public function index(): Response
+    {
+        $teamId = Auth::user()->current_team_id;
+
+        $dailyLogs = DailyLog::query()
+            ->where('team_id', $teamId)
+            ->with(['batch', 'recorder'])
+            ->orderBy('log_date', 'desc')
+            ->paginate(15);
+
+        return Inertia::render('DailyLogs/Index', [
+            'dailyLogs' => $dailyLogs->through(fn ($log) => [
+                'id' => $log->id,
+                'log_date' => $log->log_date->format('M d, Y'),
+                'batch_name' => $log->batch->name,
+                'batch_id' => $log->batch_id,
+                'mortality_count' => $log->mortality_count,
+                'feed_consumed_kg' => (float) $log->feed_consumed_kg,
+                'water_consumed_liters' => $log->water_consumed_liters ? (float) $log->water_consumed_liters : null,
+                'temperature_celsius' => $log->temperature_celsius ? (float) $log->temperature_celsius : null,
+                'recorded_by' => $log->recorder->name,
+            ]),
+            'pagination' => [
+                'current_page' => $dailyLogs->currentPage(),
+                'last_page' => $dailyLogs->lastPage(),
+                'per_page' => $dailyLogs->perPage(),
+                'total' => $dailyLogs->total(),
+            ],
+        ]);
+    }
+
+    /**
      * Show the form for creating a new daily log.
      */
     public function create(Batch $batch): Response

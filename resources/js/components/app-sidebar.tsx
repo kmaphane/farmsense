@@ -22,9 +22,9 @@ import {
     Layers,
     LayoutGrid,
     Package,
+    Scissors,
     Settings,
     ShoppingCart,
-    Scissors,
     TrendingUp,
     Users,
     Weight,
@@ -55,17 +55,17 @@ const navGroups: NavGroup[] = [
             },
             {
                 title: 'Daily Logs',
-                href: '/batches/logs',
+                href: '/daily-logs',
                 icon: FileText,
             },
             {
                 title: 'Slaughter',
-                href: '/batches/slaughter',
+                href: '/slaughter',
                 icon: Scissors,
             },
             {
-                title: 'Product Yield',
-                href: '/batches/product-yield',
+                title: 'Portioning',
+                href: '/portioning',
                 icon: Weight,
             },
         ],
@@ -80,12 +80,12 @@ const navGroups: NavGroup[] = [
             },
             {
                 title: 'Stock Movements',
-                href: '/inventory/movements',
+                href: '/stock-movements',
                 icon: TrendingUp,
             },
             {
                 title: 'Warehouses',
-                href: '/inventory/warehouses',
+                href: '/warehouses',
                 icon: Building2,
             },
         ],
@@ -95,12 +95,12 @@ const navGroups: NavGroup[] = [
         items: [
             {
                 title: 'Customers',
-                href: '/crm/customers',
+                href: '/customers',
                 icon: Users,
             },
             {
                 title: 'Suppliers',
-                href: '/crm/suppliers',
+                href: '/suppliers',
                 icon: Layers,
             },
         ],

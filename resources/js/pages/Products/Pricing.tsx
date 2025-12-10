@@ -146,7 +146,7 @@ export default function Pricing({ products }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Product Pricing', href: '/products/pricing' },
+        { title: 'Product Pricing', href: '/inventory/products/pricing' },
     ];
 
     return (
