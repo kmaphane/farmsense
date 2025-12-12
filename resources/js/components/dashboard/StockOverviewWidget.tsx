@@ -22,7 +22,12 @@ function formatCurrency(cents: number): string {
     })}`;
 }
 
-export function StockOverviewWidget({ stockValue, carcassPrice, processedProducts }: Props) {
+interface StockSummaryProps {
+    stockValue: number;
+    carcassPrice: number | null;
+}
+
+export function StockSummary({ stockValue, carcassPrice }: StockSummaryProps) {
     const stats = [
         {
             title: 'Processed Stock Value',
@@ -41,67 +46,77 @@ export function StockOverviewWidget({ stockValue, carcassPrice, processedProduct
     ];
 
     return (
-        <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-                {stats.map((stat) => (
-                    <Card key={stat.title}>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                {stat.title}
-                            </CardTitle>
-                            <stat.icon className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {stat.value}
-                            </div>
-                            {stat.description && (
-                                <p className="text-xs text-muted-foreground">
-                                    {stat.description}
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            {/* Stock Breakdown */}
-            {processedProducts.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium">
-                            Stock Breakdown
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-2">
-                            {processedProducts.map((product, i) => (
-                                <div
-                                    key={i}
-                                    className="flex items-center justify-between rounded-md border p-2"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <Badge variant="outline">
-                                            {product.type}
-                                        </Badge>
-                                        <span className="text-sm font-medium">
-                                            {product.name}
-                                        </span>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-semibold">
-                                            {formatCurrency(product.value)}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {product.quantity} units
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
+        <div className="grid gap-4 md:grid-cols-2">
+            {stats.map((stat) => (
+                <div key={stat.title} className="card-metric card-metric-brand">
+                    <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <span className="text-sm font-medium label">
+                            {stat.title}
+                        </span>
+                        <stat.icon className="h-4 w-4 icon" />
+                    </div>
+                    <div className="p-6 pt-0">
+                        <div className="text-2xl font-bold">
+                            {stat.value}
                         </div>
-                    </CardContent>
-                </Card>
-            )}
+                        {stat.description && (
+                            <p className="text-xs opacity-80 mt-1">
+                                {stat.description}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export function StockBreakdown({ processedProducts }: { processedProducts: ProcessedProduct[] }) {
+    if (processedProducts.length === 0) return null;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                    Stock Breakdown
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-2">
+                    {processedProducts.map((product, i) => (
+                        <div
+                            key={i}
+                            className="flex items-center justify-between rounded-md border p-2"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline">
+                                    {product.type}
+                                </Badge>
+                                <span className="text-sm font-medium">
+                                    {product.name}
+                                </span>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-sm font-semibold">
+                                    {formatCurrency(product.value)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    {product.quantity} units
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+export function StockOverviewWidget({ stockValue, carcassPrice, processedProducts }: Props) {
+    return (
+        <div className="space-y-4">
+            <StockSummary stockValue={stockValue} carcassPrice={carcassPrice} />
+            <StockBreakdown processedProducts={processedProducts} />
         </div>
     );
 }

@@ -1,8 +1,16 @@
 import { BatchCard, type BatchCardData } from '@/components/broiler/BatchCard';
-import { CashflowChartWidget } from '@/components/dashboard/CashflowChartWidget';
+import {
+    CashflowChartWidget,
+    CashflowSummaryCards,
+} from '@/components/dashboard/CashflowChartWidget';
+import { CollapsibleSection } from '@/components/dashboard/CollapsibleSection';
 import { LowStockAlertWidget } from '@/components/dashboard/LowStockAlertWidget';
 import { PlannedBatchTimelineWidget } from '@/components/dashboard/PlannedBatchTimelineWidget';
-import { StockOverviewWidget } from '@/components/dashboard/StockOverviewWidget';
+import { ProductionStats } from '@/components/dashboard/ProductionStats';
+import {
+    StockBreakdown,
+    StockSummary,
+} from '@/components/dashboard/StockOverviewWidget';
 import {
     Card,
     CardContent,
@@ -13,13 +21,7 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import {
-    Activity,
-    AlertTriangle,
-    Bird,
-    TrendingUp,
-    Utensils,
-} from 'lucide-react';
+import { Bird } from 'lucide-react';
 
 interface DashboardStats {
     activeBatches: number;
@@ -106,43 +108,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-function StatCard({
-    title,
-    value,
-    description,
-    icon: Icon,
-    alert,
-}: {
-    title: string;
-    value: string | number;
-    description?: string;
-    icon: React.ElementType;
-    alert?: boolean;
-}) {
-    return (
-        <Card className={alert ? 'border-red-200 dark:border-red-900' : ''}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon
-                    className={`h-4 w-4 ${alert ? 'text-red-500' : 'text-muted-foreground'}`}
-                />
-            </CardHeader>
-            <CardContent>
-                <div
-                    className={`text-2xl font-bold ${alert ? 'text-red-600 dark:text-red-400' : ''}`}
-                >
-                    {value}
-                </div>
-                {description && (
-                    <p className="text-xs text-muted-foreground">
-                        {description}
-                    </p>
-                )}
-            </CardContent>
-        </Card>
-    );
-}
-
 export default function Dashboard({
     stats,
     recentBatches,
@@ -156,133 +121,89 @@ export default function Dashboard({
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
                 {/* Zone A: Cashflow Snapshot */}
-                <section>
-                    <h2 className="mb-3 flex items-center gap-2 border-l-4 border-yellow-500 pl-3 text-lg font-bold uppercase tracking-wide text-yellow-600 dark:text-yellow-400">
-                        Cash Flow
-                    </h2>
-
+                <CollapsibleSection
+                    title="Cash Flow"
+                    summary={<CashflowSummaryCards history={cashflowHistory} />}
+                >
                     {/* 7-Day Cash Flow Tracker */}
                     <div className="mb-4">
                         <CashflowChartWidget history={cashflowHistory} />
                     </div>
-                </section>
+                </CollapsibleSection>
 
                 {/* Zone B: Processed Stock Breakdown */}
-                <section>
-                    <h2 className="mb-3 flex items-center gap-2 border-l-4 border-yellow-500 pl-3 text-lg font-bold uppercase tracking-wide text-yellow-600 dark:text-yellow-400">
-                        Stock & Inventory
-                    </h2>
-                     <StockOverviewWidget
-                        stockValue={cashflow.stockValue}
-                        carcassPrice={cashflow.carcassPrice}
-                        processedProducts={cashflow.processedProducts}
-                    />
-                </section>
+                <CollapsibleSection
+                    title="Stock & Inventory"
+                    summary={
+                        <StockSummary
+                            stockValue={cashflow.stockValue}
+                            carcassPrice={cashflow.carcassPrice}
+                        />
+                    }
+                >
+                    <div className="space-y-4">
+                        <StockSummary
+                            stockValue={cashflow.stockValue}
+                            carcassPrice={cashflow.carcassPrice}
+                        />
+                        <StockBreakdown
+                            processedProducts={cashflow.processedProducts}
+                        />
+                    </div>
+                </CollapsibleSection>
 
                 {/* Zone C: Live Pulse (Production) */}
-                <section>
-                    <h2 className="mb-3 flex items-center gap-2 border-l-4 border-yellow-500 pl-3 text-lg font-bold uppercase tracking-wide text-yellow-600 dark:text-yellow-400">
-                        Production Pulse
-                    </h2>
-
-                    {/* Quick Stats */}
-                    <div className="mb-4 grid gap-4 md:grid-cols-4">
-                        <StatCard
-                            title="Active Batches"
-                            value={stats.activeBatches}
-                            description="Currently running"
-                            icon={Bird}
-                        />
-                        <StatCard
-                            title="Total Birds"
-                            value={stats.totalBirds.toLocaleString()}
-                            description="Across all batches"
-                            icon={Bird}
-                        />
-                        <StatCard
-                            title="Average FCR"
-                            value={stats.avgFCR?.toFixed(2) ?? '-'}
-                            description="Feed Conversion Ratio"
-                            icon={Utensils}
-                        />
-                        <StatCard
-                            title="Avg Mortality Rate"
-                            value={`${stats.avgMortalityRate.toFixed(1)}%`}
-                            description={
-                                stats.avgMortalityRate > 5
-                                    ? 'Above target'
-                                    : 'Within target'
-                            }
-                            icon={Activity}
-                            alert={stats.avgMortalityRate > 5}
-                        />
+                <CollapsibleSection
+                    title="Production Pulse"
+                    summary={<ProductionStats stats={stats} />}
+                >
+                    <div className="space-y-4">
+                        <ProductionStats stats={stats} />
+                        {/* Active Batches Display */}
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <CardTitle>Active Batches</CardTitle>
+                                        <CardDescription>
+                                            Your broiler batches currently in
+                                            production
+                                        </CardDescription>
+                                    </div>
+                                    <Link
+                                        href="/batches"
+                                        className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                                    >
+                                        View All
+                                    </Link>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {recentBatches.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-12">
+                                        <Bird className="h-12 w-12 text-gray-400" />
+                                        <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+                                            No Active Batches
+                                        </h3>
+                                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                            Create a new batch to get started.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                        {recentBatches.map((batch) => (
+                                            <BatchCard
+                                                key={batch.id}
+                                                batch={batch}
+                                                variant="card"
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
-
-                    {/* Additional Quick Stats */}
-                    <div className="mb-4 grid gap-4 md:grid-cols-2">
-                        <StatCard
-                            title="Today's Logs"
-                            value={stats.todayLogs}
-                            description="Daily logs recorded today"
-                            icon={TrendingUp}
-                        />
-                        <StatCard
-                            title="Pending Alerts"
-                            value={stats.pendingAlerts}
-                            description={
-                                stats.pendingAlerts > 0
-                                    ? 'Requires attention'
-                                    : 'All clear'
-                            }
-                            icon={AlertTriangle}
-                            alert={stats.pendingAlerts > 0}
-                        />
-                    </div>
-
-                    {/* Active Batches Display */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle>Active Batches</CardTitle>
-                                    <CardDescription>
-                                        Your broiler batches currently in
-                                        production
-                                    </CardDescription>
-                                </div>
-                                <Link
-                                    href="/batches"
-                                    className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                                >
-                                    View All
-                                </Link>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            {recentBatches.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <Bird className="h-12 w-12 text-gray-400" />
-                                    <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
-                                        No Active Batches
-                                    </h3>
-                                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        Create a new batch to get started.
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {recentBatches.map((batch) => (
-                                        <BatchCard
-                                            key={batch.id}
-                                            batch={batch}
-                                            variant="card"
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </section>
+                </CollapsibleSection>
 
                 {/* Zone C & D: Inventory & Planning */}
                 <section className="grid gap-6 lg:grid-cols-2">

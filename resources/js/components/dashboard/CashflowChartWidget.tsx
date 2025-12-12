@@ -98,8 +98,83 @@ interface CashflowHistory {
     transactions?: Transaction[];
 }
 
+
+
 interface Props {
     history: CashflowHistory;
+    hideCards?: boolean;
+}
+
+export function CashflowSummaryCards({ history }: { history: CashflowHistory }) {
+    const periodDescription =
+        history.period.days === 7
+            ? 'Last 7 days'
+            : history.period.days === 30
+              ? 'Last 30 days'
+              : `${formatDateLabel(new Date(history.period.start))} - ${formatDateLabel(new Date(history.period.end))}`;
+
+    return (
+        <div className="grid gap-4 md:grid-cols-3">
+            <div className="card-metric card-metric-success">
+                <div className="flex flex-col space-y-1.5 p-6 pb-2">
+                    <div className="flex flex-row items-center justify-between space-y-0 text-sm font-medium label">
+                        <span>Cash In</span>
+                        {/* Up-right arrow for Cash In */}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 icon text-green-600"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+                    </div>
+                </div>
+                <div className="p-6 pt-0">
+                    <div className="text-2xl font-bold">
+                        {new Intl.NumberFormat('en-BW', {
+                            style: 'currency',
+                            currency: 'BWP',
+                        }).format(history.totals.cash_in / 100)}
+                    </div>
+                </div>
+            </div>
+
+            <div className="card-metric card-metric-danger">
+                <div className="flex flex-col space-y-1.5 p-6 pb-2">
+                    <div className="flex flex-row items-center justify-between space-y-0 text-sm font-medium label">
+                        <span>Cash Out</span>
+                        {/* Down arrow for Cash Out */}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 icon text-red-600"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+                <div className="p-6 pt-0">
+                    <div className="text-2xl font-bold">
+                        {new Intl.NumberFormat('en-BW', {
+                            style: 'currency',
+                            currency: 'BWP',
+                        }).format(history.totals.cash_out / 100)}
+                    </div>
+                </div>
+            </div>
+
+            <div className={`card-metric border ${history.totals.net >= 0 ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                <div className="flex flex-col space-y-1.5 p-6 pb-2">
+                    <div className="flex flex-row items-center justify-between space-y-0 text-sm font-medium label">
+                        <span>Net Flow</span>
+                        {history.totals.net >= 0 ? (
+                            // Upward trending arrow
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 icon"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+                        ) : (
+                            // Clear downward arrow
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 icon"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+                        )}
+                    </div>
+                </div>
+                <div className="p-6 pt-0">
+                    <div className="text-2xl font-bold">
+                        {new Intl.NumberFormat('en-BW', {
+                            style: 'currency',
+                            currency: 'BWP',
+                        }).format(history.totals.net / 100)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 function formatCurrency(cents: number): string {
@@ -109,6 +184,17 @@ function formatCurrency(cents: number): string {
         maximumFractionDigits: 2,
     })}`;
 }
+
+function formatCurrencyAbbr(cents: number): string {
+    const value = cents / 100;
+    if (value >= 1000000) {
+        return `P${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+        return `P${(value / 1000).toFixed(1)}K`;
+    }
+    return `P${value.toFixed(0)}`;
+}
+
 
 export function CashflowChartWidget({ history: initialHistory }: Props) {
     const [history, setHistory] = useState<CashflowHistory>(initialHistory);
@@ -121,11 +207,19 @@ export function CashflowChartWidget({ history: initialHistory }: Props) {
     const [currentPage, setCurrentPage] = useState(0);
     const ITEMS_PER_PAGE = 5;
 
+    // Calculate running balance for transactions
+    const initialBalance = 0; // You may want to pass this as a prop or get from backend
+    let runningBalance = initialBalance;
+    const transactionsWithBalance = (history.transactions || []).map((tx) => {
+        runningBalance += tx.type === 'in' ? tx.amount : -tx.amount;
+        return { ...tx, balance: runningBalance };
+    });
+
     // Update history when props change (if not in random mode) and reset pagination
-    if (initialHistory !== history && !isRandomMode) {
-        setHistory(initialHistory);
-        setCurrentPage(0); // Reset to first page on data refresh
-    }
+
+    // Default filter: Current Month
+    // Only set on initial mount
+    // (If you want to force this, you may want to trigger handleFilterChange('this_month') on mount)
 
     const maxValue = Math.max(
         ...history.daily.map((d) => Math.max(d.cash_in, d.cash_out)),
@@ -133,8 +227,11 @@ export function CashflowChartWidget({ history: initialHistory }: Props) {
 
     const getBarHeight = (value: number) => {
         if (maxValue === 0) return 0;
-        return (value / maxValue) * 100;
+        return (value / (maxValue || 1)) * 100;
     };
+
+    // Abbreviate currency for Y-axis (e.g., P35.3K)
+
 
     const handleFilterChange = (filter: string) => {
         const today = new Date();
@@ -294,9 +391,8 @@ export function CashflowChartWidget({ history: initialHistory }: Props) {
                         )}
                     </CardDescription>
                 </div>
-
                 <div className="flex items-center gap-2">
-                     <DropdownMenu>
+                    <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-8 gap-1">
                                 <Filter className="h-3.5 w-3.5" />
@@ -304,14 +400,14 @@ export function CashflowChartWidget({ history: initialHistory }: Props) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleFilterChange('this_month')}>
+                                This Month
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleFilterChange('7days')}>
                                 Last 7 Days
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleFilterChange('30days')}>
                                 Last 30 Days
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleFilterChange('this_month')}>
-                                This Month
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleFilterChange('last_month')}>
                                 Last Month
@@ -327,7 +423,7 @@ export function CashflowChartWidget({ history: initialHistory }: Props) {
                 </div>
             </CardHeader>
             <CardContent>
-                 <Dialog open={isCustomDialogOpen} onOpenChange={setIsCustomDialogOpen}>
+                <Dialog open={isCustomDialogOpen} onOpenChange={setIsCustomDialogOpen}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Select Date Range</DialogTitle>
@@ -370,107 +466,61 @@ export function CashflowChartWidget({ history: initialHistory }: Props) {
                 </Dialog>
 
                 {/* Summary Cards */}
-                <div className="mb-6 grid gap-4 md:grid-cols-3">
-                    <div className="rounded-lg border bg-gradient-to-br from-green-50 to-green-100 p-3 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
-                        <div className="flex items-center gap-2">
-                            <ArrowDown className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            <p className="text-xs font-medium text-green-700 dark:text-green-300">
-                                Cash In
-                            </p>
-                        </div>
-                        <p className="mt-1 text-lg font-bold text-green-800 dark:text-green-200">
-                            {formatCurrency(history.totals.cash_in)}
-                        </p>
-                    </div>
-
-                    <div className="rounded-lg border bg-gradient-to-br from-red-50 to-red-100 p-3 dark:from-red-950 dark:to-red-900 border-red-200 dark:border-red-800">
-                        <div className="flex items-center gap-2">
-                            <ArrowUp className="h-4 w-4 text-red-600 dark:text-red-400" />
-                            <p className="text-xs font-medium text-red-700 dark:text-red-300">
-                                Cash Out
-                            </p>
-                        </div>
-                        <p className="mt-1 text-lg font-bold text-red-800 dark:text-red-200">
-                            {formatCurrency(history.totals.cash_out)}
-                        </p>
-                    </div>
-
-                    <div
-                        className={`rounded-lg border p-3 ${
-                            history.totals.net >= 0
-                                ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800'
-                                : 'bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800'
-                        }`}
-                    >
-                        <div className="flex items-center gap-2">
-                            <TrendingUp
-                                className={`h-4 w-4 ${
-                                    history.totals.net >= 0
-                                        ? 'text-blue-600 dark:text-blue-400'
-                                        : 'text-orange-600 dark:text-orange-400'
-                                }`}
-                            />
-                            <p
-                                className={`text-xs font-medium ${
-                                    history.totals.net >= 0
-                                        ? 'text-blue-700 dark:text-blue-300'
-                                        : 'text-orange-700 dark:text-orange-300'
-                                }`}
-                            >
-                                Net Flow
-                            </p>
-                        </div>
-                        <p
-                            className={`mt-1 text-lg font-bold ${
-                                history.totals.net >= 0
-                                    ? 'text-blue-800 dark:text-blue-200'
-                                    : 'text-orange-800 dark:text-orange-200'
-                            }`}
-                        >
-                            {history.totals.net >= 0 ? '+' : ''}
-                            {formatCurrency(history.totals.net)}
-                        </p>
-                    </div>
+                <div className="mb-6">
+                    <CashflowSummaryCards history={history} />
                 </div>
 
-                {/* Bar Chart */}
+                {/* Bar Chart with Y-Axis and Zero-State */}
                 <div className="space-y-4 mb-8">
-                    <div className="flex h-48 items-end justify-between gap-2">
-                        {history.daily.map((day) => (
-                            <div
-                                key={day.date}
-                                className="flex flex-1 flex-col items-center gap-1"
-                            >
-                                {/* Bars */}
-                                <div className="flex w-full items-end justify-center gap-0.5">
-                                    {/* Cash In Bar */}
-                                    <div
-                                        className="w-1/2 rounded-t bg-green-500 dark:bg-green-600 transition-all duration-500 ease-in-out"
-                                        style={{
-                                            height: `${getBarHeight(day.cash_in)}%`,
-                                            minHeight: day.cash_in > 0 ? '4px' : '0',
-                                        }}
-                                        title={`Cash In: ${formatCurrency(day.cash_in)}`}
-                                    />
-                                    {/* Cash Out Bar */}
-                                    <div
-                                        className="w-1/2 rounded-t bg-red-500 dark:bg-red-600 transition-all duration-500 ease-in-out"
-                                        style={{
-                                            height: `${getBarHeight(day.cash_out)}%`,
-                                            minHeight: day.cash_out > 0 ? '4px' : '0',
-                                        }}
-                                        title={`Cash Out: ${formatCurrency(day.cash_out)}`}
-                                    />
+                    <div className="flex h-48 items-end justify-between gap-2 relative">
+                        {/* Y-Axis */}
+                        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between items-end pr-2 z-10 h-full">
+                            {[5,4,3,2,1,0].map((i) => (
+                                <span key={i} className="text-xs text-gray-400" style={{height: '16%'}}>
+                                    {maxValue > 0 ? formatCurrencyAbbr((maxValue/5)*i) : '0'}
+                                </span>
+                            ))}
+                        </div>
+                        {/* Bars */}
+                        <div className="flex flex-1 h-full items-end justify-between gap-2 ml-8">
+                            {history.daily.length === 0 || maxValue === 0 ? (
+                                <div className="flex items-center justify-center w-full h-full text-gray-400 text-sm">
+                                    No transaction activity for this period
                                 </div>
-
-                                {/* Date Label */}
-                                <p className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[40px] text-center">
-                                    {day.date_label}
-                                </p>
-                            </div>
-                        ))}
+                            ) : (
+                                history.daily.map((day) => (
+                                    <div
+                                        key={day.date}
+                                        className="flex flex-1 flex-col items-center gap-1"
+                                    >
+                                        <div className="flex w-full items-end justify-center gap-0.5">
+                                            {/* Cash In Bar */}
+                                            <div
+                                                className="w-1/2 rounded-t bg-green-500 dark:bg-green-600 transition-all duration-500 ease-in-out"
+                                                style={{
+                                                    height: `${getBarHeight(day.cash_in)}%`,
+                                                    minHeight: day.cash_in > 0 ? '4px' : '0',
+                                                }}
+                                                title={`Cash In: ${formatCurrency(day.cash_in)}`}
+                                            />
+                                            {/* Cash Out Bar */}
+                                            <div
+                                                className="w-1/2 rounded-t bg-red-500 dark:bg-red-600 transition-all duration-500 ease-in-out"
+                                                style={{
+                                                    height: `${getBarHeight(day.cash_out)}%`,
+                                                    minHeight: day.cash_out > 0 ? '4px' : '0',
+                                                }}
+                                                title={`Cash Out: ${formatCurrency(day.cash_out)}`}
+                                            />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[40px] text-center">
+                                            {day.date_label}
+                                        </p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
-
                     {/* Legend */}
                     <div className="flex items-center justify-center gap-4 text-xs">
                         <div className="flex items-center gap-1.5">
@@ -485,52 +535,57 @@ export function CashflowChartWidget({ history: initialHistory }: Props) {
                 </div>
 
                 {/* Transaction Table */}
-                {transactions.length > 0 && (
+                {transactionsWithBalance.length > 0 && (
                     <div className="rounded-md border">
                         <div className="p-4">
                             <h3 className="text-sm font-semibold mb-3">Recent Transactions</h3>
-                             <div className="overflow-x-auto">
+                            <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left">
                                     <thead className="text-xs text-muted-foreground uppercase bg-muted/50">
                                         <tr>
                                             <th className="px-3 py-2 rounded-tl-md">Date</th>
-                                            <th className="px-3 py-2">Attributes</th>
+                                            <th className="px-3 py-2">Category</th>
                                             <th className="px-3 py-2">Description</th>
-                                            <th className="px-3 py-2 text-right rounded-tr-md">Amount</th>
+                                            <th className="px-3 py-2 text-right">Amount</th>
+                                            <th className="px-3 py-2 text-right rounded-tr-md">Balance</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {paginatedTransactions.map((tx) => (
-                                            <tr key={tx.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
-                                                <td className="px-3 py-2 font-medium whitespace-nowrap max-w-[100px] overflow-hidden text-ellipsis" title={tx.date}>
-                                                    {tx.date}
-                                                </td>
-                                                <td className="px-3 py-2">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border shadow-sm ${
-                                                        tx.type === 'in'
-                                                            ? 'bg-gradient-to-br from-green-50 to-green-100 text-green-700 dark:from-green-950 dark:to-green-900 dark:text-green-300 border-green-200 dark:border-green-800'
-                                                            : 'bg-gradient-to-br from-red-50 to-red-100 text-red-700 dark:from-red-950 dark:to-red-900 dark:text-red-300 border-red-200 dark:border-red-800'
-                                                    }`}>
-                                                        {tx.type === 'in' ? 'Cash In' : 'Cash Out'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-3 py-2 max-w-[150px] truncate" title={tx.description}>
-                                                   <div className="flex flex-col">
-                                                       <span>{tx.description}</span>
-                                                       <span className="text-[10px] text-muted-foreground">{tx.category}</span>
-                                                   </div>
-                                                </td>
-                                                <td className={`px-3 py-2 text-right font-bold ${
-                                                    tx.type === 'in' ? 'text-green-600' : 'text-red-600'
-                                                }`}>
-                                                    {tx.type === 'in' ? '+' : '-'}{formatCurrency(tx.amount)}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {paginatedTransactions.map((tx, idx) => {
+                                            // Friendly date formatting
+                                            const txDate = new Date(tx.date);
+                                            const today = new Date();
+                                            let dateLabel = tx.date;
+                                            if (txDate.toDateString() === today.toDateString()) {
+                                                dateLabel = 'Today';
+                                            } else {
+                                                dateLabel = txDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                                            }
+                                            return (
+                                                <tr key={tx.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
+                                                    <td className="px-3 py-2 font-medium whitespace-nowrap max-w-[100px] overflow-hidden text-ellipsis" title={tx.date}>
+                                                        {dateLabel}
+                                                    </td>
+                                                    <td className="px-3 py-2">
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border shadow-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200`}>
+                                                            {tx.category}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2 max-w-[150px] truncate" title={tx.description}>
+                                                        {tx.description}
+                                                    </td>
+                                                    <td className={`px-3 py-2 text-right font-bold ${tx.type === 'in' ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {tx.type === 'in' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                                    </td>
+                                                    <td className="px-3 py-2 text-right font-mono">
+                                                        {formatCurrency(transactionsWithBalance[currentPage * ITEMS_PER_PAGE + idx]?.balance || 0)}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
-
                             {/* Pagination Controls */}
                             {totalPages > 1 && (
                                 <div className="flex items-center justify-between mt-3 text-xs">

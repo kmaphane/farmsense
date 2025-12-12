@@ -1,3 +1,11 @@
+/* Brand Green Utility */
+.text-brand-green {
+    color: oklch(0.55 0.18 145); /* Brand Emerald Green */
+}
+/* Brand Yellow Utility */
+.text-brand-yellow {
+    color: oklch(0.65 0.15 85); /* Gold from --chart-3 */
+}
 @import 'tailwindcss';
 @plugin 'tailwindcss-animate';
 
@@ -268,5 +276,62 @@
     ::selection {
         background: var(--color-primary);
         color: var(--color-primary-foreground);
+    }
+}
+
+@layer components {
+    .card-metric {
+        @apply rounded-xl border shadow-sm transition-all duration-200;
+    }
+
+    /* Success (Cash In / Positive) */
+    /* Success (Cash In / Positive) */
+    .card-metric-success {
+        @apply border-green-200 bg-gradient-to-br from-green-900 to-green-950 dark:border-green-800 dark:from-green-950 dark:to-green-900;
+        @apply text-green-50 dark:text-green-300;
+    }
+    .card-metric-success .icon,
+    .card-metric-success .label {
+         @apply text-green-100 dark:text-green-300;
+    }
+
+    /* Danger (Cash Out / Negative) */
+    .card-metric-danger {
+        @apply border-red-200 bg-gradient-to-br from-red-900 to-red-950 dark:border-red-800 dark:from-red-950 dark:to-red-900;
+        @apply text-red-50 dark:text-red-300;
+    }
+    .card-metric-danger .icon,
+    .card-metric-danger .label {
+         @apply text-red-100 dark:text-red-300;
+    }
+
+    /* Warning (Attention) */
+    .card-metric-warning {
+        @apply border-orange-200 bg-gradient-to-br from-orange-900 to-orange-950 dark:border-orange-800 dark:from-orange-950 dark:to-orange-900;
+        @apply text-orange-50 dark:text-orange-300;
+    }
+    .card-metric-warning .icon,
+    .card-metric-warning .label {
+         @apply text-orange-100 dark:text-orange-300;
+    }
+
+    /* Info (Net Flow Positive / Neutral) */
+    .card-metric-info {
+        @apply border-blue-200 bg-gradient-to-br from-blue-900 to-blue-950 dark:border-blue-800 dark:from-blue-950 dark:to-blue-900;
+        @apply text-blue-50 dark:text-blue-300;
+    }
+    .card-metric-info .icon,
+    .card-metric-info .label {
+         @apply text-blue-100 dark:text-blue-300;
+    }
+
+    /* Brand (Stock / Standard) */
+    .card-metric-brand {
+         @apply border-yellow-200 bg-gradient-to-br from-yellow-900 to-yellow-950 dark:border-yellow-800 dark:from-yellow-950 dark:to-yellow-900;
+         @apply text-yellow-50 dark:text-yellow-300;
+    }
+    .card-metric-brand .icon,
+    .card-metric-brand .label {
+         @apply text-yellow-100 dark:text-yellow-300;
     }
 }
